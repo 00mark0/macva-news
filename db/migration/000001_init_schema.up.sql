@@ -1,0 +1,131 @@
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+CREATE TABLE "user" (
+  "user_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "username" VARCHAR(50) NOT NULL,
+  "email" VARCHAR(100) UNIQUE NOT NULL,
+  "password" TEXT NOT NULL,
+  "pfp" TEXT NOT NULL DEFAULT 'https://res.cloudinary.com/dxq2xh2oq/image/upload/v1656979667/avatar/avatar-1_1_1_1_u2v3i2.png',
+  "role" VARCHAR(20) NOT NULL DEFAULT 'user',
+  "banned" BOOL DEFAULT false,
+  "is_deleted" BOOL DEFAULT false,
+  "created_at" TIMESTAMPTZ DEFAULT (now())
+);
+
+CREATE TABLE "content" (
+  "content_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "user_id" UUID NOT NULL,
+  "category_id" UUID NOT NULL,
+  "title" VARCHAR(255) NOT NULL,
+  "content_description" TEXT NOT NULL,
+  "comments_enabled" BOOL NOT NULL DEFAULT true,
+  "view_count_enabled" BOOL NOT NULL DEFAULT true,
+  "like_count_enabled" BOOL NOT NULL DEFAULT true,
+  "dislike_count_enabled" BOOL NOT NULL DEFAULT false,
+  "status" VARCHAR(20) NOT NULL DEFAULT 'draft',
+  "view_count" INT NOT NULL DEFAULT 0,
+  "like_count" INT NOT NULL DEFAULT 0,
+  "dislike_count" INT NOT NULL DEFAULT 0,
+  "comment_count" INT NOT NULL DEFAULT 0,
+  "created_at" TIMESTAMPTZ DEFAULT (now()),
+  "updated_at" TIMESTAMPTZ DEFAULT (now()),
+  "published_at" TIMESTAMPTZ DEFAULT NULL,
+  "is_deleted" BOOL DEFAULT false
+);
+
+CREATE TABLE "category" (
+  "category_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "category_name" VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE "tag" (
+  "tag_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "tag_name" VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE "content_tag" (
+  "content_id" UUID NOT NULL,
+  "tag_id" UUID NOT NULL
+);
+
+CREATE TABLE "comment" (
+  "comment_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "content_id" UUID NOT NULL,
+  "user_id" UUID NOT NULL,
+  "comment_text" TEXT NOT NULL,
+  "like_count" INT NOT NULL DEFAULT 0,
+  "dislike_count" INT NOT NULL DEFAULT 0,
+  "created_at" TIMESTAMPTZ DEFAULT (now()),
+  "updated_at" TIMESTAMPTZ DEFAULT (now()),
+  "is_deleted" BOOL DEFAULT false
+);
+
+CREATE TABLE "media" (
+  "media_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "content_id" UUID NOT NULL,
+  "media_type" VARCHAR(50) NOT NULL,
+  "media_url" VARCHAR(255) NOT NULL,
+  "media_caption" TEXT NOT NULL,
+  "media_order" INT NOT NULL DEFAULT 0
+);
+
+CREATE TABLE "content_reaction" (
+  "content_id" UUID NOT NULL,
+  "user_id" UUID NOT NULL,
+  "reaction" VARCHAR(10) NOT NULL
+);
+
+CREATE TABLE "comment_reaction" (
+  "comment_id" UUID NOT NULL,
+  "user_id" UUID NOT NULL,
+  "reaction" VARCHAR(10) NOT NULL
+);
+
+CREATE TABLE "global_settings" (
+  "global_settings_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "disable_comments" BOOL NOT NULL DEFAULT false,
+  "disable_likes" BOOL NOT NULL DEFAULT false,
+  "disable_dislikes" BOOL NOT NULL DEFAULT false,
+  "disable_views" BOOL NOT NULL DEFAULT false
+);
+
+CREATE TABLE "analytics_daily" (
+  "analytics_date" DATE PRIMARY KEY,
+  "total_views" INT NOT NULL DEFAULT 0,
+  "total_likes" INT NOT NULL DEFAULT 0,
+  "total_dislikes" INT NOT NULL DEFAULT 0,
+  "total_comments" INT NOT NULL DEFAULT 0,
+  "created_at" TIMESTAMPTZ DEFAULT (now()),
+  "updated_at" TIMESTAMPTZ DEFAULT (now())
+);
+
+-- Create indexes 
+CREATE INDEX "idx_user_email" ON "user"("email");
+CREATE INDEX "idx_user_username" ON "user"("username");
+CREATE INDEX "idx_user_active" ON "user"("is_deleted", "banned", "created_at");
+CREATE INDEX "idx_user_banned_created_at" ON "user"("banned", "created_at");
+CREATE INDEX "idx_user_deleted_created_at" ON "user"("is_deleted", "created_at");
+CREATE INDEX "idx_content_status_published" ON content("status", "is_deleted", "published_at");
+CREATE INDEX "idx_content_user" ON content("user_id", "is_deleted");
+CREATE INDEX "idx_content_category" ON content("category_id", "status", "is_deleted");
+CREATE INDEX "idx_content_fulltext" ON content USING gin (to_tsvector('english', "title" || ' ' || "content_description"));
+CREATE INDEX "idx_tag_name_lower" ON tag(lower("tag_name"));
+CREATE INDEX "idx_comment_content" ON comment("content_id", "is_deleted");
+CREATE INDEX "idx_media_content_order" ON media("content_id", "media_order");
+CREATE INDEX "idx_content_reaction_content" ON content_reaction("content_id");
+
+
+
+-- Create foreign key constraints
+ALTER TABLE "content" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("user_id");
+ALTER TABLE "content" ADD FOREIGN KEY ("category_id") REFERENCES "category" ("category_id");
+ALTER TABLE "content_tag" ADD FOREIGN KEY ("content_id") REFERENCES "content" ("content_id");
+ALTER TABLE "content_tag" ADD FOREIGN KEY ("tag_id") REFERENCES "tag" ("tag_id");
+ALTER TABLE "comment" ADD FOREIGN KEY ("content_id") REFERENCES "content" ("content_id");
+ALTER TABLE "comment" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("user_id");
+ALTER TABLE "media" ADD FOREIGN KEY ("content_id") REFERENCES "content" ("content_id");
+ALTER TABLE "content_reaction" ADD FOREIGN KEY ("content_id") REFERENCES "content" ("content_id");
+ALTER TABLE "content_reaction" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("user_id");
+ALTER TABLE "comment_reaction" ADD FOREIGN KEY ("comment_id") REFERENCES "comment" ("comment_id");
+ALTER TABLE "comment_reaction" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("user_id");
+

@@ -1,0 +1,29 @@
+services:
+  mn-app:
+    build:
+      target: prod  # use the production stage
+    container_name: macva-news
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    env_file:
+      - .env
+    restart: always
+
+  mn-db:
+    image: ${DB_DRIVER}:latest
+    restart: always
+    container_name: macva-news-db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+
+# docker compose -f docker-compose-prod.yml up --build -d
+

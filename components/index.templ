@@ -1,0 +1,14 @@
+// components/index.templ
+package components
+
+templ main() {
+<main>
+	<h1 class="text-red-400 text-center">Home Page</h1>
+	<a href="/counter" class="text-blue-500">Go to React Counter</a>
+	<a href="/widget" class="text-green-500">Go to React Widget</a>
+</main>
+}
+
+templ Index() {
+@Layout(main())
+}

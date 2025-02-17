@@ -1,0 +1,95 @@
+-- name: CreateUser :one
+INSERT INTO "user" (username, email, password) 
+VALUES ($1, $2, $3)
+RETURNING *;
+
+-- name: CreateUserAdmin :one
+INSERT INTO "user" (username, email, password, role) 
+VALUES ($1, $2, $3, $4)  
+RETURNING *;
+
+-- name: GetUserByID :one
+SELECT user_id, username, email, role, banned 
+FROM "user" 
+WHERE user_id = $1 AND banned = false;
+
+-- name: GetUserByEmail :one
+SELECT user_id, username, email, role, banned 
+FROM "user" 
+WHERE email = $1 AND banned = false;
+
+-- name: UpdateUser :exec
+UPDATE "user" 
+SET username = COALESCE($2, username),
+    pfp = COALESCE($3, pfp)
+WHERE user_id = $1;
+
+-- name: UpdateUserPassword :exec
+UPDATE "user" 
+SET password = $2 
+WHERE user_id = $1;
+
+-- name: BanUser :exec
+UPDATE "user" 
+SET banned = true 
+WHERE user_id = $1;
+
+-- name: UnbanUser :exec
+UPDATE "user" 
+SET banned = false 
+WHERE user_id = $1;
+
+-- name: DeleteUser :exec
+UPDATE "user" 
+SET email = CONCAT('deleted_', user_id, '@example.com'), 
+    password = '', 
+    pfp = 'https://res.cloudinary.com/dxq2xh2oq/image/upload/v1656979667/avatar/avatar-1_1_1_1_u2v3i2.png', 
+    is_deleted = true 
+WHERE user_id = $1;
+
+-- name: CheckEmailExists :one
+SELECT 1 
+FROM "user" 
+WHERE email = $1;
+
+-- name: GetActiveUsersCount :one
+SELECT COUNT(*) AS count
+FROM "user"
+WHERE "is_deleted" = false
+  AND "banned" = false;
+
+-- name: GetActiveUsers :many
+SELECT user_id, username, email, password, pfp, role, banned, is_deleted, created_at
+FROM "user"
+WHERE "is_deleted" = false
+  AND "banned" = false
+ORDER BY created_at DESC
+LIMIT $1 OFFSET $2;
+
+-- name: GetBannedUsersCount :one
+SELECT COUNT(*) AS count
+FROM "user"
+WHERE "banned" = true;
+
+-- name: GetBannedUsers :many
+SELECT user_id, username, email, password, pfp, role, banned, is_deleted, created_at
+FROM "user"
+WHERE "banned" = true
+ORDER BY created_at DESC
+LIMIT $1 OFFSET $2;
+
+-- name: GetDeletedUsersCount :one
+SELECT COUNT(*) AS count
+FROM "user"
+WHERE "is_deleted" = true;
+
+-- name: GetDeletedUsers :many
+SELECT user_id, username, email, password, pfp, role, banned, is_deleted, created_at
+FROM "user"
+WHERE "is_deleted" = true
+ORDER BY created_at DESC
+LIMIT $1 OFFSET $2;
+
+
+
+
