@@ -337,6 +337,154 @@ func (q *Queries) GetUserByID(ctx context.Context, userID pgtype.UUID) (GetUserB
 	return i, err
 }
 
+const searchActiveUsers = `-- name: SearchActiveUsers :many
+SELECT
+  u.user_id, u.username, u.email, u.password, u.pfp, u.role, u.banned, u.is_deleted, u.created_at
+FROM "user" u
+WHERE u.is_deleted = false 
+  AND u.banned = false
+  AND (
+    u.username ILIKE '%' || $1 || '%'
+    OR u.email ILIKE '%' || $1 || '%'
+  )
+ORDER BY u.created_at DESC
+LIMIT $2 OFFSET $3
+`
+
+type SearchActiveUsersParams struct {
+	Column1 pgtype.Text
+	Limit   int32
+	Offset  int32
+}
+
+func (q *Queries) SearchActiveUsers(ctx context.Context, arg SearchActiveUsersParams) ([]User, error) {
+	rows, err := q.db.Query(ctx, searchActiveUsers, arg.Column1, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.UserID,
+			&i.Username,
+			&i.Email,
+			&i.Password,
+			&i.Pfp,
+			&i.Role,
+			&i.Banned,
+			&i.IsDeleted,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchBannedUsers = `-- name: SearchBannedUsers :many
+SELECT
+  u.user_id, u.username, u.email, u.password, u.pfp, u.role, u.banned, u.is_deleted, u.created_at
+FROM "user" u
+WHERE u.banned = true
+  AND (
+    u.username ILIKE '%' || $1 || '%'
+    OR u.email ILIKE '%' || $1 || '%'
+  )
+ORDER BY u.created_at DESC
+LIMIT $2 OFFSET $3
+`
+
+type SearchBannedUsersParams struct {
+	Column1 pgtype.Text
+	Limit   int32
+	Offset  int32
+}
+
+func (q *Queries) SearchBannedUsers(ctx context.Context, arg SearchBannedUsersParams) ([]User, error) {
+	rows, err := q.db.Query(ctx, searchBannedUsers, arg.Column1, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.UserID,
+			&i.Username,
+			&i.Email,
+			&i.Password,
+			&i.Pfp,
+			&i.Role,
+			&i.Banned,
+			&i.IsDeleted,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchDeletedUsers = `-- name: SearchDeletedUsers :many
+SELECT
+  u.user_id, u.username, u.email, u.password, u.pfp, u.role, u.banned, u.is_deleted, u.created_at
+FROM "user" u
+WHERE u.is_deleted = true
+  AND (
+    u.username ILIKE '%' || $1 || '%'
+    OR u.email ILIKE '%' || $1 || '%'
+  )
+ORDER BY u.created_at DESC
+LIMIT $2 OFFSET $3
+`
+
+type SearchDeletedUsersParams struct {
+	Column1 pgtype.Text
+	Limit   int32
+	Offset  int32
+}
+
+func (q *Queries) SearchDeletedUsers(ctx context.Context, arg SearchDeletedUsersParams) ([]User, error) {
+	rows, err := q.db.Query(ctx, searchDeletedUsers, arg.Column1, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.UserID,
+			&i.Username,
+			&i.Email,
+			&i.Password,
+			&i.Pfp,
+			&i.Role,
+			&i.Banned,
+			&i.IsDeleted,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const unbanUser = `-- name: UnbanUser :exec
 UPDATE "user" 
 SET banned = false 

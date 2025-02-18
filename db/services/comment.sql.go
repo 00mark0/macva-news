@@ -11,6 +11,34 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createComment = `-- name: CreateComment :one
+INSERT INTO comment (content_id, user_id, comment_text)
+VALUES ($1, $2, $3)
+RETURNING comment_id, content_id, user_id, comment_text, score, created_at, updated_at, is_deleted
+`
+
+type CreateCommentParams struct {
+	ContentID   pgtype.UUID
+	UserID      pgtype.UUID
+	CommentText string
+}
+
+func (q *Queries) CreateComment(ctx context.Context, arg CreateCommentParams) (Comment, error) {
+	row := q.db.QueryRow(ctx, createComment, arg.ContentID, arg.UserID, arg.CommentText)
+	var i Comment
+	err := row.Scan(
+		&i.CommentID,
+		&i.ContentID,
+		&i.UserID,
+		&i.CommentText,
+		&i.Score,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.IsDeleted,
+	)
+	return i, err
+}
+
 const deleteCommentReaction = `-- name: DeleteCommentReaction :one
 DELETE FROM comment_reaction
 WHERE comment_id = $1 AND user_id = $2
@@ -93,7 +121,7 @@ func (q *Queries) InsertOrUpdateCommentReaction(ctx context.Context, arg InsertO
 
 const listContentComments = `-- name: ListContentComments :many
 SELECT
-  cm.comment_id, cm.content_id, cm.user_id, cm.comment_text, cm.like_count, cm.dislike_count, cm.created_at, cm.updated_at, cm.is_deleted,
+  cm.comment_id, cm.content_id, cm.user_id, cm.comment_text, cm.score, cm.created_at, cm.updated_at, cm.is_deleted,
   row_to_json(u) AS author
 FROM comment cm
 JOIN "user" u ON cm.user_id = u.user_id
@@ -109,16 +137,15 @@ type ListContentCommentsParams struct {
 }
 
 type ListContentCommentsRow struct {
-	CommentID    pgtype.UUID
-	ContentID    pgtype.UUID
-	UserID       pgtype.UUID
-	CommentText  string
-	LikeCount    int32
-	DislikeCount int32
-	CreatedAt    pgtype.Timestamptz
-	UpdatedAt    pgtype.Timestamptz
-	IsDeleted    pgtype.Bool
-	Author       []byte
+	CommentID   pgtype.UUID
+	ContentID   pgtype.UUID
+	UserID      pgtype.UUID
+	CommentText string
+	Score       int32
+	CreatedAt   pgtype.Timestamptz
+	UpdatedAt   pgtype.Timestamptz
+	IsDeleted   pgtype.Bool
+	Author      []byte
 }
 
 func (q *Queries) ListContentComments(ctx context.Context, arg ListContentCommentsParams) ([]ListContentCommentsRow, error) {
@@ -135,8 +162,7 @@ func (q *Queries) ListContentComments(ctx context.Context, arg ListContentCommen
 			&i.ContentID,
 			&i.UserID,
 			&i.CommentText,
-			&i.LikeCount,
-			&i.DislikeCount,
+			&i.Score,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.IsDeleted,
@@ -152,34 +178,93 @@ func (q *Queries) ListContentComments(ctx context.Context, arg ListContentCommen
 	return items, nil
 }
 
-const updateCommentLikeDislikeCount = `-- name: UpdateCommentLikeDislikeCount :one
+const softDeleteComment = `-- name: SoftDeleteComment :one
+UPDATE comment
+SET 
+  is_deleted = true,
+  updated_at = now()
+WHERE 
+  comment_id = $1
+  AND is_deleted = false
+RETURNING
+  comment_id,
+  is_deleted,
+  updated_at
+`
+
+type SoftDeleteCommentRow struct {
+	CommentID pgtype.UUID
+	IsDeleted pgtype.Bool
+	UpdatedAt pgtype.Timestamptz
+}
+
+func (q *Queries) SoftDeleteComment(ctx context.Context, commentID pgtype.UUID) (SoftDeleteCommentRow, error) {
+	row := q.db.QueryRow(ctx, softDeleteComment, commentID)
+	var i SoftDeleteCommentRow
+	err := row.Scan(&i.CommentID, &i.IsDeleted, &i.UpdatedAt)
+	return i, err
+}
+
+const updateComment = `-- name: UpdateComment :one
+UPDATE comment
+SET 
+  comment_text = $1,
+  updated_at = now()
+WHERE 
+  comment_id = $2
+  AND is_deleted = false
+RETURNING
+  comment_id,
+  comment_text,
+  updated_at
+`
+
+type UpdateCommentParams struct {
+	CommentText string
+	CommentID   pgtype.UUID
+}
+
+type UpdateCommentRow struct {
+	CommentID   pgtype.UUID
+	CommentText string
+	UpdatedAt   pgtype.Timestamptz
+}
+
+func (q *Queries) UpdateComment(ctx context.Context, arg UpdateCommentParams) (UpdateCommentRow, error) {
+	row := q.db.QueryRow(ctx, updateComment, arg.CommentText, arg.CommentID)
+	var i UpdateCommentRow
+	err := row.Scan(&i.CommentID, &i.CommentText, &i.UpdatedAt)
+	return i, err
+}
+
+const updateCommentScore = `-- name: UpdateCommentScore :one
 UPDATE comment c
 SET
-  like_count = (
+  score = (
     SELECT count(*) 
     FROM comment_reaction 
     WHERE comment_id = c.comment_id AND reaction = 'like'
-  ),
-  dislike_count = (
+  )
+  -
+  (
     SELECT count(*) 
     FROM comment_reaction 
     WHERE comment_id = c.comment_id AND reaction = 'dislike'
   ),
   updated_at = now()
 WHERE c.comment_id = $1
-RETURNING comment_id, content_id, user_id, comment_text, like_count, dislike_count, created_at, updated_at, is_deleted
+RETURNING comment_id, content_id, user_id, comment_text, score, created_at, updated_at, is_deleted
 `
 
-func (q *Queries) UpdateCommentLikeDislikeCount(ctx context.Context, commentID pgtype.UUID) (Comment, error) {
-	row := q.db.QueryRow(ctx, updateCommentLikeDislikeCount, commentID)
+func (q *Queries) UpdateCommentScore(ctx context.Context, commentID pgtype.UUID) (Comment, error) {
+	row := q.db.QueryRow(ctx, updateCommentScore, commentID)
 	var i Comment
 	err := row.Scan(
 		&i.CommentID,
 		&i.ContentID,
 		&i.UserID,
 		&i.CommentText,
-		&i.LikeCount,
-		&i.DislikeCount,
+		&i.Score,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.IsDeleted,

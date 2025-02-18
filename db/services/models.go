@@ -8,14 +8,30 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Ad struct {
+	ID          pgtype.UUID
+	Title       pgtype.Text
+	Description pgtype.Text
+	ImageUrl    pgtype.Text
+	TargetUrl   pgtype.Text
+	Placement   pgtype.Text
+	Status      pgtype.Text
+	Clicks      pgtype.Int4
+	StartDate   pgtype.Timestamptz
+	EndDate     pgtype.Timestamptz
+	CreatedAt   pgtype.Timestamptz
+	UpdatedAt   pgtype.Timestamptz
+}
+
 type AnalyticsDaily struct {
-	AnalyticsDate pgtype.Date
-	TotalViews    int32
-	TotalLikes    int32
-	TotalDislikes int32
-	TotalComments int32
-	CreatedAt     pgtype.Timestamptz
-	UpdatedAt     pgtype.Timestamptz
+	AnalyticsDate  pgtype.Date
+	TotalViews     int32
+	TotalLikes     int32
+	TotalDislikes  int32
+	TotalComments  int32
+	TotalAdsClicks int32
+	CreatedAt      pgtype.Timestamptz
+	UpdatedAt      pgtype.Timestamptz
 }
 
 type Category struct {
@@ -24,15 +40,14 @@ type Category struct {
 }
 
 type Comment struct {
-	CommentID    pgtype.UUID
-	ContentID    pgtype.UUID
-	UserID       pgtype.UUID
-	CommentText  string
-	LikeCount    int32
-	DislikeCount int32
-	CreatedAt    pgtype.Timestamptz
-	UpdatedAt    pgtype.Timestamptz
-	IsDeleted    pgtype.Bool
+	CommentID   pgtype.UUID
+	ContentID   pgtype.UUID
+	UserID      pgtype.UUID
+	CommentText string
+	Score       int32
+	CreatedAt   pgtype.Timestamptz
+	UpdatedAt   pgtype.Timestamptz
+	IsDeleted   pgtype.Bool
 }
 
 type CommentReaction struct {

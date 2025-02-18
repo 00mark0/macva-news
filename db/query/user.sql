@@ -90,6 +90,46 @@ WHERE "is_deleted" = true
 ORDER BY created_at DESC
 LIMIT $1 OFFSET $2;
 
+-- name: SearchActiveUsers :many
+SELECT
+  u.*
+FROM "user" u
+WHERE u.is_deleted = false 
+  AND u.banned = false
+  AND (
+    u.username ILIKE '%' || $1 || '%'
+    OR u.email ILIKE '%' || $1 || '%'
+  )
+ORDER BY u.created_at DESC
+LIMIT $2 OFFSET $3;
+
+-- name: SearchDeletedUsers :many
+SELECT
+  u.*
+FROM "user" u
+WHERE u.is_deleted = true
+  AND (
+    u.username ILIKE '%' || $1 || '%'
+    OR u.email ILIKE '%' || $1 || '%'
+  )
+ORDER BY u.created_at DESC
+LIMIT $2 OFFSET $3;
+
+-- name: SearchBannedUsers :many
+SELECT
+  u.*
+FROM "user" u
+WHERE u.banned = true
+  AND (
+    u.username ILIKE '%' || $1 || '%'
+    OR u.email ILIKE '%' || $1 || '%'
+  )
+ORDER BY u.created_at DESC
+LIMIT $2 OFFSET $3;
+
+
+
+
 
 
 

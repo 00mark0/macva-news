@@ -228,6 +228,27 @@ func (q *Queries) GetContentDetails(ctx context.Context, contentID pgtype.UUID) 
 	return i, err
 }
 
+const getContentOverview = `-- name: GetContentOverview :one
+SELECT 
+  COUNT(*) FILTER (WHERE status = 'draft' AND is_deleted = false) AS draft_count,
+  COUNT(*) FILTER (WHERE status = 'published' AND is_deleted = false) AS published_count,
+  COUNT(*) FILTER (WHERE is_deleted = true) AS deleted_count
+FROM content
+`
+
+type GetContentOverviewRow struct {
+	DraftCount     int64
+	PublishedCount int64
+	DeletedCount   int64
+}
+
+func (q *Queries) GetContentOverview(ctx context.Context) (GetContentOverviewRow, error) {
+	row := q.db.QueryRow(ctx, getContentOverview)
+	var i GetContentOverviewRow
+	err := row.Scan(&i.DraftCount, &i.PublishedCount, &i.DeletedCount)
+	return i, err
+}
+
 const incrementViewCount = `-- name: IncrementViewCount :one
 UPDATE content
 SET
@@ -432,6 +453,82 @@ func (q *Queries) ListContentByTag(ctx context.Context, arg ListContentByTagPara
 	return items, nil
 }
 
+const listContentForModeration = `-- name: ListContentForModeration :many
+SELECT c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted, row_to_json(u) AS author
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+WHERE u.banned = true
+ORDER BY c.created_at DESC
+LIMIT $1 OFFSET $2
+`
+
+type ListContentForModerationParams struct {
+	Limit  int32
+	Offset int32
+}
+
+type ListContentForModerationRow struct {
+	ContentID           pgtype.UUID
+	UserID              pgtype.UUID
+	CategoryID          pgtype.UUID
+	Title               string
+	ContentDescription  string
+	CommentsEnabled     bool
+	ViewCountEnabled    bool
+	LikeCountEnabled    bool
+	DislikeCountEnabled bool
+	Status              string
+	ViewCount           int32
+	LikeCount           int32
+	DislikeCount        int32
+	CommentCount        int32
+	CreatedAt           pgtype.Timestamptz
+	UpdatedAt           pgtype.Timestamptz
+	PublishedAt         pgtype.Timestamptz
+	IsDeleted           pgtype.Bool
+	Author              []byte
+}
+
+func (q *Queries) ListContentForModeration(ctx context.Context, arg ListContentForModerationParams) ([]ListContentForModerationRow, error) {
+	rows, err := q.db.Query(ctx, listContentForModeration, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListContentForModerationRow
+	for rows.Next() {
+		var i ListContentForModerationRow
+		if err := rows.Scan(
+			&i.ContentID,
+			&i.UserID,
+			&i.CategoryID,
+			&i.Title,
+			&i.ContentDescription,
+			&i.CommentsEnabled,
+			&i.ViewCountEnabled,
+			&i.LikeCountEnabled,
+			&i.DislikeCountEnabled,
+			&i.Status,
+			&i.ViewCount,
+			&i.LikeCount,
+			&i.DislikeCount,
+			&i.CommentCount,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.PublishedAt,
+			&i.IsDeleted,
+			&i.Author,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listPublishedContent = `-- name: ListPublishedContent :many
 SELECT
   c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
@@ -504,6 +601,247 @@ func (q *Queries) ListPublishedContent(ctx context.Context, arg ListPublishedCon
 			&i.IsDeleted,
 			&i.Author,
 			&i.Category,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listRelatedContentByCategory = `-- name: ListRelatedContentByCategory :many
+SELECT c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted, row_to_json(u) AS author
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+WHERE c.category_id = $1
+  AND c.content_id <> $2
+  AND c.status = 'published'
+  AND c.is_deleted = false
+ORDER BY c.published_at DESC
+LIMIT $3
+`
+
+type ListRelatedContentByCategoryParams struct {
+	CategoryID pgtype.UUID
+	ContentID  pgtype.UUID
+	Limit      int32
+}
+
+type ListRelatedContentByCategoryRow struct {
+	ContentID           pgtype.UUID
+	UserID              pgtype.UUID
+	CategoryID          pgtype.UUID
+	Title               string
+	ContentDescription  string
+	CommentsEnabled     bool
+	ViewCountEnabled    bool
+	LikeCountEnabled    bool
+	DislikeCountEnabled bool
+	Status              string
+	ViewCount           int32
+	LikeCount           int32
+	DislikeCount        int32
+	CommentCount        int32
+	CreatedAt           pgtype.Timestamptz
+	UpdatedAt           pgtype.Timestamptz
+	PublishedAt         pgtype.Timestamptz
+	IsDeleted           pgtype.Bool
+	Author              []byte
+}
+
+func (q *Queries) ListRelatedContentByCategory(ctx context.Context, arg ListRelatedContentByCategoryParams) ([]ListRelatedContentByCategoryRow, error) {
+	rows, err := q.db.Query(ctx, listRelatedContentByCategory, arg.CategoryID, arg.ContentID, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListRelatedContentByCategoryRow
+	for rows.Next() {
+		var i ListRelatedContentByCategoryRow
+		if err := rows.Scan(
+			&i.ContentID,
+			&i.UserID,
+			&i.CategoryID,
+			&i.Title,
+			&i.ContentDescription,
+			&i.CommentsEnabled,
+			&i.ViewCountEnabled,
+			&i.LikeCountEnabled,
+			&i.DislikeCountEnabled,
+			&i.Status,
+			&i.ViewCount,
+			&i.LikeCount,
+			&i.DislikeCount,
+			&i.CommentCount,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.PublishedAt,
+			&i.IsDeleted,
+			&i.Author,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listRelatedContentByTag = `-- name: ListRelatedContentByTag :many
+SELECT DISTINCT c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted, row_to_json(u) AS author
+FROM content c
+JOIN content_tag ct ON c.content_id = ct.content_id
+JOIN tag t ON ct.tag_id = t.tag_id
+JOIN "user" u ON c.user_id = u.user_id
+WHERE t.tag_id = $1
+  AND c.content_id <> $2
+  AND c.status = 'published'
+  AND c.is_deleted = false
+ORDER BY c.published_at DESC
+LIMIT $3
+`
+
+type ListRelatedContentByTagParams struct {
+	TagID     pgtype.UUID
+	ContentID pgtype.UUID
+	Limit     int32
+}
+
+type ListRelatedContentByTagRow struct {
+	ContentID           pgtype.UUID
+	UserID              pgtype.UUID
+	CategoryID          pgtype.UUID
+	Title               string
+	ContentDescription  string
+	CommentsEnabled     bool
+	ViewCountEnabled    bool
+	LikeCountEnabled    bool
+	DislikeCountEnabled bool
+	Status              string
+	ViewCount           int32
+	LikeCount           int32
+	DislikeCount        int32
+	CommentCount        int32
+	CreatedAt           pgtype.Timestamptz
+	UpdatedAt           pgtype.Timestamptz
+	PublishedAt         pgtype.Timestamptz
+	IsDeleted           pgtype.Bool
+	Author              []byte
+}
+
+func (q *Queries) ListRelatedContentByTag(ctx context.Context, arg ListRelatedContentByTagParams) ([]ListRelatedContentByTagRow, error) {
+	rows, err := q.db.Query(ctx, listRelatedContentByTag, arg.TagID, arg.ContentID, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListRelatedContentByTagRow
+	for rows.Next() {
+		var i ListRelatedContentByTagRow
+		if err := rows.Scan(
+			&i.ContentID,
+			&i.UserID,
+			&i.CategoryID,
+			&i.Title,
+			&i.ContentDescription,
+			&i.CommentsEnabled,
+			&i.ViewCountEnabled,
+			&i.LikeCountEnabled,
+			&i.DislikeCountEnabled,
+			&i.Status,
+			&i.ViewCount,
+			&i.LikeCount,
+			&i.DislikeCount,
+			&i.CommentCount,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.PublishedAt,
+			&i.IsDeleted,
+			&i.Author,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTrendingContent = `-- name: ListTrendingContent :many
+SELECT 
+  c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
+  (c.view_count + c.like_count + c.comment_count) AS total_interactions
+FROM content c
+WHERE c.status = 'published'
+  AND c.is_deleted = false
+  AND c.published_at >= $1
+ORDER BY total_interactions DESC
+LIMIT $2
+`
+
+type ListTrendingContentParams struct {
+	PublishedAt pgtype.Timestamptz
+	Limit       int32
+}
+
+type ListTrendingContentRow struct {
+	ContentID           pgtype.UUID
+	UserID              pgtype.UUID
+	CategoryID          pgtype.UUID
+	Title               string
+	ContentDescription  string
+	CommentsEnabled     bool
+	ViewCountEnabled    bool
+	LikeCountEnabled    bool
+	DislikeCountEnabled bool
+	Status              string
+	ViewCount           int32
+	LikeCount           int32
+	DislikeCount        int32
+	CommentCount        int32
+	CreatedAt           pgtype.Timestamptz
+	UpdatedAt           pgtype.Timestamptz
+	PublishedAt         pgtype.Timestamptz
+	IsDeleted           pgtype.Bool
+	TotalInteractions   int32
+}
+
+func (q *Queries) ListTrendingContent(ctx context.Context, arg ListTrendingContentParams) ([]ListTrendingContentRow, error) {
+	rows, err := q.db.Query(ctx, listTrendingContent, arg.PublishedAt, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListTrendingContentRow
+	for rows.Next() {
+		var i ListTrendingContentRow
+		if err := rows.Scan(
+			&i.ContentID,
+			&i.UserID,
+			&i.CategoryID,
+			&i.Title,
+			&i.ContentDescription,
+			&i.CommentsEnabled,
+			&i.ViewCountEnabled,
+			&i.LikeCountEnabled,
+			&i.DislikeCountEnabled,
+			&i.Status,
+			&i.ViewCount,
+			&i.LikeCount,
+			&i.DislikeCount,
+			&i.CommentCount,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.PublishedAt,
+			&i.IsDeleted,
+			&i.TotalInteractions,
 		); err != nil {
 			return nil, err
 		}

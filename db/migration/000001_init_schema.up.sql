@@ -53,10 +53,9 @@ CREATE TABLE "comment" (
   "content_id" UUID NOT NULL,
   "user_id" UUID NOT NULL,
   "comment_text" TEXT NOT NULL,
-  "like_count" INT NOT NULL DEFAULT 0,
-  "dislike_count" INT NOT NULL DEFAULT 0,
-  "created_at" TIMESTAMPTZ DEFAULT (now()),
-  "updated_at" TIMESTAMPTZ DEFAULT (now()),
+  "score" INT NOT NULL DEFAULT 0,  -- new net score column
+  "created_at" TIMESTAMPTZ DEFAULT now(),
+  "updated_at" TIMESTAMPTZ DEFAULT now(),
   "is_deleted" BOOL DEFAULT false
 );
 
@@ -81,6 +80,22 @@ CREATE TABLE "comment_reaction" (
   "reaction" VARCHAR(10) NOT NULL
 );
 
+CREATE TABLE "ads" (
+  "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(), 
+  "title" VARCHAR(255),                           
+  "description" TEXT,                             
+  "image_url" VARCHAR(500),                       
+  "target_url" VARCHAR(500),                      
+  "placement" VARCHAR(50),                       
+  "status" VARCHAR(20) CHECK (status IN ('active', 'inactive')), 
+  "clicks" INT DEFAULT 0,                          
+  "start_date" TIMESTAMPTZ,      
+  "end_date" TIMESTAMPTZ,                          
+  "created_at" TIMESTAMPTZ DEFAULT (now()),      
+  "updated_at" TIMESTAMPTZ DEFAULT (now())        
+);
+
+
 CREATE TABLE "global_settings" (
   "global_settings_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "disable_comments" BOOL NOT NULL DEFAULT false,
@@ -95,6 +110,7 @@ CREATE TABLE "analytics_daily" (
   "total_likes" INT NOT NULL DEFAULT 0,
   "total_dislikes" INT NOT NULL DEFAULT 0,
   "total_comments" INT NOT NULL DEFAULT 0,
+  "total_ads_clicks" INT NOT NULL DEFAULT 0,
   "created_at" TIMESTAMPTZ DEFAULT (now()),
   "updated_at" TIMESTAMPTZ DEFAULT (now())
 );
@@ -110,6 +126,8 @@ CREATE INDEX "idx_content_user" ON content("user_id", "is_deleted");
 CREATE INDEX "idx_content_category" ON content("category_id", "status", "is_deleted");
 CREATE INDEX "idx_content_fulltext" ON content USING gin (to_tsvector('english', "title" || ' ' || "content_description"));
 CREATE INDEX "idx_tag_name_lower" ON tag(lower("tag_name"));
+CREATE INDEX "idx_content_tag_content" ON content_tag("content_id");
+CREATE INDEX "idx_content_tag_tag" ON content_tag("tag_id");
 CREATE INDEX "idx_comment_content_created" ON comment("content_id", "is_deleted", "created_at");
 CREATE INDEX "idx_media_content_order" ON media("content_id", "media_order");
 CREATE INDEX "idx_content_reaction_content" ON content_reaction("content_id");

@@ -185,6 +185,60 @@ FROM content_reaction cr
 JOIN "user" u ON cr.user_id = u.user_id
 WHERE cr.content_id = $1;
 
+-- name: ListTrendingContent :many
+SELECT 
+  c.*,
+  (c.view_count + c.like_count + c.comment_count) AS total_interactions
+FROM content c
+WHERE c.status = 'published'
+  AND c.is_deleted = false
+  AND c.published_at >= $1
+ORDER BY total_interactions DESC
+LIMIT $2;
+
+-- name: GetContentOverview :one
+SELECT 
+  COUNT(*) FILTER (WHERE status = 'draft' AND is_deleted = false) AS draft_count,
+  COUNT(*) FILTER (WHERE status = 'published' AND is_deleted = false) AS published_count,
+  COUNT(*) FILTER (WHERE is_deleted = true) AS deleted_count
+FROM content;
+
+-- name: ListContentForModeration :many
+SELECT c.*, row_to_json(u) AS author
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+WHERE u.banned = true
+ORDER BY c.created_at DESC
+LIMIT $1 OFFSET $2;
+
+-- name: ListRelatedContentByCategory :many
+SELECT c.*, row_to_json(u) AS author
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+WHERE c.category_id = $1
+  AND c.content_id <> $2
+  AND c.status = 'published'
+  AND c.is_deleted = false
+ORDER BY c.published_at DESC
+LIMIT $3;
+
+-- name: ListRelatedContentByTag :many
+SELECT DISTINCT c.*, row_to_json(u) AS author
+FROM content c
+JOIN content_tag ct ON c.content_id = ct.content_id
+JOIN tag t ON ct.tag_id = t.tag_id
+JOIN "user" u ON c.user_id = u.user_id
+WHERE t.tag_id = $1
+  AND c.content_id <> $2
+  AND c.status = 'published'
+  AND c.is_deleted = false
+ORDER BY c.published_at DESC
+LIMIT $3;
+
+
+
+
+
 
 
 
