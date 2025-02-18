@@ -73,6 +73,65 @@ func (q *Queries) CreateContent(ctx context.Context, arg CreateContentParams) (C
 	return i, err
 }
 
+const deleteContentReaction = `-- name: DeleteContentReaction :one
+DELETE FROM content_reaction
+WHERE content_id = $1 AND user_id = $2
+RETURNING content_id
+`
+
+type DeleteContentReactionParams struct {
+	ContentID pgtype.UUID
+	UserID    pgtype.UUID
+}
+
+func (q *Queries) DeleteContentReaction(ctx context.Context, arg DeleteContentReactionParams) (pgtype.UUID, error) {
+	row := q.db.QueryRow(ctx, deleteContentReaction, arg.ContentID, arg.UserID)
+	var content_id pgtype.UUID
+	err := row.Scan(&content_id)
+	return content_id, err
+}
+
+const fetchContentReactions = `-- name: FetchContentReactions :many
+SELECT
+  cr.content_id, cr.user_id, cr.reaction,
+  row_to_json(u) AS user_info
+FROM content_reaction cr
+JOIN "user" u ON cr.user_id = u.user_id
+WHERE cr.content_id = $1
+`
+
+type FetchContentReactionsRow struct {
+	ContentID pgtype.UUID
+	UserID    pgtype.UUID
+	Reaction  string
+	UserInfo  []byte
+}
+
+func (q *Queries) FetchContentReactions(ctx context.Context, contentID pgtype.UUID) ([]FetchContentReactionsRow, error) {
+	rows, err := q.db.Query(ctx, fetchContentReactions, contentID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []FetchContentReactionsRow
+	for rows.Next() {
+		var i FetchContentReactionsRow
+		if err := rows.Scan(
+			&i.ContentID,
+			&i.UserID,
+			&i.Reaction,
+			&i.UserInfo,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getContentDetails = `-- name: GetContentDetails :one
 SELECT
   c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
@@ -82,21 +141,21 @@ SELECT
     SELECT array_agg(t.tag_name)
     FROM content_tag ct
     JOIN tag t ON ct.tag_id = t.tag_id
-    WHERE ct.content_id = c.content_id
+    WHERE ct.content_id = c.content_id -- No ambiguity here
   ) AS tags,
   (
     SELECT json_agg(m)
     FROM (
       SELECT media_id, media_type, media_url, media_caption, media_order
-      FROM media
-      WHERE content_id = c.content_id
-      ORDER BY media_order
+      FROM media m -- Add alias for the media table
+      WHERE m.content_id = c.content_id
+      ORDER BY m.media_order
     ) m
   ) AS media,
   (
     SELECT count(*)
     FROM content_reaction cr
-    WHERE cr.content_id = c.content_id
+    WHERE cr.content_id = c.content_id -- This is where qualification is needed
   ) AS reaction_count,
   (
     SELECT count(*)
@@ -167,6 +226,42 @@ func (q *Queries) GetContentDetails(ctx context.Context, contentID pgtype.UUID) 
 		&i.CommentCountSync,
 	)
 	return i, err
+}
+
+const incrementViewCount = `-- name: IncrementViewCount :one
+UPDATE content
+SET
+  view_count = view_count + 1
+WHERE content_id = $1
+RETURNING view_count
+`
+
+func (q *Queries) IncrementViewCount(ctx context.Context, contentID pgtype.UUID) (int32, error) {
+	row := q.db.QueryRow(ctx, incrementViewCount, contentID)
+	var view_count int32
+	err := row.Scan(&view_count)
+	return view_count, err
+}
+
+const insertOrUpdateContentReaction = `-- name: InsertOrUpdateContentReaction :one
+INSERT INTO content_reaction (content_id, user_id, reaction)
+VALUES ($1, $2, $3)
+ON CONFLICT (content_id, user_id)
+DO UPDATE SET reaction = EXCLUDED.reaction
+RETURNING content_id
+`
+
+type InsertOrUpdateContentReactionParams struct {
+	ContentID pgtype.UUID
+	UserID    pgtype.UUID
+	Reaction  string
+}
+
+func (q *Queries) InsertOrUpdateContentReaction(ctx context.Context, arg InsertOrUpdateContentReactionParams) (pgtype.UUID, error) {
+	row := q.db.QueryRow(ctx, insertOrUpdateContentReaction, arg.ContentID, arg.UserID, arg.Reaction)
+	var content_id pgtype.UUID
+	err := row.Scan(&content_id)
+	return content_id, err
 }
 
 const listContentByCategory = `-- name: ListContentByCategory :many
@@ -619,6 +714,50 @@ func (q *Queries) UpdateContent(ctx context.Context, arg UpdateContentParams) (C
 		arg.LikeCountEnabled,
 		arg.DislikeCountEnabled,
 	)
+	var i Content
+	err := row.Scan(
+		&i.ContentID,
+		&i.UserID,
+		&i.CategoryID,
+		&i.Title,
+		&i.ContentDescription,
+		&i.CommentsEnabled,
+		&i.ViewCountEnabled,
+		&i.LikeCountEnabled,
+		&i.DislikeCountEnabled,
+		&i.Status,
+		&i.ViewCount,
+		&i.LikeCount,
+		&i.DislikeCount,
+		&i.CommentCount,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.PublishedAt,
+		&i.IsDeleted,
+	)
+	return i, err
+}
+
+const updateContentLikeDislikeCount = `-- name: UpdateContentLikeDislikeCount :one
+UPDATE content c
+SET
+  like_count = (
+    SELECT count(*) 
+    FROM content_reaction 
+    WHERE content_id = c.content_id AND reaction = 'like'
+  ),
+  dislike_count = (
+    SELECT count(*) 
+    FROM content_reaction 
+    WHERE content_id = c.content_id AND reaction = 'dislike'
+  ),
+  updated_at = now()
+WHERE c.content_id = $1  -- You can use the content_id returned from the previous action here
+RETURNING content_id, user_id, category_id, title, content_description, comments_enabled, view_count_enabled, like_count_enabled, dislike_count_enabled, status, view_count, like_count, dislike_count, comment_count, created_at, updated_at, published_at, is_deleted
+`
+
+func (q *Queries) UpdateContentLikeDislikeCount(ctx context.Context, contentID pgtype.UUID) (Content, error) {
+	row := q.db.QueryRow(ctx, updateContentLikeDislikeCount, contentID)
 	var i Content
 	err := row.Scan(
 		&i.ContentID,

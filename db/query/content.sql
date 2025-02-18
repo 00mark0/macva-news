@@ -53,21 +53,21 @@ SELECT
     SELECT array_agg(t.tag_name)
     FROM content_tag ct
     JOIN tag t ON ct.tag_id = t.tag_id
-    WHERE ct.content_id = c.content_id
+    WHERE ct.content_id = c.content_id -- No ambiguity here
   ) AS tags,
   (
     SELECT json_agg(m)
     FROM (
       SELECT media_id, media_type, media_url, media_caption, media_order
-      FROM media
-      WHERE content_id = c.content_id
-      ORDER BY media_order
+      FROM media m -- Add alias for the media table
+      WHERE m.content_id = c.content_id
+      ORDER BY m.media_order
     ) m
   ) AS media,
   (
     SELECT count(*)
     FROM content_reaction cr
-    WHERE cr.content_id = c.content_id
+    WHERE cr.content_id = c.content_id -- This is where qualification is needed
   ) AS reaction_count,
   (
     SELECT count(*)
@@ -140,6 +140,50 @@ WHERE c.status = 'published'
   )
 ORDER BY c.published_at DESC
 LIMIT $2 OFFSET $3;
+
+-- name: IncrementViewCount :one
+UPDATE content
+SET
+  view_count = view_count + 1
+WHERE content_id = $1
+RETURNING view_count;
+
+-- name: InsertOrUpdateContentReaction :one
+INSERT INTO content_reaction (content_id, user_id, reaction)
+VALUES ($1, $2, $3)
+ON CONFLICT (content_id, user_id)
+DO UPDATE SET reaction = EXCLUDED.reaction
+RETURNING content_id;
+
+-- name: DeleteContentReaction :one
+DELETE FROM content_reaction
+WHERE content_id = $1 AND user_id = $2
+RETURNING content_id;
+
+-- name: UpdateContentLikeDislikeCount :one
+UPDATE content c
+SET
+  like_count = (
+    SELECT count(*) 
+    FROM content_reaction 
+    WHERE content_id = c.content_id AND reaction = 'like'
+  ),
+  dislike_count = (
+    SELECT count(*) 
+    FROM content_reaction 
+    WHERE content_id = c.content_id AND reaction = 'dislike'
+  ),
+  updated_at = now()
+WHERE c.content_id = $1  -- You can use the content_id returned from the previous action here
+RETURNING *;
+
+-- name: FetchContentReactions :many
+SELECT
+  cr.*,
+  row_to_json(u) AS user_info
+FROM content_reaction cr
+JOIN "user" u ON cr.user_id = u.user_id
+WHERE cr.content_id = $1;
 
 
 
