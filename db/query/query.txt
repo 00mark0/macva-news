@@ -1,1 +1,0 @@
-this is where you will write your sql queries and sqlc will generate go code for funcs and models for you

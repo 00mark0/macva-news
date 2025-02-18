@@ -1,1 +1,0 @@
-this is where your migration up and down files will be, when you run up, you up schema will be executed

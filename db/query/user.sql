@@ -97,11 +97,11 @@ FROM "user" u
 WHERE u.is_deleted = false 
   AND u.banned = false
   AND (
-    u.username ILIKE '%' || $1 || '%'
-    OR u.email ILIKE '%' || $1 || '%'
+    u.username ILIKE '%' || @search_term::text || '%'
+    OR u.email ILIKE '%' || @search_term::text || '%'
   )
 ORDER BY u.created_at DESC
-LIMIT $2 OFFSET $3;
+LIMIT $1 OFFSET $2;
 
 -- name: SearchDeletedUsers :many
 SELECT
@@ -109,11 +109,11 @@ SELECT
 FROM "user" u
 WHERE u.is_deleted = true
   AND (
-    u.username ILIKE '%' || $1 || '%'
-    OR u.email ILIKE '%' || $1 || '%'
+    u.username ILIKE '%' || @search_term::text || '%'
+    OR u.email ILIKE '%' || @search_term::text || '%'
   )
 ORDER BY u.created_at DESC
-LIMIT $2 OFFSET $3;
+LIMIT $1 OFFSET $2;
 
 -- name: SearchBannedUsers :many
 SELECT
@@ -121,11 +121,11 @@ SELECT
 FROM "user" u
 WHERE u.banned = true
   AND (
-    u.username ILIKE '%' || $1 || '%'
-    OR u.email ILIKE '%' || $1 || '%'
+    u.username ILIKE '%' || @search_term::text || '%'
+    OR u.email ILIKE '%' || @search_term::text || '%'
   )
 ORDER BY u.created_at DESC
-LIMIT $2 OFFSET $3;
+LIMIT $1 OFFSET $2;
 
 
 

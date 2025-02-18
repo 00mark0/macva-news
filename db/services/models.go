@@ -94,6 +94,7 @@ type GlobalSetting struct {
 	DisableLikes     bool
 	DisableDislikes  bool
 	DisableViews     bool
+	DisableAds       bool
 }
 
 type Medium struct {

@@ -344,21 +344,21 @@ FROM "user" u
 WHERE u.is_deleted = false 
   AND u.banned = false
   AND (
-    u.username ILIKE '%' || $1 || '%'
-    OR u.email ILIKE '%' || $1 || '%'
+    u.username ILIKE '%' || $3::text || '%'
+    OR u.email ILIKE '%' || $3::text || '%'
   )
 ORDER BY u.created_at DESC
-LIMIT $2 OFFSET $3
+LIMIT $1 OFFSET $2
 `
 
 type SearchActiveUsersParams struct {
-	Column1 pgtype.Text
-	Limit   int32
-	Offset  int32
+	Limit      int32
+	Offset     int32
+	SearchTerm string
 }
 
 func (q *Queries) SearchActiveUsers(ctx context.Context, arg SearchActiveUsersParams) ([]User, error) {
-	rows, err := q.db.Query(ctx, searchActiveUsers, arg.Column1, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, searchActiveUsers, arg.Limit, arg.Offset, arg.SearchTerm)
 	if err != nil {
 		return nil, err
 	}
@@ -393,21 +393,21 @@ SELECT
 FROM "user" u
 WHERE u.banned = true
   AND (
-    u.username ILIKE '%' || $1 || '%'
-    OR u.email ILIKE '%' || $1 || '%'
+    u.username ILIKE '%' || $3::text || '%'
+    OR u.email ILIKE '%' || $3::text || '%'
   )
 ORDER BY u.created_at DESC
-LIMIT $2 OFFSET $3
+LIMIT $1 OFFSET $2
 `
 
 type SearchBannedUsersParams struct {
-	Column1 pgtype.Text
-	Limit   int32
-	Offset  int32
+	Limit      int32
+	Offset     int32
+	SearchTerm string
 }
 
 func (q *Queries) SearchBannedUsers(ctx context.Context, arg SearchBannedUsersParams) ([]User, error) {
-	rows, err := q.db.Query(ctx, searchBannedUsers, arg.Column1, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, searchBannedUsers, arg.Limit, arg.Offset, arg.SearchTerm)
 	if err != nil {
 		return nil, err
 	}
@@ -442,21 +442,21 @@ SELECT
 FROM "user" u
 WHERE u.is_deleted = true
   AND (
-    u.username ILIKE '%' || $1 || '%'
-    OR u.email ILIKE '%' || $1 || '%'
+    u.username ILIKE '%' || $3::text || '%'
+    OR u.email ILIKE '%' || $3::text || '%'
   )
 ORDER BY u.created_at DESC
-LIMIT $2 OFFSET $3
+LIMIT $1 OFFSET $2
 `
 
 type SearchDeletedUsersParams struct {
-	Column1 pgtype.Text
-	Limit   int32
-	Offset  int32
+	Limit      int32
+	Offset     int32
+	SearchTerm string
 }
 
 func (q *Queries) SearchDeletedUsers(ctx context.Context, arg SearchDeletedUsersParams) ([]User, error) {
-	rows, err := q.db.Query(ctx, searchDeletedUsers, arg.Column1, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, searchDeletedUsers, arg.Limit, arg.Offset, arg.SearchTerm)
 	if err != nil {
 		return nil, err
 	}

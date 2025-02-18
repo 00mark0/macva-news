@@ -11,6 +11,43 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const aggregateAnalytics = `-- name: AggregateAnalytics :one
+SELECT
+    SUM("total_views") AS "total_views",
+    SUM("total_likes") AS "total_likes",
+    SUM("total_dislikes") AS "total_dislikes",
+    SUM("total_comments") AS "total_comments",
+    SUM("total_ads_clicks") AS "total_ads_clicks"
+FROM "analytics_daily"
+WHERE "analytics_date" BETWEEN $1 AND $2
+`
+
+type AggregateAnalyticsParams struct {
+	AnalyticsDate   pgtype.Date
+	AnalyticsDate_2 pgtype.Date
+}
+
+type AggregateAnalyticsRow struct {
+	TotalViews     int64
+	TotalLikes     int64
+	TotalDislikes  int64
+	TotalComments  int64
+	TotalAdsClicks int64
+}
+
+func (q *Queries) AggregateAnalytics(ctx context.Context, arg AggregateAnalyticsParams) (AggregateAnalyticsRow, error) {
+	row := q.db.QueryRow(ctx, aggregateAnalytics, arg.AnalyticsDate, arg.AnalyticsDate_2)
+	var i AggregateAnalyticsRow
+	err := row.Scan(
+		&i.TotalViews,
+		&i.TotalLikes,
+		&i.TotalDislikes,
+		&i.TotalComments,
+		&i.TotalAdsClicks,
+	)
+	return i, err
+}
+
 const createDailyAnalytics = `-- name: CreateDailyAnalytics :one
 INSERT INTO analytics_daily (
   analytics_date, total_views, total_likes, total_dislikes, total_comments, total_ads_clicks
@@ -56,15 +93,23 @@ SELECT analytics_date, total_views, total_likes, total_dislikes, total_comments,
 FROM analytics_daily
 WHERE analytics_date BETWEEN $1 AND $2
 ORDER BY analytics_date DESC
+LIMIT $3 OFFSET $4
 `
 
 type GetDailyAnalyticsParams struct {
 	AnalyticsDate   pgtype.Date
 	AnalyticsDate_2 pgtype.Date
+	Limit           int32
+	Offset          int32
 }
 
 func (q *Queries) GetDailyAnalytics(ctx context.Context, arg GetDailyAnalyticsParams) ([]AnalyticsDaily, error) {
-	rows, err := q.db.Query(ctx, getDailyAnalytics, arg.AnalyticsDate, arg.AnalyticsDate_2)
+	rows, err := q.db.Query(ctx, getDailyAnalytics,
+		arg.AnalyticsDate,
+		arg.AnalyticsDate_2,
+		arg.Limit,
+		arg.Offset,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -90,6 +135,17 @@ func (q *Queries) GetDailyAnalytics(ctx context.Context, arg GetDailyAnalyticsPa
 		return nil, err
 	}
 	return items, nil
+}
+
+const insertDailyAnalytics = `-- name: InsertDailyAnalytics :exec
+INSERT INTO "analytics_daily" ("analytics_date", "total_views", "total_likes", "total_dislikes", "total_comments", "total_ads_clicks")
+VALUES (CURRENT_DATE, 0, 0, 0, 0, 0)
+ON CONFLICT ("analytics_date") DO NOTHING
+`
+
+func (q *Queries) InsertDailyAnalytics(ctx context.Context) error {
+	_, err := q.db.Exec(ctx, insertDailyAnalytics)
+	return err
 }
 
 const updateDailyAnalytics = `-- name: UpdateDailyAnalytics :one

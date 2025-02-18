@@ -40,6 +40,17 @@ WHERE cm.content_id = $1
 ORDER BY cm.created_at ASC
 LIMIT $2;
 
+-- name: ListContentCommentsByScore :many
+SELECT
+  cm.*,
+  row_to_json(u) AS author
+FROM comment cm
+JOIN "user" u ON cm.user_id = u.user_id
+WHERE cm.content_id = $1
+  AND cm.is_deleted = false
+ORDER BY cm.score DESC, cm.created_at ASC
+LIMIT $2;
+
 -- name: InsertOrUpdateCommentReaction :one
 INSERT INTO comment_reaction (comment_id, user_id, reaction)
 VALUES ($1, $2, $3)

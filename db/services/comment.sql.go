@@ -178,6 +178,65 @@ func (q *Queries) ListContentComments(ctx context.Context, arg ListContentCommen
 	return items, nil
 }
 
+const listContentCommentsByScore = `-- name: ListContentCommentsByScore :many
+SELECT
+  cm.comment_id, cm.content_id, cm.user_id, cm.comment_text, cm.score, cm.created_at, cm.updated_at, cm.is_deleted,
+  row_to_json(u) AS author
+FROM comment cm
+JOIN "user" u ON cm.user_id = u.user_id
+WHERE cm.content_id = $1
+  AND cm.is_deleted = false
+ORDER BY cm.score DESC, cm.created_at ASC
+LIMIT $2
+`
+
+type ListContentCommentsByScoreParams struct {
+	ContentID pgtype.UUID
+	Limit     int32
+}
+
+type ListContentCommentsByScoreRow struct {
+	CommentID   pgtype.UUID
+	ContentID   pgtype.UUID
+	UserID      pgtype.UUID
+	CommentText string
+	Score       int32
+	CreatedAt   pgtype.Timestamptz
+	UpdatedAt   pgtype.Timestamptz
+	IsDeleted   pgtype.Bool
+	Author      []byte
+}
+
+func (q *Queries) ListContentCommentsByScore(ctx context.Context, arg ListContentCommentsByScoreParams) ([]ListContentCommentsByScoreRow, error) {
+	rows, err := q.db.Query(ctx, listContentCommentsByScore, arg.ContentID, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListContentCommentsByScoreRow
+	for rows.Next() {
+		var i ListContentCommentsByScoreRow
+		if err := rows.Scan(
+			&i.CommentID,
+			&i.ContentID,
+			&i.UserID,
+			&i.CommentText,
+			&i.Score,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.IsDeleted,
+			&i.Author,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const softDeleteComment = `-- name: SoftDeleteComment :one
 UPDATE comment
 SET 
