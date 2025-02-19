@@ -147,9 +147,40 @@ func TestGetContentDetails(t *testing.T) {
 	require.Equal(t, content1.UpdatedAt, content2.UpdatedAt)
 	require.Equal(t, content1.PublishedAt, content2.PublishedAt)
 	require.Equal(t, content1.IsDeleted, content2.IsDeleted)
-	log.Println(content2.Author)
-	log.Println(content2.Category)
-	log.Println(content2.Media)
+	log.Println(content2.AuthorUsername)
+	log.Println(content2.CategoryName)
 	log.Println(content2.ReactionCount)
 	log.Println(content2.CommentCountSync)
+}
+
+func TestGetPublishedContentCount(t *testing.T) {
+	count1, err := testQueries.GetPublishedContentCount(context.Background())
+	require.NoError(t, err)
+	require.NotZero(t, count1)
+
+	content1 := createRandomContent(t)
+
+	content2, err := testQueries.PublishContent(context.Background(), content1.ContentID)
+	require.NoError(t, err)
+	require.Equal(t, content1.ContentID, content2.ContentID)
+
+	count2, err := testQueries.GetPublishedContentCount(context.Background())
+	require.NoError(t, err)
+	require.Equal(t, count2, count1+1)
+}
+
+func TestListPublishedContent(t *testing.T) {
+	content, err := testQueries.ListPublishedContent(context.Background(), ListPublishedContentParams{Limit: 10, Offset: 0})
+	require.NoError(t, err)
+	require.NotEmpty(t, content)
+	require.LessOrEqual(t, len(content), 10)
+
+	for _, content := range content {
+		require.NotEmpty(t, content)
+		require.NotEmpty(t, content.ContentID)
+		require.NotEmpty(t, content.UserID)
+		require.NotEmpty(t, content.CategoryID)
+		require.NotEmpty(t, content.Title)
+		require.NotEmpty(t, content.ContentDescription)
+	}
 }

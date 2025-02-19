@@ -52,20 +52,14 @@ RETURNING *;
 -- name: GetContentDetails :one
 SELECT
   c.*,
-  u.*,  -- Gets all user columns
-  cat.*, -- Gets all category columns
+  u.username AS author_username,
+  cat.category_name,
   (
-    SELECT array_agg(t.tag_name)
+    SELECT array_agg(t.tag_name)::text[]
     FROM content_tag ct
     JOIN tag t ON ct.tag_id = t.tag_id
     WHERE ct.content_id = c.content_id
   ) AS tags,
-  (
-    SELECT array_agg(m.*)
-    FROM media m
-    WHERE m.content_id = c.content_id
-    ORDER BY m.media_order
-  ) AS media,
   (
     SELECT count(*)
     FROM content_reaction cr
@@ -91,8 +85,8 @@ WHERE status = 'published'
 -- name: ListPublishedContent :many
 SELECT
   c.*,
-  row_to_json(u) AS author,
-  row_to_json(cat) AS category
+  u.username AS author_username,
+  cat.category_name
 FROM content c
 JOIN "user" u ON c.user_id = u.user_id
 JOIN category cat ON c.category_id = cat.category_id

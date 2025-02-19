@@ -167,20 +167,14 @@ func (q *Queries) GetContentByTagCount(ctx context.Context, tagName string) (int
 const getContentDetails = `-- name: GetContentDetails :one
 SELECT
   c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
-  u.user_id, u.username, u.email, u.password, u.pfp, u.role, u.banned, u.is_deleted, u.created_at,  -- Gets all user columns
-  cat.category_id, cat.category_name, -- Gets all category columns
+  u.username AS author_username,
+  cat.category_name,
   (
-    SELECT array_agg(t.tag_name)
+    SELECT array_agg(t.tag_name)::text[]
     FROM content_tag ct
     JOIN tag t ON ct.tag_id = t.tag_id
     WHERE ct.content_id = c.content_id
   ) AS tags,
-  (
-    SELECT array_agg(m.*)
-    FROM media m
-    WHERE m.content_id = c.content_id
-    ORDER BY m.media_order
-  ) AS media,
   (
     SELECT count(*)
     FROM content_reaction cr
@@ -217,19 +211,9 @@ type GetContentDetailsRow struct {
 	UpdatedAt           pgtype.Timestamptz
 	PublishedAt         pgtype.Timestamptz
 	IsDeleted           pgtype.Bool
-	UserID_2            pgtype.UUID
-	Username            string
-	Email               string
-	Password            string
-	Pfp                 string
-	Role                string
-	Banned              pgtype.Bool
-	IsDeleted_2         pgtype.Bool
-	CreatedAt_2         pgtype.Timestamptz
-	CategoryID_2        pgtype.UUID
+	AuthorUsername      string
 	CategoryName        string
-	Tags                interface{}
-	Media               interface{}
+	Tags                []string
 	ReactionCount       int64
 	CommentCountSync    int64
 }
@@ -256,19 +240,9 @@ func (q *Queries) GetContentDetails(ctx context.Context, contentID pgtype.UUID) 
 		&i.UpdatedAt,
 		&i.PublishedAt,
 		&i.IsDeleted,
-		&i.UserID_2,
-		&i.Username,
-		&i.Email,
-		&i.Password,
-		&i.Pfp,
-		&i.Role,
-		&i.Banned,
-		&i.IsDeleted_2,
-		&i.CreatedAt_2,
-		&i.CategoryID_2,
+		&i.AuthorUsername,
 		&i.CategoryName,
 		&i.Tags,
-		&i.Media,
 		&i.ReactionCount,
 		&i.CommentCountSync,
 	)
@@ -654,8 +628,8 @@ func (q *Queries) ListContentForModerationCount(ctx context.Context) (int64, err
 const listPublishedContent = `-- name: ListPublishedContent :many
 SELECT
   c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
-  row_to_json(u) AS author,
-  row_to_json(cat) AS category
+  u.username AS author_username,
+  cat.category_name
 FROM content c
 JOIN "user" u ON c.user_id = u.user_id
 JOIN category cat ON c.category_id = cat.category_id
@@ -689,8 +663,8 @@ type ListPublishedContentRow struct {
 	UpdatedAt           pgtype.Timestamptz
 	PublishedAt         pgtype.Timestamptz
 	IsDeleted           pgtype.Bool
-	Author              []byte
-	Category            []byte
+	AuthorUsername      string
+	CategoryName        string
 }
 
 func (q *Queries) ListPublishedContent(ctx context.Context, arg ListPublishedContentParams) ([]ListPublishedContentRow, error) {
@@ -721,8 +695,8 @@ func (q *Queries) ListPublishedContent(ctx context.Context, arg ListPublishedCon
 			&i.UpdatedAt,
 			&i.PublishedAt,
 			&i.IsDeleted,
-			&i.Author,
-			&i.Category,
+			&i.AuthorUsername,
+			&i.CategoryName,
 		); err != nil {
 			return nil, err
 		}
