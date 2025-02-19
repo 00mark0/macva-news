@@ -171,6 +171,43 @@ func (q *Queries) GetActiveUsersCount(ctx context.Context) (int64, error) {
 	return count, err
 }
 
+const getAdminUsers = `-- name: GetAdminUsers :many
+SELECT user_id, username, email, password, pfp, role, banned, is_deleted, created_at
+FROM "user"
+WHERE "role" = 'admin'
+ORDER BY created_at DESC
+`
+
+func (q *Queries) GetAdminUsers(ctx context.Context) ([]User, error) {
+	rows, err := q.db.Query(ctx, getAdminUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.UserID,
+			&i.Username,
+			&i.Email,
+			&i.Password,
+			&i.Pfp,
+			&i.Role,
+			&i.Banned,
+			&i.IsDeleted,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getBannedUsers = `-- name: GetBannedUsers :many
 SELECT user_id, username, email, password, pfp, role, banned, is_deleted, created_at
 FROM "user"

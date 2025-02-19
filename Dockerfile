@@ -1,7 +1,7 @@
 # =========================
 # 1. Base Stage
 # =========================
-FROM golang:1.23-alpine AS base
+FROM golang:1.24-alpine AS base
 # Install dependencies required for both dev and build stages
 RUN apk add --no-cache nodejs npm make
 WORKDIR /app

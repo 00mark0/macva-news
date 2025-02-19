@@ -1,6 +1,6 @@
 module github.com/00mark0/macva-news
 
-go 1.23.5
+go 1.24.0
 
 require (
 	github.com/a-h/templ v0.3.833
@@ -21,6 +21,7 @@ require (
 	github.com/aead/poly1305 v0.0.0-20180717145839-3fee0db0b635 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
+	github.com/go-loremipsum/loremipsum v1.1.3 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect

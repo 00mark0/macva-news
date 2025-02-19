@@ -52,6 +52,12 @@ SELECT 1
 FROM "user" 
 WHERE email = $1;
 
+-- name: GetAdminUsers :many
+SELECT user_id, username, email, password, pfp, role, banned, is_deleted, created_at
+FROM "user"
+WHERE "role" = 'admin'
+ORDER BY created_at DESC;
+
 -- name: GetActiveUsersCount :one
 SELECT COUNT(*) AS count
 FROM "user"

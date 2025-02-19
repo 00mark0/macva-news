@@ -141,14 +141,15 @@ CREATE INDEX idx_analytics_daily_date_updated_at ON "analytics_daily"("analytics
 CREATE INDEX idx_recent_analytics ON "analytics_daily"("analytics_date");
 
 -- Create foreign key constraints
-ALTER TABLE "content" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("user_id");
-ALTER TABLE "content" ADD FOREIGN KEY ("category_id") REFERENCES "category" ("category_id");
-ALTER TABLE "content_tag" ADD FOREIGN KEY ("content_id") REFERENCES "content" ("content_id");
+ALTER TABLE "content" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("user_id") ON DELETE CASCADE;
+ALTER TABLE "content" ADD FOREIGN KEY ("category_id") REFERENCES "category" ("category_id") ON DELETE CASCADE;
+ALTER TABLE "content_tag" ADD FOREIGN KEY ("content_id") REFERENCES "content" ("content_id") ON DELETE CASCADE;
 ALTER TABLE "content_tag" ADD FOREIGN KEY ("tag_id") REFERENCES "tag" ("tag_id");
-ALTER TABLE "comment" ADD FOREIGN KEY ("content_id") REFERENCES "content" ("content_id");
-ALTER TABLE "comment" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("user_id");
-ALTER TABLE "media" ADD FOREIGN KEY ("content_id") REFERENCES "content" ("content_id");
-ALTER TABLE "content_reaction" ADD FOREIGN KEY ("content_id") REFERENCES "content" ("content_id");
-ALTER TABLE "content_reaction" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("user_id");
-ALTER TABLE "comment_reaction" ADD FOREIGN KEY ("comment_id") REFERENCES "comment" ("comment_id");
-ALTER TABLE "comment_reaction" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("user_id");
+ALTER TABLE "comment" ADD FOREIGN KEY ("content_id") REFERENCES "content" ("content_id") ON DELETE CASCADE;
+ALTER TABLE "comment" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("user_id") ON DELETE CASCADE;
+ALTER TABLE "media" ADD FOREIGN KEY ("content_id") REFERENCES "content" ("content_id") ON DELETE CASCADE;
+ALTER TABLE "content_reaction" ADD FOREIGN KEY ("content_id") REFERENCES "content" ("content_id") ON DELETE CASCADE;
+ALTER TABLE "content_reaction" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("user_id") ON DELETE CASCADE;
+ALTER TABLE "comment_reaction" ADD FOREIGN KEY ("comment_id") REFERENCES "comment" ("comment_id") ON DELETE CASCADE;
+ALTER TABLE "comment_reaction" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("user_id") ON DELETE CASCADE;
+

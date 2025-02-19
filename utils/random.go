@@ -9,6 +9,20 @@ import (
 
 const alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
+// Predefined list of sensible categories
+var predefinedCategories = []string{
+	"Sports",
+	"Technology",
+	"Health",
+	"Education",
+	"Finance",
+	"Entertainment",
+	"Travel",
+	"Food",
+	"Fashion",
+	"Science",
+}
+
 func init() {
 	rand.New(rand.NewSource(time.Now().UnixNano()))
 }
@@ -43,4 +57,23 @@ func RandomAmount() int64 {
 
 func RandomEmail() string {
 	return fmt.Sprintf("%s@email.com", RandomString(6))
+}
+
+// RandomCategory generates a random category name from the predefined list
+func RandomCategory() string {
+	rand.New(rand.NewSource(time.Now().UnixNano()))
+	return predefinedCategories[rand.Intn(len(predefinedCategories))]
+}
+
+// RandomCategoryList generates a shuffled list of unique categories
+func RandomCategoryList(n int) []string {
+	rand.New(rand.NewSource(time.Now().UnixNano()))
+	shuffled := make([]string, len(predefinedCategories))
+	copy(shuffled, predefinedCategories)
+	rand.Shuffle(len(shuffled), func(i, j int) { shuffled[i], shuffled[j] = shuffled[j], shuffled[i] })
+
+	if n > len(shuffled) {
+		return shuffled
+	}
+	return shuffled[:n]
 }

@@ -132,30 +132,59 @@ func (q *Queries) FetchContentReactions(ctx context.Context, contentID pgtype.UU
 	return items, nil
 }
 
+const getContentByCategoryCount = `-- name: GetContentByCategoryCount :one
+SELECT count(*)
+FROM content
+WHERE category_id = $1
+  AND status = 'published'
+  AND is_deleted = false
+`
+
+func (q *Queries) GetContentByCategoryCount(ctx context.Context, categoryID pgtype.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, getContentByCategoryCount, categoryID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const getContentByTagCount = `-- name: GetContentByTagCount :one
+SELECT count(DISTINCT c.content_id)
+FROM content c
+JOIN content_tag ct ON c.content_id = ct.content_id
+JOIN tag t ON ct.tag_id = t.tag_id
+WHERE t.tag_name = $1
+  AND c.status = 'published'
+  AND c.is_deleted = false
+`
+
+func (q *Queries) GetContentByTagCount(ctx context.Context, tagName string) (int64, error) {
+	row := q.db.QueryRow(ctx, getContentByTagCount, tagName)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const getContentDetails = `-- name: GetContentDetails :one
 SELECT
   c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
-  row_to_json(u) AS author,
-  row_to_json(cat) AS category,
+  u.user_id, u.username, u.email, u.password, u.pfp, u.role, u.banned, u.is_deleted, u.created_at,  -- Gets all user columns
+  cat.category_id, cat.category_name, -- Gets all category columns
   (
     SELECT array_agg(t.tag_name)
     FROM content_tag ct
     JOIN tag t ON ct.tag_id = t.tag_id
-    WHERE ct.content_id = c.content_id -- No ambiguity here
+    WHERE ct.content_id = c.content_id
   ) AS tags,
   (
-    SELECT json_agg(m)
-    FROM (
-      SELECT media_id, media_type, media_url, media_caption, media_order
-      FROM media m -- Add alias for the media table
-      WHERE m.content_id = c.content_id
-      ORDER BY m.media_order
-    ) m
+    SELECT array_agg(m.*)
+    FROM media m
+    WHERE m.content_id = c.content_id
+    ORDER BY m.media_order
   ) AS media,
   (
     SELECT count(*)
     FROM content_reaction cr
-    WHERE cr.content_id = c.content_id -- This is where qualification is needed
+    WHERE cr.content_id = c.content_id
   ) AS reaction_count,
   (
     SELECT count(*)
@@ -188,10 +217,19 @@ type GetContentDetailsRow struct {
 	UpdatedAt           pgtype.Timestamptz
 	PublishedAt         pgtype.Timestamptz
 	IsDeleted           pgtype.Bool
-	Author              []byte
-	Category            []byte
+	UserID_2            pgtype.UUID
+	Username            string
+	Email               string
+	Password            string
+	Pfp                 string
+	Role                string
+	Banned              pgtype.Bool
+	IsDeleted_2         pgtype.Bool
+	CreatedAt_2         pgtype.Timestamptz
+	CategoryID_2        pgtype.UUID
+	CategoryName        string
 	Tags                interface{}
-	Media               []byte
+	Media               interface{}
 	ReactionCount       int64
 	CommentCountSync    int64
 }
@@ -218,8 +256,17 @@ func (q *Queries) GetContentDetails(ctx context.Context, contentID pgtype.UUID) 
 		&i.UpdatedAt,
 		&i.PublishedAt,
 		&i.IsDeleted,
-		&i.Author,
-		&i.Category,
+		&i.UserID_2,
+		&i.Username,
+		&i.Email,
+		&i.Password,
+		&i.Pfp,
+		&i.Role,
+		&i.Banned,
+		&i.IsDeleted_2,
+		&i.CreatedAt_2,
+		&i.CategoryID_2,
+		&i.CategoryName,
 		&i.Tags,
 		&i.Media,
 		&i.ReactionCount,
@@ -246,6 +293,67 @@ func (q *Queries) GetContentOverview(ctx context.Context) (GetContentOverviewRow
 	row := q.db.QueryRow(ctx, getContentOverview)
 	var i GetContentOverviewRow
 	err := row.Scan(&i.DraftCount, &i.PublishedCount, &i.DeletedCount)
+	return i, err
+}
+
+const getPublishedContentCount = `-- name: GetPublishedContentCount :one
+SELECT count(*)
+FROM content
+WHERE status = 'published'
+  AND is_deleted = false
+`
+
+func (q *Queries) GetPublishedContentCount(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, getPublishedContentCount)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const getTrendingContentCount = `-- name: GetTrendingContentCount :one
+SELECT count(*)
+FROM content
+WHERE status = 'published'
+  AND is_deleted = false
+  AND published_at >= $1
+`
+
+func (q *Queries) GetTrendingContentCount(ctx context.Context, publishedAt pgtype.Timestamptz) (int64, error) {
+	row := q.db.QueryRow(ctx, getTrendingContentCount, publishedAt)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const hardDeleteContent = `-- name: HardDeleteContent :one
+DELETE FROM content
+WHERE content_id = $1
+RETURNING content_id, user_id, category_id, title, content_description, comments_enabled, view_count_enabled, like_count_enabled, dislike_count_enabled, status, view_count, like_count, dislike_count, comment_count, created_at, updated_at, published_at, is_deleted
+`
+
+func (q *Queries) HardDeleteContent(ctx context.Context, contentID pgtype.UUID) (Content, error) {
+	row := q.db.QueryRow(ctx, hardDeleteContent, contentID)
+	var i Content
+	err := row.Scan(
+		&i.ContentID,
+		&i.UserID,
+		&i.CategoryID,
+		&i.Title,
+		&i.ContentDescription,
+		&i.CommentsEnabled,
+		&i.ViewCountEnabled,
+		&i.LikeCountEnabled,
+		&i.DislikeCountEnabled,
+		&i.Status,
+		&i.ViewCount,
+		&i.LikeCount,
+		&i.DislikeCount,
+		&i.CommentCount,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.PublishedAt,
+		&i.IsDeleted,
+	)
 	return i, err
 }
 
@@ -529,6 +637,20 @@ func (q *Queries) ListContentForModeration(ctx context.Context, arg ListContentF
 	return items, nil
 }
 
+const listContentForModerationCount = `-- name: ListContentForModerationCount :one
+SELECT COUNT(*) AS count
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+WHERE u.banned = true
+`
+
+func (q *Queries) ListContentForModerationCount(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, listContentForModerationCount)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const listPublishedContent = `-- name: ListPublishedContent :many
 SELECT
   c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
@@ -692,6 +814,28 @@ func (q *Queries) ListRelatedContentByCategory(ctx context.Context, arg ListRela
 	return items, nil
 }
 
+const listRelatedContentByCategoryCount = `-- name: ListRelatedContentByCategoryCount :one
+SELECT COUNT(*) AS count
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+WHERE c.category_id = $1
+  AND c.content_id <> $2
+  AND c.status = 'published'
+  AND c.is_deleted = false
+`
+
+type ListRelatedContentByCategoryCountParams struct {
+	CategoryID pgtype.UUID
+	ContentID  pgtype.UUID
+}
+
+func (q *Queries) ListRelatedContentByCategoryCount(ctx context.Context, arg ListRelatedContentByCategoryCountParams) (int64, error) {
+	row := q.db.QueryRow(ctx, listRelatedContentByCategoryCount, arg.CategoryID, arg.ContentID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const listRelatedContentByTag = `-- name: ListRelatedContentByTag :many
 SELECT DISTINCT c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted, row_to_json(u) AS author
 FROM content c
@@ -772,6 +916,30 @@ func (q *Queries) ListRelatedContentByTag(ctx context.Context, arg ListRelatedCo
 		return nil, err
 	}
 	return items, nil
+}
+
+const listRelatedContentByTagCount = `-- name: ListRelatedContentByTagCount :one
+SELECT COUNT(DISTINCT c.content_id) AS count
+FROM content c
+JOIN content_tag ct ON c.content_id = ct.content_id
+JOIN tag t ON ct.tag_id = t.tag_id
+JOIN "user" u ON c.user_id = u.user_id
+WHERE t.tag_id = $1
+  AND c.content_id <> $2
+  AND c.status = 'published'
+  AND c.is_deleted = false
+`
+
+type ListRelatedContentByTagCountParams struct {
+	TagID     pgtype.UUID
+	ContentID pgtype.UUID
+}
+
+func (q *Queries) ListRelatedContentByTagCount(ctx context.Context, arg ListRelatedContentByTagCountParams) (int64, error) {
+	row := q.db.QueryRow(ctx, listRelatedContentByTagCount, arg.TagID, arg.ContentID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }
 
 const listTrendingContent = `-- name: ListTrendingContent :many

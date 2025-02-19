@@ -44,30 +44,32 @@ SET
 WHERE content_id = $1
 RETURNING *;
 
+-- name: HardDeleteContent :one
+DELETE FROM content
+WHERE content_id = $1
+RETURNING *;
+
 -- name: GetContentDetails :one
 SELECT
   c.*,
-  row_to_json(u) AS author,
-  row_to_json(cat) AS category,
+  u.*,  -- Gets all user columns
+  cat.*, -- Gets all category columns
   (
     SELECT array_agg(t.tag_name)
     FROM content_tag ct
     JOIN tag t ON ct.tag_id = t.tag_id
-    WHERE ct.content_id = c.content_id -- No ambiguity here
+    WHERE ct.content_id = c.content_id
   ) AS tags,
   (
-    SELECT json_agg(m)
-    FROM (
-      SELECT media_id, media_type, media_url, media_caption, media_order
-      FROM media m -- Add alias for the media table
-      WHERE m.content_id = c.content_id
-      ORDER BY m.media_order
-    ) m
+    SELECT array_agg(m.*)
+    FROM media m
+    WHERE m.content_id = c.content_id
+    ORDER BY m.media_order
   ) AS media,
   (
     SELECT count(*)
     FROM content_reaction cr
-    WHERE cr.content_id = c.content_id -- This is where qualification is needed
+    WHERE cr.content_id = c.content_id
   ) AS reaction_count,
   (
     SELECT count(*)
@@ -79,6 +81,12 @@ FROM content c
 JOIN "user" u ON c.user_id = u.user_id
 JOIN category cat ON c.category_id = cat.category_id
 WHERE c.content_id = $1;
+
+-- name: GetPublishedContentCount :one
+SELECT count(*)
+FROM content
+WHERE status = 'published'
+  AND is_deleted = false;
 
 -- name: ListPublishedContent :many
 SELECT
@@ -93,6 +101,13 @@ WHERE c.status = 'published'
 ORDER BY c.published_at DESC
 LIMIT $1 OFFSET $2;
 
+-- name: GetContentByCategoryCount :one
+SELECT count(*)
+FROM content
+WHERE category_id = $1
+  AND status = 'published'
+  AND is_deleted = false;
+
 -- name: ListContentByCategory :many
 SELECT
   c.*,
@@ -104,6 +119,15 @@ WHERE c.category_id = $1
   AND c.is_deleted = false
 ORDER BY c.published_at DESC
 LIMIT $2 OFFSET $3;
+
+-- name: GetContentByTagCount :one
+SELECT count(DISTINCT c.content_id)
+FROM content c
+JOIN content_tag ct ON c.content_id = ct.content_id
+JOIN tag t ON ct.tag_id = t.tag_id
+WHERE t.tag_name = $1
+  AND c.status = 'published'
+  AND c.is_deleted = false;
 
 -- name: ListContentByTag :many
 SELECT DISTINCT
@@ -185,6 +209,13 @@ FROM content_reaction cr
 JOIN "user" u ON cr.user_id = u.user_id
 WHERE cr.content_id = $1;
 
+-- name: GetTrendingContentCount :one
+SELECT count(*)
+FROM content
+WHERE status = 'published'
+  AND is_deleted = false
+  AND published_at >= $1;
+
 -- name: ListTrendingContent :many
 SELECT 
   c.*,
@@ -203,6 +234,12 @@ SELECT
   COUNT(*) FILTER (WHERE is_deleted = true) AS deleted_count
 FROM content;
 
+-- name: ListContentForModerationCount :one
+SELECT COUNT(*) AS count
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+WHERE u.banned = true;
+
 -- name: ListContentForModeration :many
 SELECT c.*, row_to_json(u) AS author
 FROM content c
@@ -210,6 +247,16 @@ JOIN "user" u ON c.user_id = u.user_id
 WHERE u.banned = true
 ORDER BY c.created_at DESC
 LIMIT $1 OFFSET $2;
+
+-- name: ListRelatedContentByCategoryCount :one
+SELECT COUNT(*) AS count
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+WHERE c.category_id = $1
+  AND c.content_id <> $2
+  AND c.status = 'published'
+  AND c.is_deleted = false;
+
 
 -- name: ListRelatedContentByCategory :many
 SELECT c.*, row_to_json(u) AS author
@@ -221,6 +268,17 @@ WHERE c.category_id = $1
   AND c.is_deleted = false
 ORDER BY c.published_at DESC
 LIMIT $3;
+
+-- name: ListRelatedContentByTagCount :one
+SELECT COUNT(DISTINCT c.content_id) AS count
+FROM content c
+JOIN content_tag ct ON c.content_id = ct.content_id
+JOIN tag t ON ct.tag_id = t.tag_id
+JOIN "user" u ON c.user_id = u.user_id
+WHERE t.tag_id = $1
+  AND c.content_id <> $2
+  AND c.status = 'published'
+  AND c.is_deleted = false;
 
 -- name: ListRelatedContentByTag :many
 SELECT DISTINCT c.*, row_to_json(u) AS author
