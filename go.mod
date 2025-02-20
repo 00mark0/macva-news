@@ -5,6 +5,7 @@ go 1.24.0
 require (
 	github.com/a-h/templ v0.3.833
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/go-loremipsum/loremipsum v1.1.3
 	github.com/go-playground/validator/v10 v10.24.0
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.2
@@ -21,7 +22,6 @@ require (
 	github.com/aead/poly1305 v0.0.0-20180717145839-3fee0db0b635 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
-	github.com/go-loremipsum/loremipsum v1.1.3 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect

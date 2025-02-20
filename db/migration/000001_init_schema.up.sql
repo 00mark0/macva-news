@@ -16,7 +16,7 @@ CREATE TABLE "content" (
   "content_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "user_id" UUID NOT NULL,
   "category_id" UUID NOT NULL,
-  "title" VARCHAR(255) NOT NULL,
+  "title" TEXT NOT NULL,
   "content_description" TEXT NOT NULL,
   "comments_enabled" BOOL NOT NULL DEFAULT true,
   "view_count_enabled" BOOL NOT NULL DEFAULT true,

@@ -370,7 +370,8 @@ func (q *Queries) InsertOrUpdateContentReaction(ctx context.Context, arg InsertO
 const listContentByCategory = `-- name: ListContentByCategory :many
 SELECT
   c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
-  row_to_json(u) AS author
+  u.user_id AS author_id,
+  u.username AS author_username
 FROM content c
 JOIN "user" u ON c.user_id = u.user_id
 WHERE c.category_id = $1
@@ -405,7 +406,8 @@ type ListContentByCategoryRow struct {
 	UpdatedAt           pgtype.Timestamptz
 	PublishedAt         pgtype.Timestamptz
 	IsDeleted           pgtype.Bool
-	Author              []byte
+	AuthorID            pgtype.UUID
+	AuthorUsername      string
 }
 
 func (q *Queries) ListContentByCategory(ctx context.Context, arg ListContentByCategoryParams) ([]ListContentByCategoryRow, error) {
@@ -436,7 +438,8 @@ func (q *Queries) ListContentByCategory(ctx context.Context, arg ListContentByCa
 			&i.UpdatedAt,
 			&i.PublishedAt,
 			&i.IsDeleted,
-			&i.Author,
+			&i.AuthorID,
+			&i.AuthorUsername,
 		); err != nil {
 			return nil, err
 		}
@@ -451,8 +454,10 @@ func (q *Queries) ListContentByCategory(ctx context.Context, arg ListContentByCa
 const listContentByTag = `-- name: ListContentByTag :many
 SELECT DISTINCT
   c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
-  row_to_json(u) AS author,
-  row_to_json(cat) AS category
+  u.user_id AS author_id,
+  u.username AS author_username,
+  cat.category_id AS category_id,
+  cat.category_name AS category_name
 FROM content c
 JOIN "user" u ON c.user_id = u.user_id
 JOIN category cat ON c.category_id = cat.category_id
@@ -490,8 +495,10 @@ type ListContentByTagRow struct {
 	UpdatedAt           pgtype.Timestamptz
 	PublishedAt         pgtype.Timestamptz
 	IsDeleted           pgtype.Bool
-	Author              []byte
-	Category            []byte
+	AuthorID            pgtype.UUID
+	AuthorUsername      string
+	CategoryID_2        pgtype.UUID
+	CategoryName        string
 }
 
 func (q *Queries) ListContentByTag(ctx context.Context, arg ListContentByTagParams) ([]ListContentByTagRow, error) {
@@ -522,8 +529,10 @@ func (q *Queries) ListContentByTag(ctx context.Context, arg ListContentByTagPara
 			&i.UpdatedAt,
 			&i.PublishedAt,
 			&i.IsDeleted,
-			&i.Author,
-			&i.Category,
+			&i.AuthorID,
+			&i.AuthorUsername,
+			&i.CategoryID_2,
+			&i.CategoryName,
 		); err != nil {
 			return nil, err
 		}
@@ -1034,8 +1043,10 @@ func (q *Queries) PublishContent(ctx context.Context, contentID pgtype.UUID) (Co
 const searchContent = `-- name: SearchContent :many
 SELECT DISTINCT
   c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
-  row_to_json(u) AS author,
-  row_to_json(cat) AS category
+  u.user_id AS author_id,
+  u.username AS author_username,
+  cat.category_id AS category_id,
+  cat.category_name AS category_name
 FROM content c
 JOIN "user" u ON c.user_id = u.user_id
 JOIN category cat ON c.category_id = cat.category_id
@@ -1077,8 +1088,10 @@ type SearchContentRow struct {
 	UpdatedAt           pgtype.Timestamptz
 	PublishedAt         pgtype.Timestamptz
 	IsDeleted           pgtype.Bool
-	Author              []byte
-	Category            []byte
+	AuthorID            pgtype.UUID
+	AuthorUsername      string
+	CategoryID_2        pgtype.UUID
+	CategoryName        string
 }
 
 func (q *Queries) SearchContent(ctx context.Context, arg SearchContentParams) ([]SearchContentRow, error) {
@@ -1109,8 +1122,10 @@ func (q *Queries) SearchContent(ctx context.Context, arg SearchContentParams) ([
 			&i.UpdatedAt,
 			&i.PublishedAt,
 			&i.IsDeleted,
-			&i.Author,
-			&i.Category,
+			&i.AuthorID,
+			&i.AuthorUsername,
+			&i.CategoryID_2,
+			&i.CategoryName,
 		); err != nil {
 			return nil, err
 		}

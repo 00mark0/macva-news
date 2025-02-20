@@ -263,7 +263,7 @@ func TestGetDeletedUsers(t *testing.T) {
 func createRandomUserInteractive(username string, email string) User {
 	hashedPassword, err := utils.HashPassword(utils.RandomString(6))
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	arg := CreateUserParams{

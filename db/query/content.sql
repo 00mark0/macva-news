@@ -105,7 +105,8 @@ WHERE category_id = $1
 -- name: ListContentByCategory :many
 SELECT
   c.*,
-  row_to_json(u) AS author
+  u.user_id AS author_id,
+  u.username AS author_username
 FROM content c
 JOIN "user" u ON c.user_id = u.user_id
 WHERE c.category_id = $1
@@ -126,8 +127,10 @@ WHERE t.tag_name = $1
 -- name: ListContentByTag :many
 SELECT DISTINCT
   c.*,
-  row_to_json(u) AS author,
-  row_to_json(cat) AS category
+  u.user_id AS author_id,
+  u.username AS author_username,
+  cat.category_id AS category_id,
+  cat.category_name AS category_name
 FROM content c
 JOIN "user" u ON c.user_id = u.user_id
 JOIN category cat ON c.category_id = cat.category_id
@@ -142,8 +145,10 @@ LIMIT $2 OFFSET $3;
 -- name: SearchContent :many
 SELECT DISTINCT
   c.*,
-  row_to_json(u) AS author,
-  row_to_json(cat) AS category
+  u.user_id AS author_id,
+  u.username AS author_username,
+  cat.category_id AS category_id,
+  cat.category_name AS category_name
 FROM content c
 JOIN "user" u ON c.user_id = u.user_id
 JOIN category cat ON c.category_id = cat.category_id

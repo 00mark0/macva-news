@@ -18,26 +18,34 @@ WITH deleted_tag AS (
 DELETE FROM content_tag
 WHERE tag_id IN (SELECT tag_id FROM deleted_tag);
 
+-- name: GetTag :one
+SELECT tag_id, tag_name
+FROM tag
+WHERE tag_id = $1;
+
 -- name: ListTags :many
 SELECT tag_id, tag_name
 FROM tag
-WHERE lower(tag_name) LIKE lower($1)
-ORDER BY tag_name ASC;
+ORDER BY tag_name ASC
+LIMIT $1;
+
+-- name: SearchTags :many
+SELECT tag_id, tag_name
+FROM tag
+WHERE lower(tag_name) LIKE lower(@search::text)
+ORDER BY tag_name ASC
+LIMIT $1;
 
 -- name: AddTagToContent :exec
 INSERT INTO content_tag (content_id, tag_id)
 VALUES ($1, $2);
 
+-- name: GetTagsByContent :many
+SELECT tag.tag_id, tag.tag_name
+FROM tag
+JOIN content_tag ct ON tag.tag_id = ct.tag_id
+WHERE ct.content_id = $1;
+
 -- name: RemoveTagFromContent :exec
 DELETE FROM content_tag
 WHERE content_id = $1 AND tag_id = $2;
-
--- name: GetContentByTag :many
-SELECT c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.status, c.published_at
-FROM content c
-JOIN content_tag ct ON c.content_id = ct.content_id
-JOIN tag t ON t.tag_id = ct.tag_id
-WHERE lower(t.tag_name) = lower($1)
-  AND c.is_deleted = false
-ORDER BY c.published_at DESC;
-

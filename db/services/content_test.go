@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var loremipsumgen = loremipsum.New()
+var Loremipsumgen = loremipsum.New()
 
 func createRandomContent(t *testing.T) Content {
 	users, err := testQueries.GetAdminUsers(context.Background())
@@ -22,8 +22,8 @@ func createRandomContent(t *testing.T) Content {
 	arg := CreateContentParams{
 		UserID:              users[0].UserID,
 		CategoryID:          category[0].CategoryID,
-		Title:               loremipsumgen.Sentence(),
-		ContentDescription:  loremipsumgen.Paragraphs(10),
+		Title:               Loremipsumgen.Sentence(),
+		ContentDescription:  Loremipsumgen.Paragraphs(10),
 		CommentsEnabled:     true,
 		ViewCountEnabled:    true,
 		LikeCountEnabled:    true,
@@ -62,8 +62,8 @@ func TestUpdateContent(t *testing.T) {
 
 	arg := UpdateContentParams{
 		ContentID:           content1.ContentID,
-		Title:               loremipsumgen.Sentence(),
-		ContentDescription:  loremipsumgen.Paragraphs(8),
+		Title:               Loremipsumgen.Sentence(),
+		ContentDescription:  Loremipsumgen.Paragraphs(8),
 		CommentsEnabled:     true,
 		ViewCountEnabled:    true,
 		LikeCountEnabled:    true,
@@ -182,5 +182,58 @@ func TestListPublishedContent(t *testing.T) {
 		require.NotEmpty(t, content.CategoryID)
 		require.NotEmpty(t, content.Title)
 		require.NotEmpty(t, content.ContentDescription)
+	}
+}
+
+func TestGetContentByCategoryCount(t *testing.T) {
+	categories, err := testQueries.ListCategories(context.Background(), ListCategoriesParams{Limit: 10, Offset: 0})
+	var category Category
+
+	for _, cat := range categories {
+		if cat.CategoryName == "Education" {
+			category = cat
+		}
+	}
+
+	count1, err := testQueries.GetContentByCategoryCount(context.Background(), category.CategoryID)
+	require.NoError(t, err)
+	require.NotZero(t, count1)
+
+	content1 := createRandomContent(t)
+
+	content2, err := testQueries.PublishContent(context.Background(), content1.ContentID)
+	require.NoError(t, err)
+	require.Equal(t, content1.ContentID, content2.ContentID)
+
+	count2, err := testQueries.GetContentByCategoryCount(context.Background(), category.CategoryID)
+	require.NoError(t, err)
+	require.Equal(t, count2, count1+1)
+}
+
+func ListContentByCategory(t *testing.T) {
+	categories, err := testQueries.ListCategories(context.Background(), ListCategoriesParams{Limit: 10, Offset: 0})
+	var category Category
+
+	content := createRandomContent(t)
+
+	for _, cat := range categories {
+		if content.CategoryID == cat.CategoryID {
+			category = cat
+		}
+	}
+
+	contents, err := testQueries.ListContentByCategory(context.Background(), ListContentByCategoryParams{CategoryID: category.CategoryID, Limit: 10, Offset: 0})
+
+	require.NoError(t, err)
+	require.NotEmpty(t, contents)
+	require.LessOrEqual(t, len(contents), 10)
+
+	for _, cont := range contents {
+		require.NotEmpty(t, cont)
+		require.NotEmpty(t, cont.ContentID)
+		require.NotEmpty(t, cont.UserID)
+		require.NotEmpty(t, cont.CategoryID)
+		require.NotEmpty(t, cont.Title)
+		require.NotEmpty(t, cont.ContentDescription)
 	}
 }

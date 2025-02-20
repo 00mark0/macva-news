@@ -54,44 +54,36 @@ func (q *Queries) DeleteTag(ctx context.Context, tagID pgtype.UUID) error {
 	return err
 }
 
-const getContentByTag = `-- name: GetContentByTag :many
-SELECT c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.status, c.published_at
-FROM content c
-JOIN content_tag ct ON c.content_id = ct.content_id
-JOIN tag t ON t.tag_id = ct.tag_id
-WHERE lower(t.tag_name) = lower($1)
-  AND c.is_deleted = false
-ORDER BY c.published_at DESC
+const getTag = `-- name: GetTag :one
+SELECT tag_id, tag_name
+FROM tag
+WHERE tag_id = $1
 `
 
-type GetContentByTagRow struct {
-	ContentID          pgtype.UUID
-	UserID             pgtype.UUID
-	CategoryID         pgtype.UUID
-	Title              string
-	ContentDescription string
-	Status             string
-	PublishedAt        pgtype.Timestamptz
+func (q *Queries) GetTag(ctx context.Context, tagID pgtype.UUID) (Tag, error) {
+	row := q.db.QueryRow(ctx, getTag, tagID)
+	var i Tag
+	err := row.Scan(&i.TagID, &i.TagName)
+	return i, err
 }
 
-func (q *Queries) GetContentByTag(ctx context.Context, lower string) ([]GetContentByTagRow, error) {
-	rows, err := q.db.Query(ctx, getContentByTag, lower)
+const getTagsByContent = `-- name: GetTagsByContent :many
+SELECT tag.tag_id, tag.tag_name
+FROM tag
+JOIN content_tag ct ON tag.tag_id = ct.tag_id
+WHERE ct.content_id = $1
+`
+
+func (q *Queries) GetTagsByContent(ctx context.Context, contentID pgtype.UUID) ([]Tag, error) {
+	rows, err := q.db.Query(ctx, getTagsByContent, contentID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetContentByTagRow
+	var items []Tag
 	for rows.Next() {
-		var i GetContentByTagRow
-		if err := rows.Scan(
-			&i.ContentID,
-			&i.UserID,
-			&i.CategoryID,
-			&i.Title,
-			&i.ContentDescription,
-			&i.Status,
-			&i.PublishedAt,
-		); err != nil {
+		var i Tag
+		if err := rows.Scan(&i.TagID, &i.TagName); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -105,12 +97,12 @@ func (q *Queries) GetContentByTag(ctx context.Context, lower string) ([]GetConte
 const listTags = `-- name: ListTags :many
 SELECT tag_id, tag_name
 FROM tag
-WHERE lower(tag_name) LIKE lower($1)
 ORDER BY tag_name ASC
+LIMIT $1
 `
 
-func (q *Queries) ListTags(ctx context.Context, lower string) ([]Tag, error) {
-	rows, err := q.db.Query(ctx, listTags, lower)
+func (q *Queries) ListTags(ctx context.Context, limit int32) ([]Tag, error) {
+	rows, err := q.db.Query(ctx, listTags, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -142,6 +134,39 @@ type RemoveTagFromContentParams struct {
 func (q *Queries) RemoveTagFromContent(ctx context.Context, arg RemoveTagFromContentParams) error {
 	_, err := q.db.Exec(ctx, removeTagFromContent, arg.ContentID, arg.TagID)
 	return err
+}
+
+const searchTags = `-- name: SearchTags :many
+SELECT tag_id, tag_name
+FROM tag
+WHERE lower(tag_name) LIKE lower($2::text)
+ORDER BY tag_name ASC
+LIMIT $1
+`
+
+type SearchTagsParams struct {
+	Limit  int32
+	Search string
+}
+
+func (q *Queries) SearchTags(ctx context.Context, arg SearchTagsParams) ([]Tag, error) {
+	rows, err := q.db.Query(ctx, searchTags, arg.Limit, arg.Search)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Tag
+	for rows.Next() {
+		var i Tag
+		if err := rows.Scan(&i.TagID, &i.TagName); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const updateTag = `-- name: UpdateTag :one
