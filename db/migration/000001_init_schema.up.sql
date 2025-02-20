@@ -71,7 +71,8 @@ CREATE TABLE "media" (
 CREATE TABLE "content_reaction" (
   "content_id" UUID NOT NULL,
   "user_id" UUID NOT NULL,
-  "reaction" VARCHAR(10) NOT NULL
+  "reaction" VARCHAR(10) NOT NULL,
+  CONSTRAINT unique_content_reaction UNIQUE (content_id, user_id)
 );
 
 CREATE TABLE "comment_reaction" (
@@ -136,9 +137,9 @@ CREATE INDEX "idx_comment_reaction_comment" ON comment_reaction("comment_id");
 CREATE INDEX "idx_content_reaction_content_user" ON content_reaction("content_id", "user_id");
 CREATE INDEX "idx_comment_reaction_comment_user" ON comment_reaction("comment_id", "user_id");
 CREATE INDEX "idx_ads_status_start_date_end_date" ON "ads"("status", "start_date", "end_date");
-CREATE INDEX idx_analytics_daily_date ON "analytics_daily"("analytics_date");
-CREATE INDEX idx_analytics_daily_date_updated_at ON "analytics_daily"("analytics_date", "updated_at");
-CREATE INDEX idx_recent_analytics ON "analytics_daily"("analytics_date");
+CREATE INDEX "idx_analytics_daily_date" ON "analytics_daily"("analytics_date");
+CREATE INDEX "idx_analytics_daily_date_updated_at" ON "analytics_daily"("analytics_date", "updated_at");
+CREATE INDEX "idx_recent_analytics" ON "analytics_daily"("analytics_date");
 
 -- Create foreign key constraints
 ALTER TABLE "content" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("user_id") ON DELETE CASCADE;

@@ -94,21 +94,29 @@ func (q *Queries) DeleteContentReaction(ctx context.Context, arg DeleteContentRe
 const fetchContentReactions = `-- name: FetchContentReactions :many
 SELECT
   cr.content_id, cr.user_id, cr.reaction,
-  row_to_json(u) AS user_info
+  u.user_id AS author_id,
+  u.username AS author_username
 FROM content_reaction cr
 JOIN "user" u ON cr.user_id = u.user_id
 WHERE cr.content_id = $1
+LIMIT $2
 `
 
-type FetchContentReactionsRow struct {
+type FetchContentReactionsParams struct {
 	ContentID pgtype.UUID
-	UserID    pgtype.UUID
-	Reaction  string
-	UserInfo  []byte
+	Limit     int32
 }
 
-func (q *Queries) FetchContentReactions(ctx context.Context, contentID pgtype.UUID) ([]FetchContentReactionsRow, error) {
-	rows, err := q.db.Query(ctx, fetchContentReactions, contentID)
+type FetchContentReactionsRow struct {
+	ContentID      pgtype.UUID
+	UserID         pgtype.UUID
+	Reaction       string
+	AuthorID       pgtype.UUID
+	AuthorUsername string
+}
+
+func (q *Queries) FetchContentReactions(ctx context.Context, arg FetchContentReactionsParams) ([]FetchContentReactionsRow, error) {
+	rows, err := q.db.Query(ctx, fetchContentReactions, arg.ContentID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +128,8 @@ func (q *Queries) FetchContentReactions(ctx context.Context, contentID pgtype.UU
 			&i.ContentID,
 			&i.UserID,
 			&i.Reaction,
-			&i.UserInfo,
+			&i.AuthorID,
+			&i.AuthorUsername,
 		); err != nil {
 			return nil, err
 		}
@@ -279,21 +288,6 @@ WHERE status = 'published'
 
 func (q *Queries) GetPublishedContentCount(ctx context.Context) (int64, error) {
 	row := q.db.QueryRow(ctx, getPublishedContentCount)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
-
-const getTrendingContentCount = `-- name: GetTrendingContentCount :one
-SELECT count(*)
-FROM content
-WHERE status = 'published'
-  AND is_deleted = false
-  AND published_at >= $1
-`
-
-func (q *Queries) GetTrendingContentCount(ctx context.Context, publishedAt pgtype.Timestamptz) (int64, error) {
-	row := q.db.QueryRow(ctx, getTrendingContentCount, publishedAt)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -1055,18 +1049,18 @@ LEFT JOIN tag t ON ct.tag_id = t.tag_id
 WHERE c.status = 'published'
   AND c.is_deleted = false
   AND (
-    c.title ILIKE '%' || $1 || '%'
-    OR c.content_description ILIKE '%' || $1 || '%'
-    OR t.tag_name ILIKE '%' || $1 || '%'
+    c.title ILIKE '%' || $3::text || '%'
+    OR c.content_description ILIKE '%' || $3::text || '%'
+    OR t.tag_name ILIKE '%' || $3::text || '%'
   )
 ORDER BY c.published_at DESC
-LIMIT $2 OFFSET $3
+LIMIT $1 OFFSET $2
 `
 
 type SearchContentParams struct {
-	Column1 pgtype.Text
-	Limit   int32
-	Offset  int32
+	Limit      int32
+	Offset     int32
+	SearchTerm string
 }
 
 type SearchContentRow struct {
@@ -1095,7 +1089,7 @@ type SearchContentRow struct {
 }
 
 func (q *Queries) SearchContent(ctx context.Context, arg SearchContentParams) ([]SearchContentRow, error) {
-	rows, err := q.db.Query(ctx, searchContent, arg.Column1, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, searchContent, arg.Limit, arg.Offset, arg.SearchTerm)
 	if err != nil {
 		return nil, err
 	}
@@ -1247,7 +1241,7 @@ SET
     WHERE content_id = c.content_id AND reaction = 'dislike'
   ),
   updated_at = now()
-WHERE c.content_id = $1  -- You can use the content_id returned from the previous action here
+WHERE c.content_id = $1 
 RETURNING content_id, user_id, category_id, title, content_description, comments_enabled, view_count_enabled, like_count_enabled, dislike_count_enabled, status, view_count, like_count, dislike_count, comment_count, created_at, updated_at, published_at, is_deleted
 `
 

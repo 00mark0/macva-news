@@ -6,6 +6,7 @@ import (
 
 	"context"
 	//"github.com/00mark0/macva-news/utils"
+	"github.com/00mark0/macva-news/utils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -81,11 +82,12 @@ func TestListTags(t *testing.T) {
 }
 
 func TestSearchTags(t *testing.T) {
-	createTagInteractive("hleb")
+	searchTerm := "hleb_" + utils.RandomString(5)
+	createTagInteractive(searchTerm)
 
 	arg := SearchTagsParams{
 		Limit:  5,
-		Search: "hleb",
+		Search: searchTerm,
 	}
 
 	tags, err := testQueries.SearchTags(context.Background(), arg)

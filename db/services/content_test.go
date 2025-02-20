@@ -7,6 +7,7 @@ import (
 	"context"
 
 	//"github.com/00mark0/macva-news/utils"
+	"github.com/00mark0/macva-news/utils"
 	"github.com/go-loremipsum/loremipsum"
 	"github.com/stretchr/testify/require"
 )
@@ -187,10 +188,11 @@ func TestListPublishedContent(t *testing.T) {
 
 func TestGetContentByCategoryCount(t *testing.T) {
 	categories, err := testQueries.ListCategories(context.Background(), ListCategoriesParams{Limit: 10, Offset: 0})
+	content := createRandomContent(t)
 	var category Category
 
 	for _, cat := range categories {
-		if cat.CategoryName == "Education" {
+		if content.CategoryID == cat.CategoryID {
 			category = cat
 		}
 	}
@@ -236,4 +238,267 @@ func ListContentByCategory(t *testing.T) {
 		require.NotEmpty(t, cont.Title)
 		require.NotEmpty(t, cont.ContentDescription)
 	}
+}
+
+func TestGetContentByTagCount(t *testing.T) {
+	tag := createRandomTag(t)
+	content1 := createRandomContent(t)
+
+	content2, err := testQueries.PublishContent(context.Background(), content1.ContentID)
+	require.NoError(t, err)
+	require.Equal(t, content1.ContentID, content2.ContentID)
+
+	arg := AddTagToContentParams{
+		ContentID: content2.ContentID,
+		TagID:     tag.TagID,
+	}
+
+	err = testQueries.AddTagToContent(context.Background(), arg)
+	require.NoError(t, err)
+
+	count1, err := testQueries.GetContentByTagCount(context.Background(), tag.TagName)
+	require.NoError(t, err)
+	require.NotZero(t, count1)
+
+	content3 := createRandomContent(t)
+
+	content4, err := testQueries.PublishContent(context.Background(), content3.ContentID)
+	require.NoError(t, err)
+	require.Equal(t, content3.ContentID, content4.ContentID)
+
+	arg2 := AddTagToContentParams{
+		ContentID: content4.ContentID,
+		TagID:     tag.TagID,
+	}
+
+	err = testQueries.AddTagToContent(context.Background(), arg2)
+	require.NoError(t, err)
+
+	count2, err := testQueries.GetContentByTagCount(context.Background(), tag.TagName)
+	require.NoError(t, err)
+	require.Equal(t, count2, count1+1)
+}
+
+func TestListContentByTag(t *testing.T) {
+	tag := createRandomTag(t)
+	content1 := createRandomContent(t)
+
+	content2, err := testQueries.PublishContent(context.Background(), content1.ContentID)
+	require.NoError(t, err)
+	require.Equal(t, content1.ContentID, content2.ContentID)
+
+	arg := AddTagToContentParams{
+		ContentID: content2.ContentID,
+		TagID:     tag.TagID,
+	}
+
+	err = testQueries.AddTagToContent(context.Background(), arg)
+	require.NoError(t, err)
+
+	contents, err := testQueries.ListContentByTag(context.Background(), ListContentByTagParams{TagName: tag.TagName, Limit: 10, Offset: 0})
+	require.NoError(t, err)
+	require.NotEmpty(t, contents)
+	require.Equal(t, len(contents), 1)
+	log.Println(contents[0].AuthorUsername)
+	log.Println(contents[0].CategoryName)
+}
+
+func createContentInteractive(title, description string) Content {
+	users, err := testQueries.GetAdminUsers(context.Background())
+
+	category, err := testQueries.ListCategories(context.Background(), ListCategoriesParams{Limit: 10, Offset: 0})
+
+	arg := CreateContentParams{
+		UserID:              users[0].UserID,
+		CategoryID:          category[0].CategoryID,
+		Title:               title,
+		ContentDescription:  description,
+		CommentsEnabled:     true,
+		ViewCountEnabled:    true,
+		LikeCountEnabled:    true,
+		DislikeCountEnabled: false,
+	}
+
+	content, err := testQueries.CreateContent(context.Background(), arg)
+	if err != nil {
+		log.Println(err)
+	}
+
+	return content
+}
+
+func TestSearchContent(t *testing.T) {
+	titleSearchTerm := "test_" + utils.RandomString(5)
+
+	content := createContentInteractive(titleSearchTerm, Loremipsumgen.Paragraphs(10))
+
+	content2, err := testQueries.PublishContent(context.Background(), content.ContentID)
+	require.NoError(t, err)
+	require.Equal(t, content.ContentID, content2.ContentID)
+	require.Equal(t, content.Title, content2.Title)
+	require.Equal(t, content.ContentDescription, content2.ContentDescription)
+
+	arg := SearchContentParams{
+		Limit:      10,
+		Offset:     0,
+		SearchTerm: titleSearchTerm,
+	}
+
+	contents, err := testQueries.SearchContent(context.Background(), arg)
+	require.NoError(t, err)
+	require.NotEmpty(t, contents)
+	require.Equal(t, len(contents), 1)
+	require.Equal(t, contents[0].ContentID, content.ContentID)
+	require.Equal(t, contents[0].Title, content.Title)
+	require.Equal(t, contents[0].ContentDescription, content.ContentDescription)
+	log.Println(contents[0].AuthorUsername)
+	log.Println(contents[0].CategoryName)
+}
+
+func TestIncrementViewCount(t *testing.T) {
+	content := createRandomContent(t)
+
+	viewCount, err := testQueries.IncrementViewCount(context.Background(), content.ContentID)
+	require.NoError(t, err)
+	require.Equal(t, viewCount, content.ViewCount+1)
+}
+
+// this one test both TestInsertOrUpdateContentReaction and FetchContentReactions
+func TestInsertOrUpdateContentReaction(t *testing.T) {
+	content := createRandomContent(t)
+	users, err := testQueries.GetActiveUsers(context.Background(), GetActiveUsersParams{Limit: 10, Offset: 0})
+	require.NoError(t, err)
+
+	contentID, err := testQueries.InsertOrUpdateContentReaction(context.Background(), InsertOrUpdateContentReactionParams{
+		ContentID: content.ContentID,
+		UserID:    users[0].UserID,
+		Reaction:  "like",
+	})
+	require.NoError(t, err)
+	require.Equal(t, contentID, content.ContentID)
+
+	contentID2, err := testQueries.InsertOrUpdateContentReaction(context.Background(), InsertOrUpdateContentReactionParams{
+		ContentID: content.ContentID,
+		UserID:    users[1].UserID,
+		Reaction:  "dislike",
+	})
+	require.NoError(t, err)
+	require.Equal(t, contentID2, content.ContentID)
+
+	contentID3, err := testQueries.InsertOrUpdateContentReaction(context.Background(), InsertOrUpdateContentReactionParams{
+		ContentID: content.ContentID,
+		UserID:    users[1].UserID,
+		Reaction:  "like",
+	})
+	require.NoError(t, err)
+	require.Equal(t, contentID3, content.ContentID)
+
+	reactions, err := testQueries.FetchContentReactions(context.Background(), FetchContentReactionsParams{
+		ContentID: content.ContentID,
+		Limit:     10,
+	})
+	require.NoError(t, err)
+	require.NotEmpty(t, reactions)
+	require.Equal(t, len(reactions), 2)
+
+	for _, reaction := range reactions {
+		require.Equal(t, reaction.ContentID, content.ContentID)
+		require.Equal(t, reaction.Reaction, "like")
+		log.Println(reaction.AuthorUsername)
+	}
+}
+
+func TestDeleteContentReaction(t *testing.T) {
+	content := createRandomContent(t)
+	users, err := testQueries.GetActiveUsers(context.Background(), GetActiveUsersParams{Limit: 10, Offset: 0})
+	require.NoError(t, err)
+
+	contentID, err := testQueries.InsertOrUpdateContentReaction(context.Background(), InsertOrUpdateContentReactionParams{
+		ContentID: content.ContentID,
+		UserID:    users[0].UserID,
+		Reaction:  "like",
+	})
+	require.NoError(t, err)
+	require.Equal(t, contentID, content.ContentID)
+
+	contentID2, err := testQueries.DeleteContentReaction(context.Background(), DeleteContentReactionParams{
+		ContentID: content.ContentID,
+		UserID:    users[0].UserID,
+	})
+	require.NoError(t, err)
+	require.Equal(t, contentID2, content.ContentID)
+
+	reactions, err := testQueries.FetchContentReactions(context.Background(), FetchContentReactionsParams{ContentID: content.ContentID, Limit: 10})
+	require.NoError(t, err)
+	require.Empty(t, reactions)
+}
+
+func TestUpdateContentLikeDislikeCount(t *testing.T) {
+	content := createRandomContent(t)
+	users, err := testQueries.GetActiveUsers(context.Background(), GetActiveUsersParams{Limit: 10, Offset: 0})
+
+	contentID, err := testQueries.InsertOrUpdateContentReaction(context.Background(), InsertOrUpdateContentReactionParams{
+		ContentID: content.ContentID,
+		UserID:    users[0].UserID,
+		Reaction:  "like",
+	})
+	require.NoError(t, err)
+	require.Equal(t, contentID, content.ContentID)
+
+	content2, err := testQueries.UpdateContentLikeDislikeCount(context.Background(), content.ContentID)
+	require.NoError(t, err)
+	require.Equal(t, content2.ContentID, content.ContentID)
+	require.Equal(t, content2.LikeCount, content.LikeCount+1)
+	require.Equal(t, content2.DislikeCount, content.DislikeCount)
+}
+
+func TestListTrendingContent(t *testing.T) {
+	content1 := createRandomContent(t)
+	content2 := createRandomContent(t)
+
+	content3, err := testQueries.PublishContent(context.Background(), content1.ContentID)
+	require.NoError(t, err)
+	content4, err := testQueries.PublishContent(context.Background(), content2.ContentID)
+	require.NoError(t, err)
+
+	require.Equal(t, content3.ContentID, content1.ContentID)
+	require.Equal(t, content4.ContentID, content2.ContentID)
+
+	viewCount, err := testQueries.IncrementViewCount(context.Background(), content1.ContentID)
+	require.NoError(t, err)
+	require.Equal(t, viewCount, content1.ViewCount+1)
+
+	viewCount2, err := testQueries.IncrementViewCount(context.Background(), content2.ContentID)
+	require.NoError(t, err)
+	require.Equal(t, viewCount2, content2.ViewCount+1)
+
+	trendingContent, err := testQueries.ListTrendingContent(context.Background(), ListTrendingContentParams{PublishedAt: content3.PublishedAt, Limit: 10})
+	require.NoError(t, err)
+	require.NotEmpty(t, trendingContent)
+	require.Equal(t, len(trendingContent), 2)
+
+	for _, cont := range trendingContent {
+		require.Equal(t, int32(1), cont.TotalInteractions)
+	}
+}
+
+func TestGetContentOverview(t *testing.T) {
+	count1, err := testQueries.GetContentOverview(context.Background())
+	require.NoError(t, err)
+	require.NotEmpty(t, count1)
+
+	_ = createRandomContent(t)
+	content2 := createRandomContent(t)
+	content3 := createRandomContent(t)
+
+	_, err = testQueries.PublishContent(context.Background(), content2.ContentID)
+
+	_, err = testQueries.SoftDeleteContent(context.Background(), content3.ContentID)
+
+	count2, err := testQueries.GetContentOverview(context.Background())
+	require.NoError(t, err)
+
+	require.Equal(t, count2.DraftCount, count1.DraftCount+1)
+	require.Equal(t, count2.PublishedCount, count1.PublishedCount+1)
+	require.Equal(t, count2.DeletedCount, count1.DeletedCount+1)
 }

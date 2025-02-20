@@ -142,6 +142,21 @@ WHERE t.tag_name = $1
 ORDER BY c.published_at DESC
 LIMIT $2 OFFSET $3;
 
+-- name: GetSearchContentCount :one
+SELECT count(DISTINCT c.content_id)
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+LEFT JOIN content_tag ct ON c.content_id = ct.content_id
+LEFT JOIN tag t ON ct.tag_id = t.tag_id
+WHERE c.status = 'published'
+  AND c.is_deleted = false
+  AND (
+    c.title ILIKE '%' || @search_term::text || '%'
+    OR c.content_description ILIKE '%' || @search_term::text || '%'
+    OR t.tag_name ILIKE '%' || @search_term::text || '%'
+  );
+
 -- name: SearchContent :many
 SELECT DISTINCT
   c.*,
@@ -157,12 +172,12 @@ LEFT JOIN tag t ON ct.tag_id = t.tag_id
 WHERE c.status = 'published'
   AND c.is_deleted = false
   AND (
-    c.title ILIKE '%' || $1 || '%'
-    OR c.content_description ILIKE '%' || $1 || '%'
-    OR t.tag_name ILIKE '%' || $1 || '%'
+    c.title ILIKE '%' || @search_term::text || '%'
+    OR c.content_description ILIKE '%' || @search_term::text || '%'
+    OR t.tag_name ILIKE '%' || @search_term::text || '%'
   )
 ORDER BY c.published_at DESC
-LIMIT $2 OFFSET $3;
+LIMIT $1 OFFSET $2;
 
 -- name: IncrementViewCount :one
 UPDATE content
@@ -197,23 +212,18 @@ SET
     WHERE content_id = c.content_id AND reaction = 'dislike'
   ),
   updated_at = now()
-WHERE c.content_id = $1  -- You can use the content_id returned from the previous action here
+WHERE c.content_id = $1 
 RETURNING *;
 
 -- name: FetchContentReactions :many
 SELECT
   cr.*,
-  row_to_json(u) AS user_info
+  u.user_id AS author_id,
+  u.username AS author_username
 FROM content_reaction cr
 JOIN "user" u ON cr.user_id = u.user_id
-WHERE cr.content_id = $1;
-
--- name: GetTrendingContentCount :one
-SELECT count(*)
-FROM content
-WHERE status = 'published'
-  AND is_deleted = false
-  AND published_at >= $1;
+WHERE cr.content_id = $1
+LIMIT $2;
 
 -- name: ListTrendingContent :many
 SELECT 
@@ -255,7 +265,6 @@ WHERE c.category_id = $1
   AND c.content_id <> $2
   AND c.status = 'published'
   AND c.is_deleted = false;
-
 
 -- name: ListRelatedContentByCategory :many
 SELECT c.*, row_to_json(u) AS author
