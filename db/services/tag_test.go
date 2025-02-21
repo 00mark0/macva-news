@@ -10,11 +10,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func createTagInteractive(name string) {
-	_, err := testQueries.CreateTag(context.Background(), name)
+func createTagInteractive(name string) Tag {
+	tag, err := testQueries.CreateTag(context.Background(), name)
 	if err != nil {
 		log.Println(err)
 	}
+
+	return tag
 }
 
 func createRandomTag(t *testing.T) Tag {

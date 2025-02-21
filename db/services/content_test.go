@@ -502,3 +502,43 @@ func TestGetContentOverview(t *testing.T) {
 	require.Equal(t, count2.PublishedCount, count1.PublishedCount+1)
 	require.Equal(t, count2.DeletedCount, count1.DeletedCount+1)
 }
+
+func TestListRelatedContent(t *testing.T) {
+	content1 := createRandomContent(t)
+	content2 := createRandomContent(t)
+
+	content1Pub, err := testQueries.PublishContent(context.Background(), content1.ContentID)
+	require.NoError(t, err)
+	require.Equal(t, content1Pub.ContentID, content1.ContentID)
+	content2Pub, err := testQueries.PublishContent(context.Background(), content2.ContentID)
+	require.NoError(t, err)
+	require.Equal(t, content2Pub.ContentID, content2.ContentID)
+
+	tag := createTagInteractive("test2")
+
+	err = testQueries.AddTagToContent(context.Background(), AddTagToContentParams{
+		ContentID: content1Pub.ContentID,
+		TagID:     tag.TagID,
+	})
+	require.NoError(t, err)
+
+	err = testQueries.AddTagToContent(context.Background(), AddTagToContentParams{
+		ContentID: content2Pub.ContentID,
+		TagID:     tag.TagID,
+	})
+	require.NoError(t, err)
+
+	relatedContent, err := testQueries.ListRelatedContent(context.Background(), ListRelatedContentParams{
+		ContentID: content1Pub.ContentID,
+		Limit:     10,
+	})
+
+	for _, content := range relatedContent {
+		log.Println(content.Title)
+	}
+
+	require.NoError(t, err)
+	require.NotEmpty(t, relatedContent)
+	require.Equal(t, 1, len(relatedContent))
+	require.Equal(t, relatedContent[0].ContentID, content2Pub.ContentID)
+}

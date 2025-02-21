@@ -243,63 +243,26 @@ SELECT
   COUNT(*) FILTER (WHERE is_deleted = true) AS deleted_count
 FROM content;
 
--- name: ListContentForModerationCount :one
-SELECT COUNT(*) AS count
+-- name: ListRelatedContent :many
+SELECT c.*
 FROM content c
-JOIN "user" u ON c.user_id = u.user_id
-WHERE u.banned = true;
-
--- name: ListContentForModeration :many
-SELECT c.*, row_to_json(u) AS author
-FROM content c
-JOIN "user" u ON c.user_id = u.user_id
-WHERE u.banned = true
-ORDER BY c.created_at DESC
-LIMIT $1 OFFSET $2;
-
--- name: ListRelatedContentByCategoryCount :one
-SELECT COUNT(*) AS count
-FROM content c
-JOIN "user" u ON c.user_id = u.user_id
-WHERE c.category_id = $1
-  AND c.content_id <> $2
-  AND c.status = 'published'
-  AND c.is_deleted = false;
-
--- name: ListRelatedContentByCategory :many
-SELECT c.*, row_to_json(u) AS author
-FROM content c
-JOIN "user" u ON c.user_id = u.user_id
-WHERE c.category_id = $1
-  AND c.content_id <> $2
+WHERE c.content_id <> $1
   AND c.status = 'published'
   AND c.is_deleted = false
+  AND c.category_id = (SELECT category_id FROM content WHERE content_id = $1)
+  AND EXISTS (
+      SELECT 1
+      FROM content_tag ct
+      WHERE ct.content_id = c.content_id
+        AND ct.tag_id IN (
+            SELECT tag_id
+            FROM content_tag
+            WHERE content_id = $1
+        )
+  )
 ORDER BY c.published_at DESC
-LIMIT $3;
+LIMIT $2;
 
--- name: ListRelatedContentByTagCount :one
-SELECT COUNT(DISTINCT c.content_id) AS count
-FROM content c
-JOIN content_tag ct ON c.content_id = ct.content_id
-JOIN tag t ON ct.tag_id = t.tag_id
-JOIN "user" u ON c.user_id = u.user_id
-WHERE t.tag_id = $1
-  AND c.content_id <> $2
-  AND c.status = 'published'
-  AND c.is_deleted = false;
-
--- name: ListRelatedContentByTag :many
-SELECT DISTINCT c.*, row_to_json(u) AS author
-FROM content c
-JOIN content_tag ct ON c.content_id = ct.content_id
-JOIN tag t ON ct.tag_id = t.tag_id
-JOIN "user" u ON c.user_id = u.user_id
-WHERE t.tag_id = $1
-  AND c.content_id <> $2
-  AND c.status = 'published'
-  AND c.is_deleted = false
-ORDER BY c.published_at DESC
-LIMIT $3;
 
 
 
