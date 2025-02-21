@@ -38,7 +38,7 @@ func (q *Queries) CheckEmailExists(ctx context.Context, email string) (int32, er
 const createUser = `-- name: CreateUser :one
 INSERT INTO "user" (username, email, password) 
 VALUES ($1, $2, $3)
-RETURNING user_id, username, email, password, pfp, role, banned, is_deleted, created_at
+RETURNING user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
 `
 
 type CreateUserParams struct {
@@ -57,6 +57,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Password,
 		&i.Pfp,
 		&i.Role,
+		&i.EmailVerified,
 		&i.Banned,
 		&i.IsDeleted,
 		&i.CreatedAt,
@@ -67,7 +68,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 const createUserAdmin = `-- name: CreateUserAdmin :one
 INSERT INTO "user" (username, email, password, role) 
 VALUES ($1, $2, $3, $4)  
-RETURNING user_id, username, email, password, pfp, role, banned, is_deleted, created_at
+RETURNING user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
 `
 
 type CreateUserAdminParams struct {
@@ -92,6 +93,7 @@ func (q *Queries) CreateUserAdmin(ctx context.Context, arg CreateUserAdminParams
 		&i.Password,
 		&i.Pfp,
 		&i.Role,
+		&i.EmailVerified,
 		&i.Banned,
 		&i.IsDeleted,
 		&i.CreatedAt,
@@ -114,7 +116,7 @@ func (q *Queries) DeleteUser(ctx context.Context, userID pgtype.UUID) error {
 }
 
 const getActiveUsers = `-- name: GetActiveUsers :many
-SELECT user_id, username, email, password, pfp, role, banned, is_deleted, created_at
+SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
 FROM "user"
 WHERE "is_deleted" = false
   AND "banned" = false
@@ -143,6 +145,7 @@ func (q *Queries) GetActiveUsers(ctx context.Context, arg GetActiveUsersParams) 
 			&i.Password,
 			&i.Pfp,
 			&i.Role,
+			&i.EmailVerified,
 			&i.Banned,
 			&i.IsDeleted,
 			&i.CreatedAt,
@@ -172,7 +175,7 @@ func (q *Queries) GetActiveUsersCount(ctx context.Context) (int64, error) {
 }
 
 const getAdminUsers = `-- name: GetAdminUsers :many
-SELECT user_id, username, email, password, pfp, role, banned, is_deleted, created_at
+SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
 FROM "user"
 WHERE "role" = 'admin'
 ORDER BY created_at DESC
@@ -194,6 +197,7 @@ func (q *Queries) GetAdminUsers(ctx context.Context) ([]User, error) {
 			&i.Password,
 			&i.Pfp,
 			&i.Role,
+			&i.EmailVerified,
 			&i.Banned,
 			&i.IsDeleted,
 			&i.CreatedAt,
@@ -209,7 +213,7 @@ func (q *Queries) GetAdminUsers(ctx context.Context) ([]User, error) {
 }
 
 const getBannedUsers = `-- name: GetBannedUsers :many
-SELECT user_id, username, email, password, pfp, role, banned, is_deleted, created_at
+SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
 FROM "user"
 WHERE "banned" = true
 ORDER BY created_at DESC
@@ -237,6 +241,7 @@ func (q *Queries) GetBannedUsers(ctx context.Context, arg GetBannedUsersParams) 
 			&i.Password,
 			&i.Pfp,
 			&i.Role,
+			&i.EmailVerified,
 			&i.Banned,
 			&i.IsDeleted,
 			&i.CreatedAt,
@@ -265,7 +270,7 @@ func (q *Queries) GetBannedUsersCount(ctx context.Context) (int64, error) {
 }
 
 const getDeletedUsers = `-- name: GetDeletedUsers :many
-SELECT user_id, username, email, password, pfp, role, banned, is_deleted, created_at
+SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
 FROM "user"
 WHERE "is_deleted" = true
 ORDER BY created_at DESC
@@ -293,6 +298,7 @@ func (q *Queries) GetDeletedUsers(ctx context.Context, arg GetDeletedUsersParams
 			&i.Password,
 			&i.Pfp,
 			&i.Role,
+			&i.EmailVerified,
 			&i.Banned,
 			&i.IsDeleted,
 			&i.CreatedAt,
@@ -321,17 +327,19 @@ func (q *Queries) GetDeletedUsersCount(ctx context.Context) (int64, error) {
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT user_id, username, email, role, banned 
+SELECT user_id, username, email, role, pfp, email_verified, banned 
 FROM "user" 
 WHERE email = $1 AND banned = false
 `
 
 type GetUserByEmailRow struct {
-	UserID   pgtype.UUID
-	Username string
-	Email    string
-	Role     string
-	Banned   pgtype.Bool
+	UserID        pgtype.UUID
+	Username      string
+	Email         string
+	Role          string
+	Pfp           string
+	EmailVerified pgtype.Bool
+	Banned        pgtype.Bool
 }
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
@@ -342,23 +350,27 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEm
 		&i.Username,
 		&i.Email,
 		&i.Role,
+		&i.Pfp,
+		&i.EmailVerified,
 		&i.Banned,
 	)
 	return i, err
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT user_id, username, email, role, banned 
+SELECT user_id, username, email, role, pfp, email_verified, banned 
 FROM "user" 
 WHERE user_id = $1 AND banned = false
 `
 
 type GetUserByIDRow struct {
-	UserID   pgtype.UUID
-	Username string
-	Email    string
-	Role     string
-	Banned   pgtype.Bool
+	UserID        pgtype.UUID
+	Username      string
+	Email         string
+	Role          string
+	Pfp           string
+	EmailVerified pgtype.Bool
+	Banned        pgtype.Bool
 }
 
 func (q *Queries) GetUserByID(ctx context.Context, userID pgtype.UUID) (GetUserByIDRow, error) {
@@ -369,6 +381,8 @@ func (q *Queries) GetUserByID(ctx context.Context, userID pgtype.UUID) (GetUserB
 		&i.Username,
 		&i.Email,
 		&i.Role,
+		&i.Pfp,
+		&i.EmailVerified,
 		&i.Banned,
 	)
 	return i, err
@@ -376,7 +390,7 @@ func (q *Queries) GetUserByID(ctx context.Context, userID pgtype.UUID) (GetUserB
 
 const searchActiveUsers = `-- name: SearchActiveUsers :many
 SELECT
-  u.user_id, u.username, u.email, u.password, u.pfp, u.role, u.banned, u.is_deleted, u.created_at
+  u.user_id, u.username, u.email, u.password, u.pfp, u.role, u.email_verified, u.banned, u.is_deleted, u.created_at
 FROM "user" u
 WHERE u.is_deleted = false 
   AND u.banned = false
@@ -410,6 +424,7 @@ func (q *Queries) SearchActiveUsers(ctx context.Context, arg SearchActiveUsersPa
 			&i.Password,
 			&i.Pfp,
 			&i.Role,
+			&i.EmailVerified,
 			&i.Banned,
 			&i.IsDeleted,
 			&i.CreatedAt,
@@ -426,7 +441,7 @@ func (q *Queries) SearchActiveUsers(ctx context.Context, arg SearchActiveUsersPa
 
 const searchBannedUsers = `-- name: SearchBannedUsers :many
 SELECT
-  u.user_id, u.username, u.email, u.password, u.pfp, u.role, u.banned, u.is_deleted, u.created_at
+  u.user_id, u.username, u.email, u.password, u.pfp, u.role, u.email_verified, u.banned, u.is_deleted, u.created_at
 FROM "user" u
 WHERE u.banned = true
   AND (
@@ -459,6 +474,7 @@ func (q *Queries) SearchBannedUsers(ctx context.Context, arg SearchBannedUsersPa
 			&i.Password,
 			&i.Pfp,
 			&i.Role,
+			&i.EmailVerified,
 			&i.Banned,
 			&i.IsDeleted,
 			&i.CreatedAt,
@@ -475,7 +491,7 @@ func (q *Queries) SearchBannedUsers(ctx context.Context, arg SearchBannedUsersPa
 
 const searchDeletedUsers = `-- name: SearchDeletedUsers :many
 SELECT
-  u.user_id, u.username, u.email, u.password, u.pfp, u.role, u.banned, u.is_deleted, u.created_at
+  u.user_id, u.username, u.email, u.password, u.pfp, u.role, u.email_verified, u.banned, u.is_deleted, u.created_at
 FROM "user" u
 WHERE u.is_deleted = true
   AND (
@@ -508,6 +524,7 @@ func (q *Queries) SearchDeletedUsers(ctx context.Context, arg SearchDeletedUsers
 			&i.Password,
 			&i.Pfp,
 			&i.Role,
+			&i.EmailVerified,
 			&i.Banned,
 			&i.IsDeleted,
 			&i.CreatedAt,
@@ -520,6 +537,17 @@ func (q *Queries) SearchDeletedUsers(ctx context.Context, arg SearchDeletedUsers
 		return nil, err
 	}
 	return items, nil
+}
+
+const setEmailVerified = `-- name: SetEmailVerified :exec
+UPDATE "user" 
+SET email_verified = true 
+WHERE user_id = $1
+`
+
+func (q *Queries) SetEmailVerified(ctx context.Context, userID pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, setEmailVerified, userID)
+	return err
 }
 
 const unbanUser = `-- name: UnbanUser :exec

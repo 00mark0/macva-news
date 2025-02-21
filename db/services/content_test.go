@@ -83,15 +83,17 @@ func TestUpdateContent(t *testing.T) {
 }
 
 func TestPublishContent(t *testing.T) {
-	content1 := createRandomContent(t)
+	for i := 0; i < 10; i++ {
+		content1 := createRandomContent(t)
 
-	content2, err := testQueries.PublishContent(context.Background(), content1.ContentID)
-	require.NoError(t, err)
+		content2, err := testQueries.PublishContent(context.Background(), content1.ContentID)
+		require.NoError(t, err)
 
-	require.Equal(t, content2.Status, "published")
-	require.Equal(t, content2.PublishedAt.Valid, true)
-	require.NotNil(t, content2.PublishedAt.Time)
-	require.NotEqual(t, content2.Status, content1.Status)
+		require.Equal(t, content2.Status, "published")
+		require.Equal(t, content2.PublishedAt.Valid, true)
+		require.NotNil(t, content2.PublishedAt.Time)
+		require.NotEqual(t, content2.Status, content1.Status)
+	}
 }
 
 func TestSoftDeleteContent(t *testing.T) {

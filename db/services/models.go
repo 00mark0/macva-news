@@ -112,13 +112,14 @@ type Tag struct {
 }
 
 type User struct {
-	UserID    pgtype.UUID
-	Username  string
-	Email     string
-	Password  string
-	Pfp       string
-	Role      string
-	Banned    pgtype.Bool
-	IsDeleted pgtype.Bool
-	CreatedAt pgtype.Timestamptz
+	UserID        pgtype.UUID
+	Username      string
+	Email         string
+	Password      string
+	Pfp           string
+	Role          string
+	EmailVerified pgtype.Bool
+	Banned        pgtype.Bool
+	IsDeleted     pgtype.Bool
+	CreatedAt     pgtype.Timestamptz
 }

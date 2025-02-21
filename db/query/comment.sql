@@ -43,12 +43,13 @@ LIMIT $2;
 -- name: ListContentCommentsByScore :many
 SELECT
   cm.*,
-  row_to_json(u) AS author
+  u.user_id,
+  u.username
 FROM comment cm
 JOIN "user" u ON cm.user_id = u.user_id
 WHERE cm.content_id = $1
   AND cm.is_deleted = false
-ORDER BY cm.score DESC, cm.created_at ASC
+ORDER BY cm.score DESC
 LIMIT $2;
 
 -- name: InsertOrUpdateCommentReaction :one
@@ -84,8 +85,11 @@ RETURNING *;
 -- name: FetchCommentReactions :many
 SELECT
   cr.*,
-  row_to_json(u) AS user_info
+  u.user_id,
+  u.username
 FROM comment_reaction cr
 JOIN "user" u ON cr.user_id = u.user_id
-WHERE cr.comment_id = $1;
+WHERE cr.comment_id = $1
+LIMIT $2;
+
 

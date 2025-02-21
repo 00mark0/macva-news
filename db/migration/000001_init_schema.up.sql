@@ -7,6 +7,7 @@ CREATE TABLE "user" (
   "password" TEXT NOT NULL,
   "pfp" TEXT NOT NULL DEFAULT 'https://res.cloudinary.com/dxq2xh2oq/image/upload/v1656979667/avatar/avatar-1_1_1_1_u2v3i2.png',
   "role" VARCHAR(20) NOT NULL DEFAULT 'user',
+  "email_verified" BOOL DEFAULT false,
   "banned" BOOL DEFAULT false,
   "is_deleted" BOOL DEFAULT false,
   "created_at" TIMESTAMPTZ DEFAULT (now())
@@ -53,9 +54,9 @@ CREATE TABLE "comment" (
   "content_id" UUID NOT NULL,
   "user_id" UUID NOT NULL,
   "comment_text" TEXT NOT NULL,
-  "score" INT NOT NULL DEFAULT 0,  -- new net score column
+  "score" INT NOT NULL DEFAULT 0,
   "created_at" TIMESTAMPTZ DEFAULT now(),
-  "updated_at" TIMESTAMPTZ DEFAULT now(),
+  "updated_at" TIMESTAMPTZ DEFAULT NULL,
   "is_deleted" BOOL DEFAULT false
 );
 
@@ -78,7 +79,8 @@ CREATE TABLE "content_reaction" (
 CREATE TABLE "comment_reaction" (
   "comment_id" UUID NOT NULL,
   "user_id" UUID NOT NULL,
-  "reaction" VARCHAR(10) NOT NULL
+  "reaction" VARCHAR(10) NOT NULL,
+  CONSTRAINT unique_comment_reaction UNIQUE (comment_id, user_id)
 );
 
 CREATE TABLE "ads" (

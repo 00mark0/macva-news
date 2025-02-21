@@ -372,3 +372,9 @@ func TestSearchBannedUsers(t *testing.T) {
 		require.Equal(t, searchTerm[:8], user.Username[:8])
 	}
 }
+
+func TestSetEmailVerified(t *testing.T) {
+	user := createRandomUser(t)
+	err := testQueries.SetEmailVerified(context.Background(), user.UserID)
+	require.NoError(t, err)
+}

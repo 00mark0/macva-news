@@ -9,12 +9,12 @@ VALUES ($1, $2, $3, $4)
 RETURNING *;
 
 -- name: GetUserByID :one
-SELECT user_id, username, email, role, banned 
+SELECT user_id, username, email, role, pfp, email_verified, banned 
 FROM "user" 
 WHERE user_id = $1 AND banned = false;
 
 -- name: GetUserByEmail :one
-SELECT user_id, username, email, role, banned 
+SELECT user_id, username, email, role, pfp, email_verified, banned 
 FROM "user" 
 WHERE email = $1 AND banned = false;
 
@@ -53,7 +53,7 @@ FROM "user"
 WHERE email = $1;
 
 -- name: GetAdminUsers :many
-SELECT user_id, username, email, password, pfp, role, banned, is_deleted, created_at
+SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
 FROM "user"
 WHERE "role" = 'admin'
 ORDER BY created_at DESC;
@@ -65,7 +65,7 @@ WHERE "is_deleted" = false
   AND "banned" = false;
 
 -- name: GetActiveUsers :many
-SELECT user_id, username, email, password, pfp, role, banned, is_deleted, created_at
+SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
 FROM "user"
 WHERE "is_deleted" = false
   AND "banned" = false
@@ -78,7 +78,7 @@ FROM "user"
 WHERE "banned" = true;
 
 -- name: GetBannedUsers :many
-SELECT user_id, username, email, password, pfp, role, banned, is_deleted, created_at
+SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
 FROM "user"
 WHERE "banned" = true
 ORDER BY created_at DESC
@@ -90,7 +90,7 @@ FROM "user"
 WHERE "is_deleted" = true;
 
 -- name: GetDeletedUsers :many
-SELECT user_id, username, email, password, pfp, role, banned, is_deleted, created_at
+SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
 FROM "user"
 WHERE "is_deleted" = true
 ORDER BY created_at DESC
@@ -132,6 +132,11 @@ WHERE u.banned = true
   )
 ORDER BY u.created_at DESC
 LIMIT $1 OFFSET $2;
+
+-- name: SetEmailVerified :exec
+UPDATE "user" 
+SET email_verified = true 
+WHERE user_id = $1;
 
 
 

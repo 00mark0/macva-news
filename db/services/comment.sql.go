@@ -60,21 +60,29 @@ func (q *Queries) DeleteCommentReaction(ctx context.Context, arg DeleteCommentRe
 const fetchCommentReactions = `-- name: FetchCommentReactions :many
 SELECT
   cr.comment_id, cr.user_id, cr.reaction,
-  row_to_json(u) AS user_info
+  u.user_id,
+  u.username
 FROM comment_reaction cr
 JOIN "user" u ON cr.user_id = u.user_id
 WHERE cr.comment_id = $1
+LIMIT $2
 `
+
+type FetchCommentReactionsParams struct {
+	CommentID pgtype.UUID
+	Limit     int32
+}
 
 type FetchCommentReactionsRow struct {
 	CommentID pgtype.UUID
 	UserID    pgtype.UUID
 	Reaction  string
-	UserInfo  []byte
+	UserID_2  pgtype.UUID
+	Username  string
 }
 
-func (q *Queries) FetchCommentReactions(ctx context.Context, commentID pgtype.UUID) ([]FetchCommentReactionsRow, error) {
-	rows, err := q.db.Query(ctx, fetchCommentReactions, commentID)
+func (q *Queries) FetchCommentReactions(ctx context.Context, arg FetchCommentReactionsParams) ([]FetchCommentReactionsRow, error) {
+	rows, err := q.db.Query(ctx, fetchCommentReactions, arg.CommentID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +94,8 @@ func (q *Queries) FetchCommentReactions(ctx context.Context, commentID pgtype.UU
 			&i.CommentID,
 			&i.UserID,
 			&i.Reaction,
-			&i.UserInfo,
+			&i.UserID_2,
+			&i.Username,
 		); err != nil {
 			return nil, err
 		}
@@ -181,12 +190,13 @@ func (q *Queries) ListContentComments(ctx context.Context, arg ListContentCommen
 const listContentCommentsByScore = `-- name: ListContentCommentsByScore :many
 SELECT
   cm.comment_id, cm.content_id, cm.user_id, cm.comment_text, cm.score, cm.created_at, cm.updated_at, cm.is_deleted,
-  row_to_json(u) AS author
+  u.user_id,
+  u.username
 FROM comment cm
 JOIN "user" u ON cm.user_id = u.user_id
 WHERE cm.content_id = $1
   AND cm.is_deleted = false
-ORDER BY cm.score DESC, cm.created_at ASC
+ORDER BY cm.score DESC
 LIMIT $2
 `
 
@@ -204,7 +214,8 @@ type ListContentCommentsByScoreRow struct {
 	CreatedAt   pgtype.Timestamptz
 	UpdatedAt   pgtype.Timestamptz
 	IsDeleted   pgtype.Bool
-	Author      []byte
+	UserID_2    pgtype.UUID
+	Username    string
 }
 
 func (q *Queries) ListContentCommentsByScore(ctx context.Context, arg ListContentCommentsByScoreParams) ([]ListContentCommentsByScoreRow, error) {
@@ -225,7 +236,8 @@ func (q *Queries) ListContentCommentsByScore(ctx context.Context, arg ListConten
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.IsDeleted,
-			&i.Author,
+			&i.UserID_2,
+			&i.Username,
 		); err != nil {
 			return nil, err
 		}
