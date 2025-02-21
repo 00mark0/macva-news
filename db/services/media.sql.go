@@ -25,18 +25,18 @@ WHERE media.media_id = data.media_id
 `
 
 type BatchUpdateMediaOrderParams struct {
-	Column1 pgtype.UUID
-	Column2 int32
-	Column3 pgtype.UUID
-	Column4 int32
+	Media1ID    pgtype.UUID
+	Media1Order int32
+	Media2ID    pgtype.UUID
+	Media2Order int32
 }
 
 func (q *Queries) BatchUpdateMediaOrder(ctx context.Context, arg BatchUpdateMediaOrderParams) error {
 	_, err := q.db.Exec(ctx, batchUpdateMediaOrder,
-		arg.Column1,
-		arg.Column2,
-		arg.Column3,
-		arg.Column4,
+		arg.Media1ID,
+		arg.Media1Order,
+		arg.Media2ID,
+		arg.Media2Order,
 	)
 	return err
 }

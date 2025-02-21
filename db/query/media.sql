@@ -27,8 +27,8 @@ SET media_order = data.new_order
 FROM (
     VALUES 
       -- Format: (media_id, new_order)
-      ($1::uuid, $2::int),
-      ($3::uuid, $4::int)
+      (@media1_id::uuid, @media1_order::int),
+      (@media2_id::uuid, @media2_order::int)
       -- Add more tuples as needed...
 ) AS data(media_id, new_order)
 WHERE media.media_id = data.media_id;
