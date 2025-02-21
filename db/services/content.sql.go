@@ -94,8 +94,7 @@ func (q *Queries) DeleteContentReaction(ctx context.Context, arg DeleteContentRe
 const fetchContentReactions = `-- name: FetchContentReactions :many
 SELECT
   cr.content_id, cr.user_id, cr.reaction,
-  u.user_id AS author_id,
-  u.username AS author_username
+  u.username
 FROM content_reaction cr
 JOIN "user" u ON cr.user_id = u.user_id
 WHERE cr.content_id = $1
@@ -108,11 +107,10 @@ type FetchContentReactionsParams struct {
 }
 
 type FetchContentReactionsRow struct {
-	ContentID      pgtype.UUID
-	UserID         pgtype.UUID
-	Reaction       string
-	AuthorID       pgtype.UUID
-	AuthorUsername string
+	ContentID pgtype.UUID
+	UserID    pgtype.UUID
+	Reaction  string
+	Username  string
 }
 
 func (q *Queries) FetchContentReactions(ctx context.Context, arg FetchContentReactionsParams) ([]FetchContentReactionsRow, error) {
@@ -128,8 +126,7 @@ func (q *Queries) FetchContentReactions(ctx context.Context, arg FetchContentRea
 			&i.ContentID,
 			&i.UserID,
 			&i.Reaction,
-			&i.AuthorID,
-			&i.AuthorUsername,
+			&i.Username,
 		); err != nil {
 			return nil, err
 		}
@@ -176,25 +173,14 @@ func (q *Queries) GetContentByTagCount(ctx context.Context, tagName string) (int
 const getContentDetails = `-- name: GetContentDetails :one
 SELECT
   c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
-  u.username AS author_username,
+  u.username,
   cat.category_name,
   (
     SELECT array_agg(t.tag_name)::text[]
     FROM content_tag ct
     JOIN tag t ON ct.tag_id = t.tag_id
     WHERE ct.content_id = c.content_id
-  ) AS tags,
-  (
-    SELECT count(*)
-    FROM content_reaction cr
-    WHERE cr.content_id = c.content_id
-  ) AS reaction_count,
-  (
-    SELECT count(*)
-    FROM comment cm
-    WHERE cm.content_id = c.content_id
-      AND cm.is_deleted = false
-  ) AS comment_count_sync
+  ) AS tags
 FROM content c
 JOIN "user" u ON c.user_id = u.user_id
 JOIN category cat ON c.category_id = cat.category_id
@@ -220,11 +206,9 @@ type GetContentDetailsRow struct {
 	UpdatedAt           pgtype.Timestamptz
 	PublishedAt         pgtype.Timestamptz
 	IsDeleted           pgtype.Bool
-	AuthorUsername      string
+	Username            string
 	CategoryName        string
 	Tags                []string
-	ReactionCount       int64
-	CommentCountSync    int64
 }
 
 func (q *Queries) GetContentDetails(ctx context.Context, contentID pgtype.UUID) (GetContentDetailsRow, error) {
@@ -249,11 +233,9 @@ func (q *Queries) GetContentDetails(ctx context.Context, contentID pgtype.UUID) 
 		&i.UpdatedAt,
 		&i.PublishedAt,
 		&i.IsDeleted,
-		&i.AuthorUsername,
+		&i.Username,
 		&i.CategoryName,
 		&i.Tags,
-		&i.ReactionCount,
-		&i.CommentCountSync,
 	)
 	return i, err
 }
@@ -387,8 +369,7 @@ func (q *Queries) InsertOrUpdateContentReaction(ctx context.Context, arg InsertO
 const listContentByCategory = `-- name: ListContentByCategory :many
 SELECT
   c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
-  u.user_id AS author_id,
-  u.username AS author_username
+  u.username
 FROM content c
 JOIN "user" u ON c.user_id = u.user_id
 WHERE c.category_id = $1
@@ -423,8 +404,7 @@ type ListContentByCategoryRow struct {
 	UpdatedAt           pgtype.Timestamptz
 	PublishedAt         pgtype.Timestamptz
 	IsDeleted           pgtype.Bool
-	AuthorID            pgtype.UUID
-	AuthorUsername      string
+	Username            string
 }
 
 func (q *Queries) ListContentByCategory(ctx context.Context, arg ListContentByCategoryParams) ([]ListContentByCategoryRow, error) {
@@ -455,8 +435,7 @@ func (q *Queries) ListContentByCategory(ctx context.Context, arg ListContentByCa
 			&i.UpdatedAt,
 			&i.PublishedAt,
 			&i.IsDeleted,
-			&i.AuthorID,
-			&i.AuthorUsername,
+			&i.Username,
 		); err != nil {
 			return nil, err
 		}
@@ -471,10 +450,8 @@ func (q *Queries) ListContentByCategory(ctx context.Context, arg ListContentByCa
 const listContentByTag = `-- name: ListContentByTag :many
 SELECT DISTINCT
   c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
-  u.user_id AS author_id,
-  u.username AS author_username,
-  cat.category_id AS category_id,
-  cat.category_name AS category_name
+  u.username,
+  cat.category_name
 FROM content c
 JOIN "user" u ON c.user_id = u.user_id
 JOIN category cat ON c.category_id = cat.category_id
@@ -512,9 +489,7 @@ type ListContentByTagRow struct {
 	UpdatedAt           pgtype.Timestamptz
 	PublishedAt         pgtype.Timestamptz
 	IsDeleted           pgtype.Bool
-	AuthorID            pgtype.UUID
-	AuthorUsername      string
-	CategoryID_2        pgtype.UUID
+	Username            string
 	CategoryName        string
 }
 
@@ -546,9 +521,7 @@ func (q *Queries) ListContentByTag(ctx context.Context, arg ListContentByTagPara
 			&i.UpdatedAt,
 			&i.PublishedAt,
 			&i.IsDeleted,
-			&i.AuthorID,
-			&i.AuthorUsername,
-			&i.CategoryID_2,
+			&i.Username,
 			&i.CategoryName,
 		); err != nil {
 			return nil, err
@@ -564,7 +537,7 @@ func (q *Queries) ListContentByTag(ctx context.Context, arg ListContentByTagPara
 const listPublishedContent = `-- name: ListPublishedContent :many
 SELECT
   c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
-  u.username AS author_username,
+  u.username,
   cat.category_name
 FROM content c
 JOIN "user" u ON c.user_id = u.user_id
@@ -599,7 +572,7 @@ type ListPublishedContentRow struct {
 	UpdatedAt           pgtype.Timestamptz
 	PublishedAt         pgtype.Timestamptz
 	IsDeleted           pgtype.Bool
-	AuthorUsername      string
+	Username            string
 	CategoryName        string
 }
 
@@ -631,7 +604,7 @@ func (q *Queries) ListPublishedContent(ctx context.Context, arg ListPublishedCon
 			&i.UpdatedAt,
 			&i.PublishedAt,
 			&i.IsDeleted,
-			&i.AuthorUsername,
+			&i.Username,
 			&i.CategoryName,
 		); err != nil {
 			return nil, err
@@ -827,10 +800,8 @@ func (q *Queries) PublishContent(ctx context.Context, contentID pgtype.UUID) (Co
 const searchContent = `-- name: SearchContent :many
 SELECT DISTINCT
   c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
-  u.user_id AS author_id,
-  u.username AS author_username,
-  cat.category_id AS category_id,
-  cat.category_name AS category_name
+  u.username,
+  cat.category_name
 FROM content c
 JOIN "user" u ON c.user_id = u.user_id
 JOIN category cat ON c.category_id = cat.category_id
@@ -872,9 +843,7 @@ type SearchContentRow struct {
 	UpdatedAt           pgtype.Timestamptz
 	PublishedAt         pgtype.Timestamptz
 	IsDeleted           pgtype.Bool
-	AuthorID            pgtype.UUID
-	AuthorUsername      string
-	CategoryID_2        pgtype.UUID
+	Username            string
 	CategoryName        string
 }
 
@@ -906,9 +875,7 @@ func (q *Queries) SearchContent(ctx context.Context, arg SearchContentParams) ([
 			&i.UpdatedAt,
 			&i.PublishedAt,
 			&i.IsDeleted,
-			&i.AuthorID,
-			&i.AuthorUsername,
-			&i.CategoryID_2,
+			&i.Username,
 			&i.CategoryName,
 		); err != nil {
 			return nil, err

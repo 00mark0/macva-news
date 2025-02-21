@@ -32,7 +32,7 @@ RETURNING
 -- name: ListContentComments :many
 SELECT
   cm.*,
-  row_to_json(u) AS author
+  u.username
 FROM comment cm
 JOIN "user" u ON cm.user_id = u.user_id
 WHERE cm.content_id = $1
@@ -43,7 +43,6 @@ LIMIT $2;
 -- name: ListContentCommentsByScore :many
 SELECT
   cm.*,
-  u.user_id,
   u.username
 FROM comment cm
 JOIN "user" u ON cm.user_id = u.user_id
@@ -85,7 +84,6 @@ RETURNING *;
 -- name: FetchCommentReactions :many
 SELECT
   cr.*,
-  u.user_id,
   u.username
 FROM comment_reaction cr
 JOIN "user" u ON cr.user_id = u.user_id

@@ -52,25 +52,14 @@ RETURNING *;
 -- name: GetContentDetails :one
 SELECT
   c.*,
-  u.username AS author_username,
+  u.username,
   cat.category_name,
   (
     SELECT array_agg(t.tag_name)::text[]
     FROM content_tag ct
     JOIN tag t ON ct.tag_id = t.tag_id
     WHERE ct.content_id = c.content_id
-  ) AS tags,
-  (
-    SELECT count(*)
-    FROM content_reaction cr
-    WHERE cr.content_id = c.content_id
-  ) AS reaction_count,
-  (
-    SELECT count(*)
-    FROM comment cm
-    WHERE cm.content_id = c.content_id
-      AND cm.is_deleted = false
-  ) AS comment_count_sync
+  ) AS tags
 FROM content c
 JOIN "user" u ON c.user_id = u.user_id
 JOIN category cat ON c.category_id = cat.category_id
@@ -85,7 +74,7 @@ WHERE status = 'published'
 -- name: ListPublishedContent :many
 SELECT
   c.*,
-  u.username AS author_username,
+  u.username,
   cat.category_name
 FROM content c
 JOIN "user" u ON c.user_id = u.user_id
@@ -105,8 +94,7 @@ WHERE category_id = $1
 -- name: ListContentByCategory :many
 SELECT
   c.*,
-  u.user_id AS author_id,
-  u.username AS author_username
+  u.username
 FROM content c
 JOIN "user" u ON c.user_id = u.user_id
 WHERE c.category_id = $1
@@ -127,10 +115,8 @@ WHERE t.tag_name = $1
 -- name: ListContentByTag :many
 SELECT DISTINCT
   c.*,
-  u.user_id AS author_id,
-  u.username AS author_username,
-  cat.category_id AS category_id,
-  cat.category_name AS category_name
+  u.username,
+  cat.category_name
 FROM content c
 JOIN "user" u ON c.user_id = u.user_id
 JOIN category cat ON c.category_id = cat.category_id
@@ -160,10 +146,8 @@ WHERE c.status = 'published'
 -- name: SearchContent :many
 SELECT DISTINCT
   c.*,
-  u.user_id AS author_id,
-  u.username AS author_username,
-  cat.category_id AS category_id,
-  cat.category_name AS category_name
+  u.username,
+  cat.category_name
 FROM content c
 JOIN "user" u ON c.user_id = u.user_id
 JOIN category cat ON c.category_id = cat.category_id
@@ -218,8 +202,7 @@ RETURNING *;
 -- name: FetchContentReactions :many
 SELECT
   cr.*,
-  u.user_id AS author_id,
-  u.username AS author_username
+  u.username
 FROM content_reaction cr
 JOIN "user" u ON cr.user_id = u.user_id
 WHERE cr.content_id = $1

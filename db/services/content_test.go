@@ -129,6 +129,14 @@ func TestHardDeleteContent(t *testing.T) {
 func TestGetContentDetails(t *testing.T) {
 	content1 := createRandomContent(t)
 
+	tag := createRandomTag(t)
+
+	err := testQueries.AddTagToContent(context.Background(), AddTagToContentParams{
+		ContentID: content1.ContentID,
+		TagID:     tag.TagID,
+	})
+	require.NoError(t, err)
+
 	content2, err := testQueries.GetContentDetails(context.Background(), content1.ContentID)
 	require.NoError(t, err)
 
@@ -150,10 +158,9 @@ func TestGetContentDetails(t *testing.T) {
 	require.Equal(t, content1.UpdatedAt, content2.UpdatedAt)
 	require.Equal(t, content1.PublishedAt, content2.PublishedAt)
 	require.Equal(t, content1.IsDeleted, content2.IsDeleted)
-	log.Println(content2.AuthorUsername)
+	log.Println(content2.Username)
 	log.Println(content2.CategoryName)
-	log.Println(content2.ReactionCount)
-	log.Println(content2.CommentCountSync)
+	log.Println(content2.Tags)
 }
 
 func TestGetPublishedContentCount(t *testing.T) {
@@ -178,13 +185,14 @@ func TestListPublishedContent(t *testing.T) {
 	require.NotEmpty(t, content)
 	require.LessOrEqual(t, len(content), 10)
 
-	for _, content := range content {
-		require.NotEmpty(t, content)
-		require.NotEmpty(t, content.ContentID)
-		require.NotEmpty(t, content.UserID)
-		require.NotEmpty(t, content.CategoryID)
-		require.NotEmpty(t, content.Title)
-		require.NotEmpty(t, content.ContentDescription)
+	for _, cont := range content {
+		require.NotEmpty(t, cont)
+		require.NotEmpty(t, cont.ContentID)
+		require.NotEmpty(t, cont.UserID)
+		require.NotEmpty(t, cont.CategoryID)
+		require.NotEmpty(t, cont.Title)
+		require.NotEmpty(t, cont.ContentDescription)
+		log.Println(cont.Username)
 	}
 }
 
@@ -214,7 +222,7 @@ func TestGetContentByCategoryCount(t *testing.T) {
 	require.Equal(t, count2, count1+1)
 }
 
-func ListContentByCategory(t *testing.T) {
+func TestListContentByCategory(t *testing.T) {
 	categories, err := testQueries.ListCategories(context.Background(), ListCategoriesParams{Limit: 10, Offset: 0})
 	var category Category
 
@@ -239,6 +247,7 @@ func ListContentByCategory(t *testing.T) {
 		require.NotEmpty(t, cont.CategoryID)
 		require.NotEmpty(t, cont.Title)
 		require.NotEmpty(t, cont.ContentDescription)
+		log.Println(cont.Username)
 	}
 }
 
@@ -301,7 +310,7 @@ func TestListContentByTag(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, contents)
 	require.Equal(t, len(contents), 1)
-	log.Println(contents[0].AuthorUsername)
+	log.Println(contents[0].Username)
 	log.Println(contents[0].CategoryName)
 }
 
@@ -353,7 +362,7 @@ func TestSearchContent(t *testing.T) {
 	require.Equal(t, contents[0].ContentID, content.ContentID)
 	require.Equal(t, contents[0].Title, content.Title)
 	require.Equal(t, contents[0].ContentDescription, content.ContentDescription)
-	log.Println(contents[0].AuthorUsername)
+	log.Println(contents[0].Username)
 	log.Println(contents[0].CategoryName)
 }
 
@@ -406,7 +415,7 @@ func TestInsertOrUpdateContentReaction(t *testing.T) {
 	for _, reaction := range reactions {
 		require.Equal(t, reaction.ContentID, content.ContentID)
 		require.Equal(t, reaction.Reaction, "like")
-		log.Println(reaction.AuthorUsername)
+		log.Println(reaction.Username)
 	}
 }
 
