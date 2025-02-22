@@ -3,13 +3,13 @@ SELECT *
 FROM analytics_daily
 WHERE analytics_date BETWEEN $1 AND $2
 ORDER BY analytics_date DESC
-LIMIT $3 OFFSET $4;
+LIMIT $3;
 
 -- name: CreateDailyAnalytics :one
 INSERT INTO analytics_daily (
   analytics_date, total_views, total_likes, total_dislikes, total_comments, total_ads_clicks
 )
-VALUES ($1, $2, $3, $4, $5, $6)
+VALUES ($1, 0, 0, 0, 0, 0)
 RETURNING *;
 
 -- name: UpdateDailyAnalytics :one
@@ -23,11 +23,6 @@ SET
   updated_at = now()
 WHERE analytics_date = $1
 RETURNING *;
-
--- name: InsertDailyAnalytics :exec
-INSERT INTO "analytics_daily" ("analytics_date", "total_views", "total_likes", "total_dislikes", "total_comments", "total_ads_clicks")
-VALUES (CURRENT_DATE, 0, 0, 0, 0, 0)
-ON CONFLICT ("analytics_date") DO NOTHING;
 
 -- name: AggregateAnalytics :one
 SELECT

@@ -9,6 +9,26 @@ import (
 	"context"
 )
 
+const createGlobalSettings = `-- name: CreateGlobalSettings :one
+INSERT INTO "global_settings" ("disable_comments", "disable_likes", "disable_dislikes", "disable_views", "disable_ads")
+VALUES (false, false, true, false, false)
+RETURNING global_settings_id, disable_comments, disable_likes, disable_dislikes, disable_views, disable_ads
+`
+
+func (q *Queries) CreateGlobalSettings(ctx context.Context) (GlobalSetting, error) {
+	row := q.db.QueryRow(ctx, createGlobalSettings)
+	var i GlobalSetting
+	err := row.Scan(
+		&i.GlobalSettingsID,
+		&i.DisableComments,
+		&i.DisableLikes,
+		&i.DisableDislikes,
+		&i.DisableViews,
+		&i.DisableAds,
+	)
+	return i, err
+}
+
 const getGlobalSettings = `-- name: GetGlobalSettings :one
 SELECT global_settings_id, disable_comments, disable_likes, disable_dislikes, disable_views, disable_ads FROM "global_settings" LIMIT 1
 `
@@ -32,10 +52,9 @@ UPDATE "global_settings"
 SET
     "disable_comments" = false,
     "disable_likes" = false,
-    "disable_dislikes" = false,
+    "disable_dislikes" = true,
     "disable_views" = false,
-    "disable_ads" = false,
-    "updated_at" = now()
+    "disable_ads" = false
 WHERE "global_settings_id" = (SELECT "global_settings_id" FROM "global_settings" LIMIT 1)
 `
 
@@ -51,8 +70,7 @@ SET
     "disable_likes" = $2,
     "disable_dislikes" = $3,
     "disable_views" = $4,
-    "disable_ads" = $5,
-    "updated_at" = now()
+    "disable_ads" = $5
 WHERE "global_settings_id" = (SELECT "global_settings_id" FROM "global_settings" LIMIT 1)
 `
 

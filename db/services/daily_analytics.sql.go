@@ -52,28 +52,12 @@ const createDailyAnalytics = `-- name: CreateDailyAnalytics :one
 INSERT INTO analytics_daily (
   analytics_date, total_views, total_likes, total_dislikes, total_comments, total_ads_clicks
 )
-VALUES ($1, $2, $3, $4, $5, $6)
+VALUES ($1, 0, 0, 0, 0, 0)
 RETURNING analytics_date, total_views, total_likes, total_dislikes, total_comments, total_ads_clicks, created_at, updated_at
 `
 
-type CreateDailyAnalyticsParams struct {
-	AnalyticsDate  pgtype.Date
-	TotalViews     int32
-	TotalLikes     int32
-	TotalDislikes  int32
-	TotalComments  int32
-	TotalAdsClicks int32
-}
-
-func (q *Queries) CreateDailyAnalytics(ctx context.Context, arg CreateDailyAnalyticsParams) (AnalyticsDaily, error) {
-	row := q.db.QueryRow(ctx, createDailyAnalytics,
-		arg.AnalyticsDate,
-		arg.TotalViews,
-		arg.TotalLikes,
-		arg.TotalDislikes,
-		arg.TotalComments,
-		arg.TotalAdsClicks,
-	)
+func (q *Queries) CreateDailyAnalytics(ctx context.Context, analyticsDate pgtype.Date) (AnalyticsDaily, error) {
+	row := q.db.QueryRow(ctx, createDailyAnalytics, analyticsDate)
 	var i AnalyticsDaily
 	err := row.Scan(
 		&i.AnalyticsDate,
@@ -93,23 +77,17 @@ SELECT analytics_date, total_views, total_likes, total_dislikes, total_comments,
 FROM analytics_daily
 WHERE analytics_date BETWEEN $1 AND $2
 ORDER BY analytics_date DESC
-LIMIT $3 OFFSET $4
+LIMIT $3
 `
 
 type GetDailyAnalyticsParams struct {
 	AnalyticsDate   pgtype.Date
 	AnalyticsDate_2 pgtype.Date
 	Limit           int32
-	Offset          int32
 }
 
 func (q *Queries) GetDailyAnalytics(ctx context.Context, arg GetDailyAnalyticsParams) ([]AnalyticsDaily, error) {
-	rows, err := q.db.Query(ctx, getDailyAnalytics,
-		arg.AnalyticsDate,
-		arg.AnalyticsDate_2,
-		arg.Limit,
-		arg.Offset,
-	)
+	rows, err := q.db.Query(ctx, getDailyAnalytics, arg.AnalyticsDate, arg.AnalyticsDate_2, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
