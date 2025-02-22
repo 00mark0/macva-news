@@ -16,7 +16,7 @@ INSERT INTO "ads"
 ("title", "description", "image_url", "target_url", "placement", "status", "start_date", "end_date")
 VALUES 
 ($1, $2, $3, $4, $5, $6, $7, $8)
-RETURNING "id"
+RETURNING id, title, description, image_url, target_url, placement, status, clicks, start_date, end_date, created_at, updated_at
 `
 
 type CreateAdParams struct {
@@ -30,7 +30,7 @@ type CreateAdParams struct {
 	EndDate     pgtype.Timestamptz
 }
 
-func (q *Queries) CreateAd(ctx context.Context, arg CreateAdParams) (pgtype.UUID, error) {
+func (q *Queries) CreateAd(ctx context.Context, arg CreateAdParams) (Ad, error) {
 	row := q.db.QueryRow(ctx, createAd,
 		arg.Title,
 		arg.Description,
@@ -41,36 +41,89 @@ func (q *Queries) CreateAd(ctx context.Context, arg CreateAdParams) (pgtype.UUID
 		arg.StartDate,
 		arg.EndDate,
 	)
-	var id pgtype.UUID
-	err := row.Scan(&id)
-	return id, err
+	var i Ad
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Description,
+		&i.ImageUrl,
+		&i.TargetUrl,
+		&i.Placement,
+		&i.Status,
+		&i.Clicks,
+		&i.StartDate,
+		&i.EndDate,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const deactivateAd = `-- name: DeactivateAd :one
 UPDATE "ads"
 SET 
   "status" = 'inactive', 
-  "updated_at" = now()
+  "updated_at" = now(),
+  "start_date" = NULL,
+  "end_date" = NULL
 WHERE "id" = $1
-RETURNING "id"
+RETURNING id, title, description, image_url, target_url, placement, status, clicks, start_date, end_date, created_at, updated_at
 `
 
-func (q *Queries) DeactivateAd(ctx context.Context, id pgtype.UUID) (pgtype.UUID, error) {
+func (q *Queries) DeactivateAd(ctx context.Context, id pgtype.UUID) (Ad, error) {
 	row := q.db.QueryRow(ctx, deactivateAd, id)
-	err := row.Scan(&id)
-	return id, err
+	var i Ad
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Description,
+		&i.ImageUrl,
+		&i.TargetUrl,
+		&i.Placement,
+		&i.Status,
+		&i.Clicks,
+		&i.StartDate,
+		&i.EndDate,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
-const deleteAd = `-- name: DeleteAd :one
+const deleteAd = `-- name: DeleteAd :exec
 DELETE FROM "ads"
 WHERE "id" = $1
-RETURNING "id"
 `
 
-func (q *Queries) DeleteAd(ctx context.Context, id pgtype.UUID) (pgtype.UUID, error) {
-	row := q.db.QueryRow(ctx, deleteAd, id)
-	err := row.Scan(&id)
-	return id, err
+func (q *Queries) DeleteAd(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deleteAd, id)
+	return err
+}
+
+const getAd = `-- name: GetAd :one
+SELECT id, title, description, image_url, target_url, placement, status, clicks, start_date, end_date, created_at, updated_at 
+FROM "ads"
+WHERE "id" = $1
+`
+
+func (q *Queries) GetAd(ctx context.Context, id pgtype.UUID) (Ad, error) {
+	row := q.db.QueryRow(ctx, getAd, id)
+	var i Ad
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Description,
+		&i.ImageUrl,
+		&i.TargetUrl,
+		&i.Placement,
+		&i.Status,
+		&i.Clicks,
+		&i.StartDate,
+		&i.EndDate,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const incrementAdClicks = `-- name: IncrementAdClicks :one
@@ -95,10 +148,50 @@ FROM "ads"
 WHERE "status" = 'active'
   AND "start_date" <= now() 
   AND "end_date" >= now()
+LIMIT $1
 `
 
-func (q *Queries) ListActiveAds(ctx context.Context) ([]Ad, error) {
-	rows, err := q.db.Query(ctx, listActiveAds)
+func (q *Queries) ListActiveAds(ctx context.Context, limit int32) ([]Ad, error) {
+	rows, err := q.db.Query(ctx, listActiveAds, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Ad
+	for rows.Next() {
+		var i Ad
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.ImageUrl,
+			&i.TargetUrl,
+			&i.Placement,
+			&i.Status,
+			&i.Clicks,
+			&i.StartDate,
+			&i.EndDate,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listAds = `-- name: ListAds :many
+SELECT id, title, description, image_url, target_url, placement, status, clicks, start_date, end_date, created_at, updated_at 
+FROM "ads"
+LIMIT $1
+`
+
+func (q *Queries) ListAds(ctx context.Context, limit int32) ([]Ad, error) {
+	rows, err := q.db.Query(ctx, listAds, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -137,10 +230,56 @@ WHERE "placement" = $1
   AND "status" = 'active'
   AND "start_date" <= now() 
   AND "end_date" >= now()
+LIMIT $2
 `
 
-func (q *Queries) ListAdsByPlacement(ctx context.Context, placement pgtype.Text) ([]Ad, error) {
-	rows, err := q.db.Query(ctx, listAdsByPlacement, placement)
+type ListAdsByPlacementParams struct {
+	Placement pgtype.Text
+	Limit     int32
+}
+
+func (q *Queries) ListAdsByPlacement(ctx context.Context, arg ListAdsByPlacementParams) ([]Ad, error) {
+	rows, err := q.db.Query(ctx, listAdsByPlacement, arg.Placement, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Ad
+	for rows.Next() {
+		var i Ad
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.ImageUrl,
+			&i.TargetUrl,
+			&i.Placement,
+			&i.Status,
+			&i.Clicks,
+			&i.StartDate,
+			&i.EndDate,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listInactiveAds = `-- name: ListInactiveAds :many
+SELECT id, title, description, image_url, target_url, placement, status, clicks, start_date, end_date, created_at, updated_at 
+FROM "ads"
+WHERE "status" = 'inactive'
+LIMIT $1
+`
+
+func (q *Queries) ListInactiveAds(ctx context.Context, limit int32) ([]Ad, error) {
+	rows, err := q.db.Query(ctx, listInactiveAds, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -185,7 +324,7 @@ SET
   "end_date" = $8,
   "updated_at" = now()
 WHERE "id" = $9
-RETURNING "id"
+RETURNING id, title, description, image_url, target_url, placement, status, clicks, start_date, end_date, created_at, updated_at
 `
 
 type UpdateAdParams struct {
@@ -200,7 +339,7 @@ type UpdateAdParams struct {
 	ID          pgtype.UUID
 }
 
-func (q *Queries) UpdateAd(ctx context.Context, arg UpdateAdParams) (pgtype.UUID, error) {
+func (q *Queries) UpdateAd(ctx context.Context, arg UpdateAdParams) (Ad, error) {
 	row := q.db.QueryRow(ctx, updateAd,
 		arg.Title,
 		arg.Description,
@@ -212,7 +351,20 @@ func (q *Queries) UpdateAd(ctx context.Context, arg UpdateAdParams) (pgtype.UUID
 		arg.EndDate,
 		arg.ID,
 	)
-	var id pgtype.UUID
-	err := row.Scan(&id)
-	return id, err
+	var i Ad
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Description,
+		&i.ImageUrl,
+		&i.TargetUrl,
+		&i.Placement,
+		&i.Status,
+		&i.Clicks,
+		&i.StartDate,
+		&i.EndDate,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }

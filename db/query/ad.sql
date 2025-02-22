@@ -3,7 +3,7 @@ INSERT INTO "ads"
 ("title", "description", "image_url", "target_url", "placement", "status", "start_date", "end_date")
 VALUES 
 ($1, $2, $3, $4, $5, $6, $7, $8)
-RETURNING "id";
+RETURNING *;
 
 -- name: UpdateAd :one
 UPDATE "ads"
@@ -18,27 +18,45 @@ SET
   "end_date" = $8,
   "updated_at" = now()
 WHERE "id" = $9
-RETURNING "id";
+RETURNING *;
 
 -- name: DeactivateAd :one
 UPDATE "ads"
 SET 
   "status" = 'inactive', 
-  "updated_at" = now()
+  "updated_at" = now(),
+  "start_date" = NULL,
+  "end_date" = NULL
 WHERE "id" = $1
-RETURNING "id";
+RETURNING *;
 
--- name: DeleteAd :one
+-- name: DeleteAd :exec
 DELETE FROM "ads"
-WHERE "id" = $1
-RETURNING "id";
+WHERE "id" = $1;
+
+-- name: GetAd :one
+SELECT * 
+FROM "ads"
+WHERE "id" = $1;
+
+-- name: ListAds :many
+SELECT * 
+FROM "ads"
+LIMIT $1;
+
+-- name: ListInactiveAds :many
+SELECT * 
+FROM "ads"
+WHERE "status" = 'inactive'
+LIMIT $1;
 
 -- name: ListActiveAds :many
 SELECT * 
 FROM "ads"
 WHERE "status" = 'active'
   AND "start_date" <= now() 
-  AND "end_date" >= now();
+  AND "end_date" >= now()
+LIMIT $1;
 
 -- name: ListAdsByPlacement :many
 SELECT * 
@@ -46,7 +64,8 @@ FROM "ads"
 WHERE "placement" = $1
   AND "status" = 'active'
   AND "start_date" <= now() 
-  AND "end_date" >= now();
+  AND "end_date" >= now()
+LIMIT $2;
 
 -- name: IncrementAdClicks :one
 UPDATE "ads"
@@ -55,4 +74,3 @@ SET
   "updated_at" = now()
 WHERE "id" = $1
 RETURNING "clicks";
-

@@ -77,3 +77,9 @@ func RandomCategoryList(n int) []string {
 	}
 	return shuffled[:n]
 }
+
+// RandomPlacement returns a random ad placement between "footer", "side", and "top"
+func RandomPlacement() string {
+	placements := []string{"footer", "side", "top"}
+	return placements[rand.Intn(len(placements))]
+}
