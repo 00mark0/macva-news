@@ -115,17 +115,6 @@ func (q *Queries) GetDailyAnalytics(ctx context.Context, arg GetDailyAnalyticsPa
 	return items, nil
 }
 
-const insertDailyAnalytics = `-- name: InsertDailyAnalytics :exec
-INSERT INTO "analytics_daily" ("analytics_date", "total_views", "total_likes", "total_dislikes", "total_comments", "total_ads_clicks")
-VALUES (CURRENT_DATE, 0, 0, 0, 0, 0)
-ON CONFLICT ("analytics_date") DO NOTHING
-`
-
-func (q *Queries) InsertDailyAnalytics(ctx context.Context) error {
-	_, err := q.db.Exec(ctx, insertDailyAnalytics)
-	return err
-}
-
 const updateDailyAnalytics = `-- name: UpdateDailyAnalytics :one
 UPDATE analytics_daily
 SET 

@@ -327,7 +327,7 @@ func (q *Queries) GetDeletedUsersCount(ctx context.Context) (int64, error) {
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT user_id, username, email, role, pfp, email_verified, banned 
+SELECT user_id, username, password, email, role, pfp, email_verified, banned 
 FROM "user" 
 WHERE email = $1 AND banned = false
 `
@@ -335,6 +335,7 @@ WHERE email = $1 AND banned = false
 type GetUserByEmailRow struct {
 	UserID        pgtype.UUID
 	Username      string
+	Password      string
 	Email         string
 	Role          string
 	Pfp           string
@@ -348,6 +349,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEm
 	err := row.Scan(
 		&i.UserID,
 		&i.Username,
+		&i.Password,
 		&i.Email,
 		&i.Role,
 		&i.Pfp,
@@ -358,7 +360,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEm
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT user_id, username, email, role, pfp, email_verified, banned 
+SELECT user_id, username, password, email, role, pfp, email_verified, banned 
 FROM "user" 
 WHERE user_id = $1 AND banned = false
 `
@@ -366,6 +368,7 @@ WHERE user_id = $1 AND banned = false
 type GetUserByIDRow struct {
 	UserID        pgtype.UUID
 	Username      string
+	Password      string
 	Email         string
 	Role          string
 	Pfp           string
@@ -379,6 +382,7 @@ func (q *Queries) GetUserByID(ctx context.Context, userID pgtype.UUID) (GetUserB
 	err := row.Scan(
 		&i.UserID,
 		&i.Username,
+		&i.Password,
 		&i.Email,
 		&i.Role,
 		&i.Pfp,

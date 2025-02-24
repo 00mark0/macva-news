@@ -1,2 +1,6 @@
 /* static/css/style.css */
 @import "tailwindcss";
+
+body {
+    font-family: 'Merriweather', sans-serif;
+}

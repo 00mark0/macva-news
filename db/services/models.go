@@ -123,3 +123,9 @@ type User struct {
 	IsDeleted     pgtype.Bool
 	CreatedAt     pgtype.Timestamptz
 }
+
+type View struct {
+	ViewID    pgtype.UUID
+	ContentID pgtype.UUID
+	UserID    pgtype.UUID
+}

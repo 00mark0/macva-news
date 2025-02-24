@@ -9,12 +9,12 @@ VALUES ($1, $2, $3, $4)
 RETURNING *;
 
 -- name: GetUserByID :one
-SELECT user_id, username, email, role, pfp, email_verified, banned 
+SELECT user_id, username, password, email, role, pfp, email_verified, banned 
 FROM "user" 
 WHERE user_id = $1 AND banned = false;
 
 -- name: GetUserByEmail :one
-SELECT user_id, username, email, role, pfp, email_verified, banned 
+SELECT user_id, username, password, email, role, pfp, email_verified, banned 
 FROM "user" 
 WHERE email = $1 AND banned = false;
 

@@ -1,0 +1,11 @@
+package components
+
+import "github.com/00mark0/macva-news/token"
+
+templ AdminDashboard() {
+<h1>Pregled</h1>
+}
+
+templ DashPage(props ...interface{}) {
+@AdminLayout(props[0].(*token.Payload), AdminDashboard())
+}

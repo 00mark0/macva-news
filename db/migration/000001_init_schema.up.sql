@@ -34,6 +34,12 @@ CREATE TABLE "content" (
   "is_deleted" BOOL DEFAULT false
 );
 
+CREATE TABLE "views" (
+  "view_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "content_id" UUID NOT NULL,
+  "user_id" UUID UNIQUE NOT NULL
+);
+
 CREATE TABLE "category" (
   "category_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "category_name" VARCHAR(50) NOT NULL

@@ -15,7 +15,7 @@ import (
 )
 
 func createRandomUser(t *testing.T) User {
-	hashedPassword, err := utils.HashPassword(utils.RandomString(6))
+	hashedPassword, err := utils.HashPassword("123456")
 	arg := CreateUserParams{
 		Username: utils.RandomUser(),
 		Email:    utils.RandomEmail(),
@@ -42,10 +42,15 @@ func createRandomUser(t *testing.T) User {
 }
 
 func createAdminUser(t *testing.T) User {
+	hashedPassword, err := utils.HashPassword("123456")
+	if err != nil {
+		log.Println(err)
+	}
+
 	arg := CreateUserAdminParams{
 		Username: "admin",
 		Email:    "admin@gmail.com",
-		Password: "123456",
+		Password: hashedPassword,
 		Role:     "admin",
 	}
 
