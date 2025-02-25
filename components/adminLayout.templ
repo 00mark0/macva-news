@@ -19,11 +19,12 @@ templ AdminLayout(payload *token.Payload, children ...templ.Component) {
 		rel="stylesheet" />
 	<link href="/static/css/output.css" rel="stylesheet" />
 	<script src="/static/js/htmx.min.js"></script>
+	<script src="/static/js/dark-mode.js"></script>
 	<script src="/static/js/admin.js" defer></script>
 </head>
 
 <body>
-	<nav class="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+	<nav class="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-black dark:border-gray-200">
 		<div class="px-3 py-3 lg:px-5 lg:pl-3">
 			<div class="flex items-center justify-between">
 				<div class="flex items-center justify-start rtl:justify-end">
@@ -50,14 +51,14 @@ templ AdminLayout(payload *token.Payload, children ...templ.Component) {
 					<div class="flex items-center ms-3">
 						<div>
 							<button type="button"
-								class="flex text-sm rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+								class="cursor-pointer flex text-sm rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
 								aria-expanded="false" data-dropdown-toggle="dropdown-user">
 								<span class="sr-only">Open user menu</span>
 								<img class="w-10 h-10 rounded-full object-fit"
 									src="/static/assets/default-avatar-64x64.png" alt="user photo" />
 							</button>
 						</div>
-						<div class="z-50 hidden absolute top-14 right-0 mt-2 w-48 text-base list-none bg-white divide-y divide-gray-100 rounded-sm shadow-sm dark:bg-gray-700 dark:divide-gray-600"
+						<div class="z-50 hidden absolute top-12 right-0 w-48 text-base list-none bg-white divide-y divide-gray-100 rounded-sm shadow-sm dark:bg-black dark:divide-gray-200"
 							id="dropdown-user">
 							<div class="px-4 py-3" role="none">
 								<p class="text-sm text-gray-900 dark:text-white" role="none">
@@ -85,7 +86,7 @@ templ AdminLayout(payload *token.Payload, children ...templ.Component) {
 								</li>
 								<li>
 									<a hx-post="/api/admin/logout"
-										class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+										class="cursor-pointer block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
 										role="menuitem">Odjavi se</a>
 								</li>
 							</ul>
@@ -96,10 +97,10 @@ templ AdminLayout(payload *token.Payload, children ...templ.Component) {
 		</div>
 	</nav>
 	<aside id="logo-sidebar"
-		class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+		class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-black dark:border-gray-200"
 		aria-label="Sidebar">
-		<div class="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
-			<ul class="space-y-2 font-medium">
+		<div class="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-black">
+			<ul class="space-y-2 font-medium pt-3">
 				<li class="cursor-pointer">
 					<a id="pregled" hx-trigger="click" hx-get="/admin/hx-admin" hx-target="#admin-content"
 						hx-swap="innerHTML"
@@ -184,7 +185,7 @@ templ AdminLayout(payload *token.Payload, children ...templ.Component) {
 			</ul>
 		</div>
 	</aside>
-	<div id="admin-content" class="sm:pl-72 pl-2 sm:pt-24 pt-18">
+	<div id="admin-content" class="sm:pl-64 sm:pt-20 pt-16">
 		for _, child := range children {
 		@child
 		}

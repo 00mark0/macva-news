@@ -55,7 +55,9 @@ func (server *Server) adminLogin(ctx echo.Context) error {
 	}
 
 	if user.Role != "admin" {
-		return ctx.Redirect(http.StatusSeeOther, "/")
+		loginErr = "Nevažecí podaci za prijavu"
+
+		return Render(ctx, http.StatusOK, components.AdminLoginForm(loginErr))
 	}
 
 	err = utils.CheckPassword(req.Password, user.Password)
