@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/token"
 	"github.com/00mark0/macva-news/utils"
 
@@ -40,6 +41,7 @@ type loginUserRes struct {
 
 func (server *Server) adminLogin(ctx echo.Context) error {
 	var req loginUserReq
+	var loginErr components.LoginErr
 	if err := ctx.Bind(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
 		return err
@@ -47,8 +49,9 @@ func (server *Server) adminLogin(ctx echo.Context) error {
 
 	user, err := server.store.GetUserByEmail(ctx.Request().Context(), req.Email)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, errorResponse("failed to get user", err))
-		return err
+		loginErr = "Nevažeći podaci za prijavu"
+
+		return Render(ctx, http.StatusOK, components.AdminLoginForm(loginErr))
 	}
 
 	if user.Role != "admin" {
@@ -57,8 +60,9 @@ func (server *Server) adminLogin(ctx echo.Context) error {
 
 	err = utils.CheckPassword(req.Password, user.Password)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, errorResponse("invalid credentials", err))
-		return err
+		loginErr = "Nevažecí podaci za prijavu"
+
+		return Render(ctx, http.StatusOK, components.AdminLoginForm(loginErr))
 	}
 
 	durationStr := os.Getenv("ACCESS_TOKEN_DURATION")
@@ -97,7 +101,8 @@ func (server *Server) adminLogin(ctx echo.Context) error {
 		Path:    "/",
 	})
 
-	return ctx.Redirect(http.StatusSeeOther, "/admin")
+	ctx.Response().Header().Set("HX-Redirect", "/admin")
+	return ctx.NoContent(http.StatusOK)
 }
 
 func (server *Server) logOut(ctx echo.Context) error {

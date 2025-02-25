@@ -32,7 +32,7 @@ func (server *Server) setupRouter() {
 	adminRoutes.GET("/admin/content", server.adminArts)
 	adminRoutes.GET("/admin/users", server.adminUsers)
 	adminRoutes.GET("/admin/ads", server.adminAds)
-	router.GET("/admin/login", server.login)
+	router.GET("/admin/login", server.adminLoginPage)
 
 	// Auth api
 	router.POST("/api/admin/login", server.adminLogin)

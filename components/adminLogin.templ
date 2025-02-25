@@ -1,13 +1,16 @@
 package components
 
-templ AdminLogin() {
+type LoginErr string
+
+templ AdminLogin(props ...interface{}) {
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>Prijava</title>
+	<title>Admin Prijava</title>
+	<meta name="description" content="Mačva News Admin Prijava" />
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 	<link
@@ -36,44 +39,9 @@ templ AdminLogin() {
 				class="w-48 h-28 mx-auto mb-4 rounded-lg" />
 			<h1 class="text-2xl font-bold text-gray-900">Admin Prijava</h1>
 		</div>
-		<form class="space-y-6" action="/api/admin/login" method="POST">
-			<div>
-				<label htmlFor="email" class="block text-sm font-medium text-gray-700 mb-1">
-					Email Adresa
-				</label>
-				<input id="email" type="email" name="email"
-					class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-					placeholder="you@example.com" />
-			</div>
-			<div>
-				<label htmlFor="password" class="block text-sm font-medium text-gray-700 mb-1">
-					Lozinka
-				</label>
-				<input id="password" type="password" name="password"
-					class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-					placeholder="••••••••" />
-			</div>
-			<div class="flex items-center justify-between">
-				<div class="flex items-center">
-					<input id="remember-me" type="checkbox"
-						class="h-4 w-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500" />
-					<label htmlFor="remember-me" class="ml-2 text-sm text-gray-600">
-						Zapamti me
-					</label>
-				</div>
-				<a href="#" class="text-sm text-blue-500 hover:text-blue-600">
-					Zaboravio/la lozinku?
-				</a>
-			</div>
-			<button type="submit"
-				class="cursor-pointer w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
-				Prijava
-			</button>
-			<a href="/"
-				class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
-				Nazad na početnu
-			</a>
-		</form>
+		<div id="admin-form">
+			@AdminLoginForm(props[0].(LoginErr))
+		</div>
 		<p class="mt-6 text-center text-sm text-gray-600">
 			Nemate nalog?
 			<a href="/register" class="text-blue-500 hover:text-blue-600 font-medium">
@@ -84,4 +52,53 @@ templ AdminLogin() {
 </div>
 
 </html>
+}
+
+templ AdminLoginForm(loginErr LoginErr) {
+<form class="space-y-6" hx-post="/api/admin/login" hx-target="#admin-form" hx-swap="innerHTML">
+	<div>
+		if string(loginErr) != "" {
+		<div class="bg-red-100 border border-red-400 mb-4 text-center text-sm text-red-700 px-4 py-2 rounded relative"
+			role="alert">
+			<span class="block sm:inline">
+				{ string(loginErr) }
+			</span>
+		</div>
+		}
+		<label htmlFor="email" class="block text-sm font-medium text-gray-700 mb-1">
+			Email Adresa
+		</label>
+		<input id="email" type="email" name="email"
+			class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+			placeholder="you@example.com" />
+	</div>
+	<div>
+		<label htmlFor="password" class="block text-sm font-medium text-gray-700 mb-1">
+			Lozinka
+		</label>
+		<input id="password" type="password" name="password"
+			class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+			placeholder="••••••••" />
+	</div>
+	<div class="flex items-center justify-between">
+		<div class="flex items-center">
+			<input id="remember-me" type="checkbox"
+				class="h-4 w-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500" />
+			<label htmlFor="remember-me" class="ml-2 text-sm text-gray-600">
+				Zapamti me
+			</label>
+		</div>
+		<a href="#" class="text-sm text-blue-500 hover:text-blue-600">
+			Zaboravio/la lozinku?
+		</a>
+	</div>
+	<button type="submit"
+		class="cursor-pointer w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+		Prijava
+	</button>
+	<a href="/"
+		class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+		Nazad na početnu
+	</a>
+</form>
 }
