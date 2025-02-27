@@ -47,8 +47,8 @@ func (server *Server) adminAds(ctx echo.Context) error {
 	return Render(ctx, http.StatusOK, components.AdminAds())
 }
 
-func (server *Server) adminLoginPage(ctx echo.Context) error {
+func (server *Server) loginPage(ctx echo.Context) error {
 	var loginErr components.LoginErr
 
-	return Render(ctx, http.StatusOK, components.AdminLogin(loginErr))
+	return Render(ctx, http.StatusOK, components.Login(loginErr))
 }

@@ -39,7 +39,7 @@ type loginUserRes struct {
 	User        userResponse `json:"user"`
 }
 
-func (server *Server) adminLogin(ctx echo.Context) error {
+func (server *Server) login(ctx echo.Context) error {
 	var req loginUserReq
 	var loginErr components.LoginErr
 	if err := ctx.Bind(&req); err != nil {
@@ -47,24 +47,30 @@ func (server *Server) adminLogin(ctx echo.Context) error {
 		return err
 	}
 
+	if req.Email == "" {
+		loginErr = "Email obavezan"
+
+		return Render(ctx, http.StatusOK, components.LoginForm(loginErr))
+	}
+
+	if req.Password == "" {
+		loginErr = "Lozinka obavezna"
+
+		return Render(ctx, http.StatusOK, components.LoginForm(loginErr))
+	}
+
 	user, err := server.store.GetUserByEmail(ctx.Request().Context(), req.Email)
 	if err != nil {
 		loginErr = "Nevažeći podaci za prijavu"
 
-		return Render(ctx, http.StatusOK, components.AdminLoginForm(loginErr))
-	}
-
-	if user.Role != "admin" {
-		loginErr = "Nevažecí podaci za prijavu"
-
-		return Render(ctx, http.StatusOK, components.AdminLoginForm(loginErr))
+		return Render(ctx, http.StatusOK, components.LoginForm(loginErr))
 	}
 
 	err = utils.CheckPassword(req.Password, user.Password)
 	if err != nil {
 		loginErr = "Nevažecí podaci za prijavu"
 
-		return Render(ctx, http.StatusOK, components.AdminLoginForm(loginErr))
+		return Render(ctx, http.StatusOK, components.LoginForm(loginErr))
 	}
 
 	durationStr := os.Getenv("ACCESS_TOKEN_DURATION")
@@ -103,7 +109,7 @@ func (server *Server) adminLogin(ctx echo.Context) error {
 		Path:    "/",
 	})
 
-	ctx.Response().Header().Set("HX-Redirect", "/admin")
+	ctx.Response().Header().Set("HX-Redirect", "/")
 	return ctx.NoContent(http.StatusOK)
 }
 

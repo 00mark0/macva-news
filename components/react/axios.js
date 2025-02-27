@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const axiosInstance = axios.create({
+const fetch = axios.create({
 	baseURL: 'http://localhost:3000',
 	timeout: 1000,
 	headers: {
@@ -8,5 +8,5 @@ const axiosInstance = axios.create({
 	},
 });
 
-export default axiosInstance;
+export default fetch;
 

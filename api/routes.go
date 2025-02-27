@@ -24,7 +24,6 @@ func (server *Server) setupRouter() {
 	adminRoutes := router.Group("")
 	adminRoutes.Use(adminMiddleware(server.tokenMaker))
 
-	// Pages
 	// Admin Page Routes
 	adminRoutes.GET("/admin", server.adminDash)
 	adminRoutes.GET("/admin/hx-admin", server.adminDashContent)
@@ -32,13 +31,18 @@ func (server *Server) setupRouter() {
 	adminRoutes.GET("/admin/content", server.adminArts)
 	adminRoutes.GET("/admin/users", server.adminUsers)
 	adminRoutes.GET("/admin/ads", server.adminAds)
-	router.GET("/admin/login", server.adminLoginPage)
+
+	// Admin API Routes
+	adminRoutes.GET("/api/admin/trending", server.listTrendingContent)
+
+	// Auth Pages
+	router.GET("/login", server.loginPage)
 
 	// Auth api
-	router.POST("/api/admin/login", server.adminLogin)
-	adminRoutes.POST("/api/admin/logout", server.logOut)
+	router.POST("/api/login", server.login)
+	adminRoutes.POST("/api/logout", server.logOut)
 
-	// User
+	// User Page Routes
 	router.GET("/", server.homePage)
 	router.GET("/counter", server.counterPage)
 	router.GET("/widget", server.widgetPage)

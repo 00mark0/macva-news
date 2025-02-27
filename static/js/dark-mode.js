@@ -1,4 +1,4 @@
-// Save this to /static/js/dark-mode.js
+// /static/js/dark-mode.js
 
 document.addEventListener('DOMContentLoaded', function() {
     // Check for saved theme preference or use system preference
