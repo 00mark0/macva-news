@@ -1,10 +1,12 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import TrendingContent from './trendingContent';
+import DailyAnalytics from './daily-analytics';
 
 // Registry mapping component names to React components
 const components = {
 	TrendingContent,
+	DailyAnalytics
 };
 
 // Function to mount React components in a given root element

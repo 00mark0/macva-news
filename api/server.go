@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/00mark0/macva-news/db/services"
 	"github.com/00mark0/macva-news/token"
+	"github.com/00mark0/macva-news/utils"
 
 	"fmt"
 
@@ -29,6 +30,7 @@ func NewServer(store *db.Store, symmetricKey string) (*Server, error) {
 	}
 
 	server.setupRouter()
+	go utils.ScheduleMidnightTask()
 
 	return server, nil
 }

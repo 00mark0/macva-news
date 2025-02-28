@@ -34,6 +34,7 @@ func (server *Server) setupRouter() {
 
 	// Admin API Routes
 	adminRoutes.GET("/api/admin/trending", server.listTrendingContent)
+	adminRoutes.GET("/api/admin/analytics", server.getDailyAnalytics)
 
 	// Auth Pages
 	router.GET("/login", server.loginPage)

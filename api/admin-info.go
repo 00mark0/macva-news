@@ -15,7 +15,7 @@ type TrendingContentReq struct {
 	Limit       int32  `query:"limit"`
 }
 
-type TrendingContent struct {
+type TrendingContentRes struct {
 	ContentID           string `json:"content_id"`
 	UserID              string `json:"user_id"`
 	CategoryID          string `json:"category_id"`
@@ -75,10 +75,10 @@ func (server *Server) listTrendingContent(ctx echo.Context) error {
 		return err
 	}
 
-	var trendingContent []TrendingContent
+	var trendingContent []TrendingContentRes
 
 	for _, content := range data {
-		trendingContent = append(trendingContent, TrendingContent{
+		trendingContent = append(trendingContent, TrendingContentRes{
 			ContentID:           content.ContentID.String(),
 			UserID:              content.UserID.String(),
 			CategoryID:          content.CategoryID.String(),
@@ -103,6 +103,75 @@ func (server *Server) listTrendingContent(ctx echo.Context) error {
 
 	if acceptHeader := ctx.Request().Header.Get("Accept"); acceptHeader == "application/json" {
 		return ctx.JSON(http.StatusOK, trendingContent)
+	}
+
+	return nil
+}
+
+type DailyAnalyticsReq struct {
+	AnalyticsDate  string `query:"start_date"`
+	AnalyticsDate2 string `query:"end_date"`
+	Limit          int32  `query:"limit"`
+}
+
+type DailyAnalyticsRes struct {
+	AnalytycsDate  string `json:"analytics_date"`
+	TotalViews     int    `json:"total_views"`
+	TotalLikes     int    `json:"total_likes"`
+	TotalDislikes  int    `json:"total_dislikes"`
+	TotalComments  int    `json:"total_comments"`
+	TotalAdsClicks int    `json:"total_ads_clicks"`
+	CreatedAt      string `json:"created_at"`
+}
+
+func (server *Server) getDailyAnalytics(ctx echo.Context) error {
+	var req DailyAnalyticsReq
+
+	if err := ctx.Bind(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		return err
+	}
+
+	analyticsDate, err := time.Parse("2006-01-02", req.AnalyticsDate)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse("invalid date format for analytics_date, expected YYYY-MM-DD", err))
+		return err
+	}
+
+	analyticsDate2, err := time.Parse("2006-01-02", req.AnalyticsDate2)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse("invalid date format for analytics_date_2, expected YYYY-MM-DD", err))
+		return err
+	}
+
+	arg := db.GetDailyAnalyticsParams{
+		AnalyticsDate:   pgtype.Date{Time: analyticsDate, Valid: true},
+		AnalyticsDate_2: pgtype.Date{Time: analyticsDate2, Valid: true},
+		Limit:           req.Limit,
+	}
+
+	data, err := server.store.GetDailyAnalytics(ctx.Request().Context(), arg)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get daily analytics", err))
+		return err
+	}
+
+	var dailyAnalytics []DailyAnalyticsRes
+
+	for _, analytics := range data {
+		dailyAnalytics = append(dailyAnalytics, DailyAnalyticsRes{
+			AnalytycsDate:  analytics.AnalyticsDate.Time.Format("2006-01-02"),
+			TotalViews:     int(analytics.TotalViews),
+			TotalLikes:     int(analytics.TotalLikes),
+			TotalDislikes:  int(analytics.TotalDislikes),
+			TotalComments:  int(analytics.TotalComments),
+			TotalAdsClicks: int(analytics.TotalAdsClicks),
+			CreatedAt:      analytics.CreatedAt.Time.Format("2006-01-02"),
+		})
+	}
+
+	if acceptHeader := ctx.Request().Header.Get("Accept"); acceptHeader == "application/json" {
+		return ctx.JSON(http.StatusOK, dailyAnalytics)
 	}
 
 	return nil

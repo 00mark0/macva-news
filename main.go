@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/00mark0/macva-news/api"
-	"github.com/00mark0/macva-news/db/services"
 	"log"
 	"os"
+
+	"github.com/00mark0/macva-news/api"
+	"github.com/00mark0/macva-news/db/services"
 
 	"context"
 
@@ -49,5 +50,4 @@ func main() {
 	if err != nil {
 		log.Fatal("Cannot start server!:", err)
 	}
-
 }
