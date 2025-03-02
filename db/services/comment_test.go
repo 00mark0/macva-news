@@ -12,7 +12,7 @@ import (
 )
 
 func createRandomComment(t *testing.T) Comment {
-	categories, err := testQueries.ListCategories(context.Background(), ListCategoriesParams{Limit: 10, Offset: 0})
+	categories, err := testQueries.ListCategories(context.Background(), 10)
 	require.NoError(t, err)
 	require.NotEmpty(t, categories)
 
@@ -52,7 +52,7 @@ func createRandomComment(t *testing.T) Comment {
 }
 
 func createRandomComments(t *testing.T) []Comment {
-	categories, err := testQueries.ListCategories(context.Background(), ListCategoriesParams{Limit: 10, Offset: 0})
+	categories, err := testQueries.ListCategories(context.Background(), 10)
 	require.NoError(t, err)
 	require.NotEmpty(t, categories)
 

@@ -28,7 +28,7 @@ export default function TrendingContent() {
 				date = startOfDay(now); // Start of current day
 				break;
 			case 'week':
-				date = startOfWeek(now); // Start of current week
+				date = startOfWeek(now, { weekStartsOn: 1 }); // Start of current week
 				break;
 			case 'month':
 				date = subDays(now, 30); // Start of current month
@@ -62,7 +62,6 @@ export default function TrendingContent() {
 				setHasMore(res.data.length === limit);
 			}
 
-			console.log("API response:", res.data);
 		} catch (error) {
 			console.error('Error fetching trending content:', error);
 			setError('Failed to fetch trending content');

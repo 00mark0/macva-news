@@ -37,7 +37,6 @@ export default function DailyAnalytics() {
 				setAnalytics(Array.isArray(res.data) ? res.data : []);
 			}
 
-			console.log("Analytics data:", res.data);
 		} catch (error) {
 			console.error('Error fetching analytics:', error);
 			setError('Failed to fetch analytics data');
@@ -113,7 +112,7 @@ export default function DailyAnalytics() {
 
 			{/* Date range selector */}
 			<div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-6">
-				<form onSubmit={handleSubmit} className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 sm:items-center items-center">
+				<form onSubmit={handleSubmit} className="flex flex-col flex-wrap space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 items-center">
 					<div className="flex-1">
 						<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
 							Početni datum
@@ -157,7 +156,7 @@ export default function DailyAnalytics() {
 
 					<button
 						type="submit"
-						className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+						className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors sm:mt-6"
 					>
 						Prikaži
 					</button>

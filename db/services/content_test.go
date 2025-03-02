@@ -18,7 +18,7 @@ func createRandomContent(t *testing.T) Content {
 	users, err := testQueries.GetAdminUsers(context.Background())
 	require.NoError(t, err)
 
-	category, err := testQueries.ListCategories(context.Background(), ListCategoriesParams{Limit: 10, Offset: 0})
+	category, err := testQueries.ListCategories(context.Background(), 10)
 
 	arg := CreateContentParams{
 		UserID:              users[0].UserID,
@@ -197,7 +197,7 @@ func TestListPublishedContent(t *testing.T) {
 }
 
 func TestGetContentByCategoryCount(t *testing.T) {
-	categories, err := testQueries.ListCategories(context.Background(), ListCategoriesParams{Limit: 10, Offset: 0})
+	categories, err := testQueries.ListCategories(context.Background(), 10)
 	content := createRandomContent(t)
 	var category Category
 
@@ -223,7 +223,7 @@ func TestGetContentByCategoryCount(t *testing.T) {
 }
 
 func TestListContentByCategory(t *testing.T) {
-	categories, err := testQueries.ListCategories(context.Background(), ListCategoriesParams{Limit: 10, Offset: 0})
+	categories, err := testQueries.ListCategories(context.Background(), 10)
 	var category Category
 
 	content := createRandomContent(t)
@@ -317,7 +317,7 @@ func TestListContentByTag(t *testing.T) {
 func createContentInteractive(title, description string) Content {
 	users, err := testQueries.GetAdminUsers(context.Background())
 
-	category, err := testQueries.ListCategories(context.Background(), ListCategoriesParams{Limit: 10, Offset: 0})
+	category, err := testQueries.ListCategories(context.Background(), 10)
 
 	arg := CreateContentParams{
 		UserID:              users[0].UserID,

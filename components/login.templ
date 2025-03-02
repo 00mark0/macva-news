@@ -42,7 +42,7 @@ templ Login(props ...interface{}) {
 					/>
 					<h1 class="text-2xl font-bold text-gray-900">Dobrodošli!</h1>
 				</div>
-				<div id="admin-form">
+				<div id="login-form">
 					@LoginForm(props[0].(LoginErr))
 				</div>
 				<p class="mt-6 text-center text-sm text-gray-600">
@@ -57,7 +57,7 @@ templ Login(props ...interface{}) {
 }
 
 templ LoginForm(loginErr LoginErr) {
-	<form class="space-y-6" hx-post="/api/login" hx-target="#admin-form" hx-swap="innerHTML">
+	<form class="space-y-6" hx-post="/api/login" hx-target="#login-form" hx-swap="innerHTML">
 		<div>
 			if string(loginErr) != "" {
 				<div

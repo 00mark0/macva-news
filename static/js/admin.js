@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const userMenuButton = document.querySelector('[data-dropdown-toggle="dropdown-user"]');
     const userMenu = document.getElementById('dropdown-user');
 
+
     if (userMenuButton && userMenu) {
         // Position the dropdown properly
         userMenu.style.position = 'absolute';
@@ -53,5 +54,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         }
+    });
+
+    const userMenuItems = [
+        document.getElementById('user-menu-item-overview'),
+        document.getElementById('user-menu-item-settings'),
+        document.getElementById('user-menu-item-earnings'),
+        document.getElementById('user-menu-item-logout')
+    ]
+
+    userMenuItems.forEach(item => {
+        item.addEventListener('click', function() {
+            userMenu.classList.add('hidden');
+        });
     });
 });

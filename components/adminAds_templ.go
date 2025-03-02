@@ -29,7 +29,7 @@ func AdminAds() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"w-full min-h-screen dark:bg-black sm:p-8 p-4\"><h1 class=\"text-black dark:text-white\">Reklame</h1></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"w-full min-h-screen dark:bg-black sm:p-8 p-4\"><h1 class=\"text-3xl font-semibold text-black dark:text-white mb-10\">Oglasi</h1></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

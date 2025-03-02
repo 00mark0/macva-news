@@ -64,25 +64,8 @@ func TestGetCategoryByName(t *testing.T) {
 	require.Equal(t, category1.CategoryName, category2.CategoryName)
 }
 
-func TestGetCategoryCount(t *testing.T) {
-	count, err := testQueries.GetCategoryCount(context.Background())
-	require.NoError(t, err)
-	require.NotZero(t, count)
-
-	_ = createCategoryInteractive(utils.RandomString(10))
-
-	count2, err := testQueries.GetCategoryCount(context.Background())
-	require.NoError(t, err)
-	require.Equal(t, count2, count+1)
-}
-
 func TestListCategories(t *testing.T) {
-	arg := ListCategoriesParams{
-		Limit:  5,
-		Offset: 0,
-	}
-
-	categories, err := testQueries.ListCategories(context.Background(), arg)
+	categories, err := testQueries.ListCategories(context.Background(), 5)
 	require.NoError(t, err)
 	require.LessOrEqual(t, len(categories), 5)
 
@@ -111,15 +94,15 @@ func TestUpdateCategory(t *testing.T) {
 func TestDeleteCategory(t *testing.T) {
 	category1, err := testQueries.CreateCategory(context.Background(), utils.RandomString(10))
 
-	count1, err := testQueries.GetCategoryCount(context.Background())
+	count1, err := testQueries.ListCategories(context.Background(), 20)
 	require.NoError(t, err)
-	require.NotZero(t, count1)
+	require.NotZero(t, len(count1))
 
 	deleted, err := testQueries.DeleteCategory(context.Background(), category1.CategoryID)
 	require.NoError(t, err)
 	require.Equal(t, category1.CategoryID, deleted.CategoryID)
 
-	count2, err := testQueries.GetCategoryCount(context.Background())
+	count2, err := testQueries.ListCategories(context.Background(), 20)
 	require.NoError(t, err)
-	require.Equal(t, count2, count1-1)
+	require.Equal(t, len(count2), len(count1)-1)
 }

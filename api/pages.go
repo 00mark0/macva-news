@@ -1,10 +1,14 @@
 package api
 
 import (
+	"log"
+	"net/http"
+
 	"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/token"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
-	"net/http"
 )
 
 func (server *Server) homePage(ctx echo.Context) error {
@@ -32,7 +36,80 @@ func (server *Server) adminDashContent(ctx echo.Context) error {
 }
 
 func (server *Server) adminCats(ctx echo.Context) error {
-	return Render(ctx, http.StatusOK, components.AdminCategories())
+	var req ListCatsReq
+
+	if err := ctx.Bind(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		return err
+	}
+
+	nextLimit := req.Limit + 10
+
+	categories, err := server.store.ListCategories(ctx.Request().Context(), nextLimit)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get categories", err))
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.AdminCategories(int(nextLimit), categories))
+}
+
+func (server *Server) createCategoryForm(ctx echo.Context) error {
+	var createCategoryErr components.CreateCategoryErr
+
+	return Render(ctx, http.StatusOK, components.CreateCategoryForm(createCategoryErr))
+}
+
+func (server *Server) deleteCategoryModal(ctx echo.Context) error {
+	categoryID := ctx.Param("id")
+
+	// Parse string UUID into proper UUID format
+	parsedUUID, err := uuid.Parse(categoryID)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, errorResponse("invalid category ID format", err))
+	}
+
+	// Create a pgtype.UUID with the parsed UUID
+	pgUUID := pgtype.UUID{
+		Bytes: parsedUUID,
+		Valid: true,
+	}
+
+	category, err := server.store.GetCategoryByID(ctx.Request().Context(), pgUUID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get category", err))
+		log.Println("Category error:", err)
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.DeleteCategoryModal(category))
+}
+
+func (server *Server) updateCategoryForm(ctx echo.Context) error {
+	categoryID := ctx.Param("id")
+
+	var updateCategoryErr components.UpdateCategoryErr
+
+	// Parse string UUID into proper UUID format
+	parsedUUID, err := uuid.Parse(categoryID)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, errorResponse("invalid category ID format", err))
+	}
+
+	// Create a pgtype.UUID with the parsed UUID
+	pgUUID := pgtype.UUID{
+		Bytes: parsedUUID,
+		Valid: true,
+	}
+
+	category, err := server.store.GetCategoryByID(ctx.Request().Context(), pgUUID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get category", err))
+		log.Println("Category error:", err)
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.UpdateCategoryForm(category, updateCategoryErr))
 }
 
 func (server *Server) adminArts(ctx echo.Context) error {

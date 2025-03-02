@@ -50,6 +50,19 @@ func (q *Queries) GetCategory(ctx context.Context, categoryID pgtype.UUID) (Cate
 	return i, err
 }
 
+const getCategoryByID = `-- name: GetCategoryByID :one
+SELECT category_id, category_name
+FROM category
+WHERE category_id = $1
+`
+
+func (q *Queries) GetCategoryByID(ctx context.Context, categoryID pgtype.UUID) (Category, error) {
+	row := q.db.QueryRow(ctx, getCategoryByID, categoryID)
+	var i Category
+	err := row.Scan(&i.CategoryID, &i.CategoryName)
+	return i, err
+}
+
 const getCategoryByName = `-- name: GetCategoryByName :one
 SELECT category_id, category_name
 FROM category
@@ -63,32 +76,15 @@ func (q *Queries) GetCategoryByName(ctx context.Context, categoryName string) (C
 	return i, err
 }
 
-const getCategoryCount = `-- name: GetCategoryCount :one
-SELECT COUNT(*) AS count
-FROM category
-`
-
-func (q *Queries) GetCategoryCount(ctx context.Context) (int64, error) {
-	row := q.db.QueryRow(ctx, getCategoryCount)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
-
 const listCategories = `-- name: ListCategories :many
 SELECT category_id, category_name
 FROM category
 ORDER BY category_name ASC
-LIMIT $1 OFFSET $2
+LIMIT $1
 `
 
-type ListCategoriesParams struct {
-	Limit  int32
-	Offset int32
-}
-
-func (q *Queries) ListCategories(ctx context.Context, arg ListCategoriesParams) ([]Category, error) {
-	rows, err := q.db.Query(ctx, listCategories, arg.Limit, arg.Offset)
+func (q *Queries) ListCategories(ctx context.Context, limit int32) ([]Category, error) {
+	rows, err := q.db.Query(ctx, listCategories, limit)
 	if err != nil {
 		return nil, err
 	}

@@ -25,16 +25,31 @@ func (server *Server) setupRouter() {
 	adminRoutes.Use(adminMiddleware(server.tokenMaker))
 
 	// Admin Page Routes
+	// Admin overview
 	adminRoutes.GET("/admin", server.adminDash)
 	adminRoutes.GET("/admin/hx-admin", server.adminDashContent)
+	// Admin categories
 	adminRoutes.GET("/admin/categories", server.adminCats)
+	adminRoutes.GET("/admin/create-cat-form", server.createCategoryForm)
+	adminRoutes.GET("/admin/delete-cat-modal/:id", server.deleteCategoryModal)
+	adminRoutes.GET("/admin/update-cat-form/:id", server.updateCategoryForm)
+	// Admin articles
 	adminRoutes.GET("/admin/content", server.adminArts)
+	// Admin users
 	adminRoutes.GET("/admin/users", server.adminUsers)
+	// Admin ads
 	adminRoutes.GET("/admin/ads", server.adminAds)
 
 	// Admin API Routes
+	// Admin overview
 	adminRoutes.GET("/api/admin/trending", server.listTrendingContent)
 	adminRoutes.GET("/api/admin/analytics", server.getDailyAnalytics)
+
+	// Admin categories
+	adminRoutes.GET("/api/admin/categories", server.listCats)
+	adminRoutes.POST("/api/admin/category", server.createCategory)
+	adminRoutes.DELETE("/api/admin/category/:id", server.deleteCategory)
+	adminRoutes.PUT("/api/admin/category/:id", server.updateCategory)
 
 	// Auth Pages
 	router.GET("/login", server.loginPage)

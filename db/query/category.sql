@@ -8,20 +8,21 @@ SELECT *
 FROM category
 WHERE category_id = $1;
 
+-- name: GetCategoryByID :one
+SELECT *
+FROM category
+WHERE category_id = $1;
+
 -- name: GetCategoryByName :one
 SELECT *
 FROM category
 WHERE category_name = $1;
 
--- name: GetCategoryCount :one
-SELECT COUNT(*) AS count
-FROM category;
-
 -- name: ListCategories :many
 SELECT *
 FROM category
 ORDER BY category_name ASC
-LIMIT $1 OFFSET $2;
+LIMIT $1;
 
 -- name: UpdateCategory :one
 UPDATE category

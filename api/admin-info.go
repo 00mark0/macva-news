@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"time"
 
-	//"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/db/services"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
