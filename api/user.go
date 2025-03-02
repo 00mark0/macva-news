@@ -66,6 +66,12 @@ func (server *Server) login(ctx echo.Context) error {
 		return Render(ctx, http.StatusOK, components.LoginForm(loginErr))
 	}
 
+	if user.Banned.Bool {
+		loginErr = "Nevažecí podaci za prijavu"
+
+		return Render(ctx, http.StatusOK, components.LoginForm(loginErr))
+	}
+
 	err = utils.CheckPassword(req.Password, user.Password)
 	if err != nil {
 		loginErr = "Nevažecí podaci za prijavu"

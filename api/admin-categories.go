@@ -85,6 +85,7 @@ func (server *Server) createCategory(ctx echo.Context) error {
 		return err
 	}
 
+	ctx.Response().Header().Set("HX-Trigger", `{"categoriesUpdated": ""}`)
 	return ctx.NoContent(http.StatusOK)
 }
 
@@ -187,5 +188,6 @@ func (server *Server) updateCategory(ctx echo.Context) error {
 		return err
 	}
 
+	ctx.Response().Header().Set("HX-Trigger", `{"categoriesUpdated": ""}`)
 	return ctx.NoContent(http.StatusOK)
 }

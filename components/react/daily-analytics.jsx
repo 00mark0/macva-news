@@ -76,10 +76,10 @@ export default function DailyAnalytics() {
 		setEndDate(format(end, 'yyyy-MM-dd'));
 
 		// Trigger fetch immediately after state updates by using the values directly
-		setLoading(true);
-		setTimeout(() => {
-			fetchAnalytics();
-		}, 0);
+		//setLoading(true);
+		//setTimeout(() => {
+		//	fetchAnalytics();
+		//}, 0);
 	};
 
 	// Format date for display
