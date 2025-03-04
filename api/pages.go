@@ -160,7 +160,7 @@ func (server *Server) adminArts(ctx echo.Context) error {
 		})
 	}
 
-	url := "/admin/pub-content?limit="
+	url := "/api/admin/content/published?limit="
 
 	return Render(ctx, http.StatusOK, components.AdminArticles(overview, int(nextLimit), content, url))
 }
@@ -203,7 +203,7 @@ func (server *Server) publishedContentList(ctx echo.Context) error {
 		})
 	}
 
-	url := "/admin/pub-content?limit="
+	url := "/api/admin/content/published?limit="
 
 	return Render(ctx, http.StatusOK, components.PublishedContentSort(int(nextLimit), content, url))
 }

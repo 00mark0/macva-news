@@ -1,31 +1,31 @@
 package components
 
 import (
-"fmt"
-"github.com/00mark0/macva-news/db/services"
+	"fmt"
+	"github.com/00mark0/macva-news/db/services"
 )
 
 type ListPublishedContentRes struct {
-ContentID string
-UserID string
-CategoryID string
-Title string
-ContentDescription string
-CommentsEnabled bool
-ViewCountEnabled bool
-LikeCountEnabled bool
-DislikeCountEnabled bool
-Status string
-ViewCount int32
-LikeCount int32
-DislikeCount int32
-CommentCount int32
-CreatedAt string
-UpdatedAt string
-PublishedAt string
-IsDeleted bool
-Username string
-CategoryName string
+	ContentID           string
+	UserID              string
+	CategoryID          string
+	Title               string
+	ContentDescription  string
+	CommentsEnabled     bool
+	ViewCountEnabled    bool
+	LikeCountEnabled    bool
+	DislikeCountEnabled bool
+	Status              string
+	ViewCount           int32
+	LikeCount           int32
+	DislikeCount        int32
+	CommentCount        int32
+	CreatedAt           string
+	UpdatedAt           string
+	PublishedAt         string
+	IsDeleted           bool
+	Username            string
+	CategoryName        string
 }
 
 script toggleDropdown(index int) {
@@ -49,480 +49,640 @@ console.warn('No URL set for this sort option.');
 }
 
 templ AdminArticles(overview db.GetContentOverviewRow, nextLimit int, content []ListPublishedContentRes, url string) {
-<div class="w-full min-h-screen dark:bg-black bg-gray-50 sm:p-8 p-4">
-	<div class="flex justify-between items-center">
-		<h1 class="text-3xl font-semibold text-black dark:text-white mb-10">Artikli</h1>
-		<button
-			class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 mb-10">
-			Novi Artikl
-		</button>
-	</div>
-	<!-- Floating Nav Container -->
-	<div class="flex justify-center w-full mb-8">
-		<div
-			class="flex flex-col sm:flex-row items-center gap-4 sm:gap-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-xl shadow-lg p-2 sm:p-1 border border-gray-200 dark:border-gray-700">
-			<button hx-trigger="click" hx-get="/admin/pub-content" hx-target="#nav-switch" hx-swap="innerHTML"
-				class="relative px-6 py-3 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600 group bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 w-full sm:w-auto"
-				id="published-btn"
-				_="on click add .active to me remove .active from #draft-btn remove .active from #deleted-btn">
-				<span class="flex items-center justify-center">
-					<span
-						class="inline-flex items-center justify-center w-6 h-6 mr-2 rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs">
-						{ fmt.Sprintf("%d", overview.PublishedCount) }
-					</span>
-					<span>Objavljeni</span>
-				</span>
-				<span
-					class="absolute bottom-0 left-0 w-full h-1 bg-blue-500 rounded-b-lg opacity-0 transition-all duration-200 group-[.active]:opacity-100"></span>
-			</button>
-			<div class="hidden sm:block h-6 w-px bg-gray-300 dark:bg-gray-600 mx-1"></div>
-			<button hx-trigger="click" hx-get="/admin/draft-content" hx-target="#nav-switch" hx-swap="innerHTML"
-				class="relative px-6 py-3 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600 group bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 w-full sm:w-auto"
-				id="draft-btn"
-				_="on click add .active to me remove .active from #published-btn remove .active from #deleted-btn">
-				<span class="flex items-center justify-center">
-					<span
-						class="inline-flex items-center justify-center w-6 h-6 mr-2 rounded-full bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs">
-						{ fmt.Sprintf("%d", overview.DraftCount) }
-					</span>
-					<span>Neobjavljeni</span>
-				</span>
-				<span
-					class="absolute bottom-0 left-0 w-full h-1 bg-blue-500 rounded-b-lg opacity-0 transition-all duration-200 group-[.active]:opacity-100"></span>
-			</button>
-			<div class="hidden sm:block h-6 w-px bg-gray-300 dark:bg-gray-600 mx-1"></div>
-			<button hx-trigger="click" hx-get="/admin/del-content" hx-target="#nav-switch" hx-swap="innerHTML"
-				class="relative px-6 py-3 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600 group bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 w-full sm:w-auto"
-				id="deleted-btn"
-				_="on click add .active to me remove .active from #published-btn remove .active from #draft-btn">
-				<span class="flex items-center justify-center">
-					<span
-						class="inline-flex items-center justify-center w-6 h-6 mr-2 rounded-full bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs">
-						{ fmt.Sprintf("%d", overview.DeletedCount) }
-					</span>
-					<span>Arhivirani</span>
-				</span>
-				<span
-					class="absolute bottom-0 left-0 w-full h-1 bg-blue-500 rounded-b-lg opacity-0 transition-all duration-200 group-[.active]:opacity-100"></span>
+	<div class="w-full min-h-screen dark:bg-black bg-gray-50 sm:p-8 p-4">
+		<div class="flex justify-between items-center">
+			<h1 class="text-3xl font-semibold text-black dark:text-white mb-10">Artikli</h1>
+			<button
+				class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 mb-10"
+			>
+				Novi Artikl
 			</button>
 		</div>
+		<!-- Floating Nav Container -->
+		<div class="flex justify-center w-full mb-8">
+			<div
+				class="flex flex-col sm:flex-row items-center gap-4 sm:gap-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-xl shadow-lg p-2 sm:p-1 border border-gray-200 dark:border-gray-700"
+			>
+				<button
+					hx-trigger="click"
+					hx-get="/admin/pub-content"
+					hx-target="#nav-switch"
+					hx-swap="innerHTML"
+					class="relative px-6 py-3 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600 group bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 w-full sm:w-auto"
+					id="published-btn"
+					_="on click add .active to me remove .active from #draft-btn remove .active from #deleted-btn"
+				>
+					<span class="flex items-center justify-center">
+						<span
+							class="inline-flex items-center justify-center w-6 h-6 mr-2 rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs"
+						>
+							{ fmt.Sprintf("%d", overview.PublishedCount) }
+						</span>
+						<span>Objavljeni</span>
+					</span>
+					<span
+						class="absolute bottom-0 left-0 w-full h-1 bg-blue-500 rounded-b-lg opacity-0 transition-all duration-200 group-[.active]:opacity-100"
+					></span>
+				</button>
+				<div class="hidden sm:block h-6 w-px bg-gray-300 dark:bg-gray-600 mx-1"></div>
+				<button
+					hx-trigger="click"
+					hx-get="/admin/draft-content"
+					hx-target="#nav-switch"
+					hx-swap="innerHTML"
+					class="relative px-6 py-3 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600 group bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 w-full sm:w-auto"
+					id="draft-btn"
+					_="on click add .active to me remove .active from #published-btn remove .active from #deleted-btn"
+				>
+					<span class="flex items-center justify-center">
+						<span
+							class="inline-flex items-center justify-center w-6 h-6 mr-2 rounded-full bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs"
+						>
+							{ fmt.Sprintf("%d", overview.DraftCount) }
+						</span>
+						<span>Neobjavljeni</span>
+					</span>
+					<span
+						class="absolute bottom-0 left-0 w-full h-1 bg-blue-500 rounded-b-lg opacity-0 transition-all duration-200 group-[.active]:opacity-100"
+					></span>
+				</button>
+				<div class="hidden sm:block h-6 w-px bg-gray-300 dark:bg-gray-600 mx-1"></div>
+				<button
+					hx-trigger="click"
+					hx-get="/admin/del-content"
+					hx-target="#nav-switch"
+					hx-swap="innerHTML"
+					class="relative px-6 py-3 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600 group bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 w-full sm:w-auto"
+					id="deleted-btn"
+					_="on click add .active to me remove .active from #published-btn remove .active from #draft-btn"
+				>
+					<span class="flex items-center justify-center">
+						<span
+							class="inline-flex items-center justify-center w-6 h-6 mr-2 rounded-full bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs"
+						>
+							{ fmt.Sprintf("%d", overview.DeletedCount) }
+						</span>
+						<span>Arhivirani</span>
+					</span>
+					<span
+						class="absolute bottom-0 left-0 w-full h-1 bg-blue-500 rounded-b-lg opacity-0 transition-all duration-200 group-[.active]:opacity-100"
+					></span>
+				</button>
+			</div>
+		</div>
+		<div id="nav-switch">
+			@PublishedContentSort(nextLimit, content, url)
+		</div>
 	</div>
-	<div id="nav-switch">
-		@PublishedContentSort(nextLimit, content, url)
-	</div>
-</div>
 }
 
 templ PublishedContentSort(nextLimit int, content []ListPublishedContentRes, url string) {
-<div class="space-y-4">
-	<div class="flex flex-col sm:flex-row items-center justify-between pb-4 border-b dark:border-gray-700">
-		<h2 class="text-xl font-medium text-gray-800 dark:text-gray-200">Objavljeni Artikli</h2>
-		<div class="flex flex-row space-x-2">
-			<select id="pub-sort-select" onChange={ handlePubSort() } class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2
-				text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200">
-				<option data-url={ fmt.Sprintf("/api/admin/content/published?limit=%d", nextLimit-20) }>
-					Najnovije
-				</option>
-				<option data-url={ fmt.Sprintf("/api/admin/content/published/oldest?limit=%d", nextLimit-20) }>
-					Najstarije
-				</option>
-				<option data-url={ fmt.Sprintf("/api/admin/content/published/title?limit=%d", nextLimit-20) }>
-					Po
-					naslovu
-				</option>
-			</select>
+	<div class="space-y-4">
+		<div class="flex flex-col sm:flex-row items-center justify-between pb-4 border-b dark:border-gray-700">
+			<h2 class="text-xl font-medium text-gray-800 dark:text-gray-200">Objavljeni Artikli</h2>
+			<div class="flex flex-row space-x-2">
+				<select
+					id="pub-sort-select"
+					onChange={ handlePubSort() }
+					class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2
+				text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200"
+				>
+					<option data-url={ fmt.Sprintf("/api/admin/content/published?limit=%d", nextLimit-20) }>
+						Najnovije
+					</option>
+					<option data-url={ fmt.Sprintf("/api/admin/content/published/oldest?limit=%d", nextLimit-20) }>
+						Najstarije
+					</option>
+					<option data-url={ fmt.Sprintf("/api/admin/content/published/title?limit=%d", nextLimit-20) }>
+						Po
+						naslovu
+					</option>
+				</select>
+			</div>
+		</div>
+		<div id="admin-articles" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+			@PublishedContent(nextLimit, content, url)
 		</div>
 	</div>
-	<div id="admin-articles" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-		@PublishedContent(nextLimit, content, url)
-	</div>
-</div>
 }
 
 templ PublishedContent(nextLimit int, content []ListPublishedContentRes, url string) {
-<div class="space-y-4">
-	<div class="overflow-x-auto">
-		<table class="min-w-full">
-			<thead class="bg-gray-50 dark:bg-gray-700">
-				<tr>
-					<th
-						class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-						Naslov
-					</th>
-					<th
-						class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-						Kategorija
-					</th>
-					<th
-						class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-						Datum objave
-					</th>
-					<th
-						class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-						Autor
-					</th>
-					<th
-						class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-						Akcije
-					</th>
-				</tr>
-			</thead>
-			<tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-				for i, v := range content {
-				<tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-					<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-						<p class="w-64 truncate">{ v.Title }</p>
-					</td>
-					<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-						{ v.CategoryName }
-					</td>
-					<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-						{
+	<div class="space-y-4">
+		<div class="overflow-x-auto">
+			<table class="min-w-full">
+				<thead class="bg-gray-50 dark:bg-gray-700">
+					<tr>
+						<th
+							class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+						>
+							Naslov
+						</th>
+						<th
+							class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+						>
+							Kategorija
+						</th>
+						<th
+							class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+						>
+							Datum objave
+						</th>
+						<th
+							class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+						>
+							Autor
+						</th>
+						<th
+							class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+						>
+							Akcije
+						</th>
+					</tr>
+				</thead>
+				<tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+					for i, v := range content {
+						<tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+							<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+								<p class="w-64 truncate">{ v.Title }</p>
+							</td>
+							<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+								{ v.CategoryName }
+							</td>
+							<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+								{ 
 						v.PublishedAt }
-					</td>
-					<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-						{
+							</td>
+							<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+								{ 
 						v.Username }
-					</td>
-					<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-						<div class="relative inline-block text-left" id={ "dropdown-container-" + fmt.Sprint(i) }>
-							<button type="button"
-								class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3 flex items-center"
-								onClick={ toggleDropdown(i) }>
-								<svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-									xmlns="http://www.w3.org/2000/svg">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-										d="M19 9l-7 7-7-7"></path>
-								</svg>
-							</button>
-						</div>
-						<button
-							class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3">Uredi</button>
-						<button
-							class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">Arhiviraj</button>
-					</td>
-				</tr>
-				<tr>
-					<td colspan="5">
-						<div id={ "dropdown-" + fmt.Sprint(i) }
-							class="hidden w-full rounded-md bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
-							<div class="p-4">
-								<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-									<!-- Content Details -->
-									<div class="space-y-3">
-										<h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">
-											Detalji
-											sadržaja
-										</h3>
-										<div>
-											<p class="text-xs text-gray-500 dark:text-gray-400">Opis</p>
-											<p class="text-sm text-gray-800 dark:text-gray-200 mt-1">
-												{
-												v.ContentDescription }
-											</p>
-										</div>
-										<div>
-											<p class="text-xs text-gray-500 dark:text-gray-400">Status</p>
-											<div class="mt-1">
-												if v.Status == "published" {
-												<span
-													class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
-													Objavljeno
-												</span>
-												} else if v.Status == "draft" {
-												<span
-													class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100">
-													Nacrt
-												</span>
-												} else {
-												<span
-													class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-													{ v.Status }
-												</span>
-												}
-											</div>
-										</div>
-										<div>
-											<p class="text-xs text-gray-500 dark:text-gray-400">ID Sadržaja</p>
-											<p class="text-sm font-mono text-gray-600 dark:text-gray-400 mt-1">
-												{
-												v.ContentID }
-											</p>
-										</div>
-									</div>
-									<!-- Statistics -->
-									<div class="space-y-3">
-										<h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">
-											Statistika
-										</h3>
-										<div class="grid grid-cols-2 gap-3">
-											<div class="bg-white dark:bg-gray-700 p-2 rounded-md shadow-sm">
-												<p class="text-xs text-gray-500 dark:text-gray-400">Pregledi</p>
-												<p class="text-lg font-semibold text-gray-800 dark:text-white">
-													{
-													fmt.Sprint(v.ViewCount) }
-												</p>
-											</div>
-											<div class="bg-white dark:bg-gray-700 p-2 rounded-md shadow-sm">
-												<p class="text-xs text-gray-500 dark:text-gray-400">Komentari</p>
-												<p class="text-lg font-semibold text-gray-800 dark:text-white">
-													{
-													fmt.Sprint(v.CommentCount) }
-												</p>
-											</div>
-											<div class="bg-white dark:bg-gray-700 p-2 rounded-md shadow-sm">
-												<p class="text-xs text-gray-500 dark:text-gray-400">Lajkovi</p>
-												<p class="text-lg font-semibold text-gray-800 dark:text-white">
-													{
-													fmt.Sprint(v.LikeCount) }
-												</p>
-											</div>
-											<div class="bg-white dark:bg-gray-700 p-2 rounded-md shadow-sm">
-												<p class="text-xs text-gray-500 dark:text-gray-400">Dislajkovi</p>
-												<p class="text-lg font-semibold text-gray-800 dark:text-white">
-													{
-													fmt.Sprint(v.DislikeCount) }
-												</p>
-											</div>
-										</div>
-										<div>
-											<p class="text-xs text-gray-500 dark:text-gray-400">Datumi</p>
-											<div class="mt-1 space-y-1">
-												<p class="text-xs text-gray-600 dark:text-gray-400">
-													<span class="font-medium">Kreirano:</span> {
-													v.CreatedAt }
-												</p>
-												<p class="text-xs text-gray-600 dark:text-gray-400">
-													<span class="font-medium">Ažurirano:</span> {
-													v.UpdatedAt }
-												</p>
-												<p class="text-xs text-gray-600 dark:text-gray-400">
-													<span class="font-medium">Objavljeno:</span> {
-													v.PublishedAt }
-												</p>
-											</div>
-										</div>
-									</div>
-									<!-- Settings and Toggles -->
-									<div class="space-y-3">
-										<h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">
-											Postavke
-										</h3>
-										<div class="space-y-3">
-											<!-- Comments Toggle -->
-											<div class="flex items-center justify-between">
-												<span class="text-sm text-gray-700 dark:text-gray-300">
-													Komentari
-													omogućeni
-												</span>
-												<label class="inline-flex items-center cursor-pointer">
-													<input type="checkbox" class="sr-only peer" checked?={
-														v.CommentsEnabled } />
-													<div
-														class="relative w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
-													</div>
-												</label>
-											</div>
-											<!-- View Count Toggle -->
-											<div class="flex items-center justify-between">
-												<span class="text-sm text-gray-700 dark:text-gray-300">
-													Prikaz
-													brojača pregleda
-												</span>
-												<label class="inline-flex items-center cursor-pointer">
-													<input type="checkbox" class="sr-only peer" checked?={
-														v.ViewCountEnabled } />
-													<div
-														class="relative w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
-													</div>
-												</label>
-											</div>
-											<!-- Like Count Toggle -->
-											<div class="flex items-center justify-between">
-												<span class="text-sm text-gray-700 dark:text-gray-300">
-													Prikaz
-													brojača lajkova
-												</span>
-												<label class="inline-flex items-center cursor-pointer">
-													<input type="checkbox" class="sr-only peer" checked?={
-														v.LikeCountEnabled } />
-													<div
-														class="relative w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
-													</div>
-												</label>
-											</div>
-											<!-- Dislike Count Toggle -->
-											<div class="flex items-center justify-between">
-												<span class="text-sm text-gray-700 dark:text-gray-300">
-													Prikaz
-													brojača dislajkova
-												</span>
-												<label class="inline-flex items-center cursor-pointer">
-													<input type="checkbox" class="sr-only peer" checked?={
-														v.DislikeCountEnabled } />
-													<div
-														class="relative w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
-													</div>
-												</label>
-											</div>
-											<!-- Is Deleted -->
-											<div class="flex items-center justify-between">
-												<span class="text-sm text-gray-700 dark:text-gray-300">Obrisano</span>
+							</td>
+							<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+								<div class="relative inline-block text-left" id={ "dropdown-container-" + fmt.Sprint(i) }>
+									<button
+										type="button"
+										class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3 flex items-center"
+										onClick={ toggleDropdown(i) }
+									>
+										<svg
+											class="w-4 h-4 ml-1"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+											xmlns="http://www.w3.org/2000/svg"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M19 9l-7 7-7-7"
+											></path>
+										</svg>
+									</button>
+								</div>
+								<button
+									class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3"
+								>Uredi</button>
+								<button
+									hx-put={ fmt.Sprintf("/api/admin/content/archive/%v", v.ContentID) }
+									hx-target="#admin-content"
+									hx-trigger="click"
+									class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+								>Arhiviraj</button>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="5">
+								<div
+									id={ "dropdown-" + fmt.Sprint(i) }
+									class="hidden w-full rounded-md bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm"
+								>
+									<div class="p-4">
+										<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+											<!-- Content Details -->
+											<div class="space-y-3">
+												<h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+													Detalji
+													sadržaja
+												</h3>
 												<div>
-													if v.IsDeleted {
-													<span
-														class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100">
-														Da
-													</span>
-													} else {
-													<span
-														class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
-														Ne
-													</span>
-													}
+													<p class="text-xs text-gray-500 dark:text-gray-400">Opis</p>
+													<p class="text-sm text-gray-800 dark:text-gray-200 mt-1">
+														{ 
+												v.ContentDescription }
+													</p>
+												</div>
+												<div>
+													<p class="text-xs text-gray-500 dark:text-gray-400">Status</p>
+													<div class="mt-1">
+														if v.Status == "published" {
+															<span
+																class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
+															>
+																Objavljeno
+															</span>
+														} else if v.Status == "draft" {
+															<span
+																class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100"
+															>
+																Nacrt
+															</span>
+														} else {
+															<span
+																class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+															>
+																{ v.Status }
+															</span>
+														}
+													</div>
+												</div>
+												<div>
+													<p class="text-xs text-gray-500 dark:text-gray-400">ID Sadržaja</p>
+													<p class="text-sm font-mono text-gray-600 dark:text-gray-400 mt-1">
+														{ 
+												v.ContentID }
+													</p>
+												</div>
+											</div>
+											<!-- Statistics -->
+											<div class="space-y-3">
+												<h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+													Statistika
+												</h3>
+												<div class="grid grid-cols-2 gap-3">
+													<div class="bg-white dark:bg-gray-700 p-2 rounded-md shadow-sm">
+														<p class="text-xs text-gray-500 dark:text-gray-400">Pregledi</p>
+														<p class="text-lg font-semibold text-gray-800 dark:text-white">
+															{ 
+													fmt.Sprint(v.ViewCount) }
+														</p>
+													</div>
+													<div class="bg-white dark:bg-gray-700 p-2 rounded-md shadow-sm">
+														<p class="text-xs text-gray-500 dark:text-gray-400">Komentari</p>
+														<p class="text-lg font-semibold text-gray-800 dark:text-white">
+															{ 
+													fmt.Sprint(v.CommentCount) }
+														</p>
+													</div>
+													<div class="bg-white dark:bg-gray-700 p-2 rounded-md shadow-sm">
+														<p class="text-xs text-gray-500 dark:text-gray-400">Lajkovi</p>
+														<p class="text-lg font-semibold text-gray-800 dark:text-white">
+															{ 
+													fmt.Sprint(v.LikeCount) }
+														</p>
+													</div>
+													<div class="bg-white dark:bg-gray-700 p-2 rounded-md shadow-sm">
+														<p class="text-xs text-gray-500 dark:text-gray-400">Dislajkovi</p>
+														<p class="text-lg font-semibold text-gray-800 dark:text-white">
+															{ 
+													fmt.Sprint(v.DislikeCount) }
+														</p>
+													</div>
+												</div>
+												<div>
+													<p class="text-xs text-gray-500 dark:text-gray-400">Datumi</p>
+													<div class="mt-1 space-y-1">
+														<p class="text-xs text-gray-600 dark:text-gray-400">
+															<span class="font-medium">Kreirano:</span> { 
+													v.CreatedAt }
+														</p>
+														<p class="text-xs text-gray-600 dark:text-gray-400">
+															<span class="font-medium">Ažurirano:</span> { 
+													v.UpdatedAt }
+														</p>
+														<p class="text-xs text-gray-600 dark:text-gray-400">
+															<span class="font-medium">Objavljeno:</span> { 
+													v.PublishedAt }
+														</p>
+													</div>
+												</div>
+											</div>
+											<!-- Settings and Toggles -->
+											<div class="space-y-3">
+												<h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+													Postavke
+												</h3>
+												<div class="space-y-3">
+													<!-- Comments Toggle -->
+													<div class=" flex items-center justify-between">
+														<span class="text-sm text-gray-700 dark:text-gray-300">
+															Komentari
+															omogućeni
+														</span>
+														<form
+															hx-put={ fmt.Sprintf("/api/admin/content/%v", v.ContentID) }
+															hx-trigger="change"
+															hx-target="this"
+															hx-swap="none"
+														>
+															<label class="inline-flex items-center cursor-pointer">
+																<input
+																	id="comments-checkbox"
+																	type="checkbox"
+																	name="comments_enabled"
+																	class="sr-only peer"
+																	checked?={ 
+															v.CommentsEnabled }
+																	value="true"
+																/>
+																<input
+																	id="comments-hidden"
+																	type="hidden"
+																	name="comments_enabled"
+																	value="false"
+																/>
+																<div
+																	class="relative w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+																></div>
+															</label>
+														</form>
+													</div>
+													<!-- View Count Toggle -->
+													<div class="flex items-center justify-between">
+														<span class="text-sm text-gray-700 dark:text-gray-300">
+															Prikaz
+															brojača pregleda
+														</span>
+														<form
+															hx-put={ fmt.Sprintf("/api/admin/content/%v", v.ContentID) }
+															hx-trigger="change"
+															hx-target="this"
+															hx-swap="none"
+														>
+															<label class="inline-flex items-center cursor-pointer">
+																<input
+																	id="comments-checkbox"
+																	type="checkbox"
+																	name="view_count_enabled"
+																	class="sr-only peer"
+																	checked?={ 
+															v.ViewCountEnabled }
+																	value="true"
+																/>
+																<input
+																	id="comments-hidden"
+																	type="hidden"
+																	name="view_count_enabled"
+																	value="false"
+																/>
+																<div
+																	class="relative w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+																></div>
+															</label>
+														</form>
+													</div>
+													<!-- Like Count Toggle -->
+													<div class="flex items-center justify-between">
+														<span class="text-sm text-gray-700 dark:text-gray-300">
+															Prikaz
+															brojača lajkova
+														</span>
+														<form
+															hx-put={ fmt.Sprintf("/api/admin/content/%v", v.ContentID) }
+															hx-trigger="change"
+															hx-target="this"
+															hx-swap="none"
+														>
+															<label class="inline-flex items-center cursor-pointer">
+																<input
+																	id="comments-checkbox"
+																	type="checkbox"
+																	name="like_count_enabled"
+																	class="sr-only peer"
+																	checked?={ 
+															v.LikeCountEnabled }
+																	value="true"
+																/>
+																<input
+																	id="comments-hidden"
+																	type="hidden"
+																	name="like_count_enabled"
+																	value="false"
+																/>
+																<div
+																	class="relative w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+																></div>
+															</label>
+														</form>
+													</div>
+													<!-- Dislike Count Toggle -->
+													<div class="flex items-center justify-between">
+														<span class="text-sm text-gray-700 dark:text-gray-300">
+															Prikaz
+															brojača dislajkova
+														</span>
+														<form
+															hx-put={ fmt.Sprintf("/api/admin/content/%v", v.ContentID) }
+															hx-trigger="change"
+															hx-target="this"
+															hx-swap="none"
+														>
+															<label class="inline-flex items-center cursor-pointer">
+																<input
+																	id="comments-checkbox"
+																	type="checkbox"
+																	name="dislike_count_enabled"
+																	class="sr-only peer"
+																	checked?={ 
+															v.DislikeCountEnabled }
+																	value="true"
+																/>
+																<input
+																	id="comments-hidden"
+																	type="hidden"
+																	name="dislike_count_enabled"
+																	value="false"
+																/>
+																<div
+																	class="relative w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+																></div>
+															</label>
+														</form>
+													</div>
+													<!-- Is Deleted -->
+													<div class="flex items-center justify-between">
+														<span class="text-sm text-gray-700 dark:text-gray-300">Obrisano</span>
+														<div>
+															if v.IsDeleted {
+																<span
+																	class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100"
+																>
+																	Da
+																</span>
+															} else {
+																<span
+																	class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
+																>
+																	Ne
+																</span>
+															}
+														</div>
+													</div>
 												</div>
 											</div>
 										</div>
 									</div>
 								</div>
-							</div>
-						</div>
-					</td>
-				</tr>
-				}
-			</tbody>
-		</table>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+		if len(content) == nextLimit {
+			<div class="text-center">
+				<button
+					hx-trigger="click"
+					hx-get={ url + fmt.Sprintf("%d", nextLimit) }
+					hx-target="#admin-articles"
+					hx-swap="innerHTML"
+					class="cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
+				>
+					Učitaj više
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-4 w-4 ml-2"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+					</svg>
+				</button>
+			</div>
+		}
 	</div>
-	if len(content) == nextLimit {
-	<div class="text-center">
-		<button hx-trigger="click" hx-get={ url + fmt.Sprintf("%d", nextLimit) } hx-target="#admin-articles"
-			hx-swap="innerHTML"
-			class="cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
-			Učitaj više
-			<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24"
-				stroke="currentColor">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-			</svg>
-		</button>
-	</div>
-	}
-</div>
 }
 
 templ DraftContent() {
-<div class="space-y-4">
-	<div class="flex flex-col sm:flex-row items-center justify-between pb-4 border-b dark:border-gray-700">
-		<h2 class="text-xl font-medium text-gray-800 dark:text-gray-200">Neobjavljeni Artikli</h2>
-		<div class="flex flex-row space-x-2">
-			<select
-				class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200">
-				<option>Najnovije</option>
-				<option>Najstarije</option>
-				<option>Po naslovu</option>
-			</select>
-			<button
-				class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
-				Novi Artikl
-			</button>
+	<div class="space-y-4">
+		<div class="flex flex-col sm:flex-row items-center justify-between pb-4 border-b dark:border-gray-700">
+			<h2 class="text-xl font-medium text-gray-800 dark:text-gray-200">Neobjavljeni Artikli</h2>
+			<div class="flex flex-row space-x-2">
+				<select
+					class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200"
+				>
+					<option>Najnovije</option>
+					<option>Najstarije</option>
+					<option>Po naslovu</option>
+				</select>
+				<button
+					class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+				>
+					Novi Artikl
+				</button>
+			</div>
+		</div>
+		<div class="overflow-x-auto">
+			<table class="min-w-full">
+				<thead class="bg-gray-50 dark:bg-gray-700">
+					<tr>
+						<th
+							class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+						>
+							Naslov
+						</th>
+						<th
+							class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+						>
+							Autor
+						</th>
+						<th
+							class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+						>
+							Zadnje uređivanje
+						</th>
+						<th
+							class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+						>
+							Akcije
+						</th>
+					</tr>
+				</thead>
+				<tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+					<tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+						<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+							Primjer
+							neobjavljenog članka
+						</td>
+						<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Admin User</td>
+						<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">01.03.2025</td>
+						<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+							<button
+								class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3"
+							>Uredi</button>
+							<button
+								class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 mr-3"
+							>Objavi</button>
+							<button
+								class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+							>Arhiviraj</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
 		</div>
 	</div>
-	<div class="overflow-x-auto">
-		<table class="min-w-full">
-			<thead class="bg-gray-50 dark:bg-gray-700">
-				<tr>
-					<th
-						class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-						Naslov
-					</th>
-					<th
-						class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-						Autor
-					</th>
-					<th
-						class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-						Zadnje uređivanje
-					</th>
-					<th
-						class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-						Akcije
-					</th>
-				</tr>
-			</thead>
-			<tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-				<tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-					<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-						Primjer
-						neobjavljenog članka
-					</td>
-					<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Admin User</td>
-					<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">01.03.2025</td>
-					<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-						<button
-							class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3">Uredi</button>
-						<button
-							class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 mr-3">Objavi</button>
-						<button
-							class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">Arhiviraj</button>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
-</div>
 }
 
 templ DeletedContent() {
-<div class="space-y-4">
-	<div class="flex items-center justify-between pb-4 border-b dark:border-gray-700">
-		<h2 class="text-xl font-medium text-gray-800 dark:text-gray-200">Arhivirani Artikli</h2>
-		<div class="flex space-x-2">
-			<select
-				class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200">
-				<option>Najnovije</option>
-				<option>Najstarije</option>
-				<option>Po naslovu</option>
-			</select>
+	<div class="space-y-4">
+		<div class="flex items-center justify-between pb-4 border-b dark:border-gray-700">
+			<h2 class="text-xl font-medium text-gray-800 dark:text-gray-200">Arhivirani Artikli</h2>
+			<div class="flex space-x-2">
+				<select
+					class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200"
+				>
+					<option>Najnovije</option>
+					<option>Najstarije</option>
+					<option>Po naslovu</option>
+				</select>
+			</div>
+		</div>
+		<div class="overflow-x-auto">
+			<table class="min-w-full">
+				<thead class="bg-gray-50 dark:bg-gray-700">
+					<tr>
+						<th
+							class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+						>
+							Naslov
+						</th>
+						<th
+							class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+						>
+							Autor
+						</th>
+						<th
+							class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+						>
+							Arhivirano
+						</th>
+						<th
+							class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+						>
+							Akcije
+						</th>
+					</tr>
+				</thead>
+				<tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+					<tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+						<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+							Primjer
+							arhiviranog članka
+						</td>
+						<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Admin User</td>
+						<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">01.03.2025</td>
+						<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+							<button
+								class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3"
+							>Pregled</button>
+							<button
+								class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
+							>Obnovi</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
 		</div>
 	</div>
-	<div class="overflow-x-auto">
-		<table class="min-w-full">
-			<thead class="bg-gray-50 dark:bg-gray-700">
-				<tr>
-					<th
-						class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-						Naslov
-					</th>
-					<th
-						class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-						Autor
-					</th>
-					<th
-						class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-						Arhivirano
-					</th>
-					<th
-						class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-						Akcije
-					</th>
-				</tr>
-			</thead>
-			<tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-				<tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-					<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-						Primjer
-						arhiviranog članka
-					</td>
-					<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Admin User</td>
-					<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">01.03.2025</td>
-					<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-						<button
-							class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3">Pregled</button>
-						<button
-							class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300">Obnovi</button>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
-</div>
 }

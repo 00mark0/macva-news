@@ -58,6 +58,8 @@ func (server *Server) setupRouter() {
 	adminRoutes.GET("/api/admin/content/published", server.listPubContent)
 	adminRoutes.GET("/api/admin/content/published/oldest", server.listPubContentOldest)
 	adminRoutes.GET("/api/admin/content/published/title", server.listPubContentTitle)
+	adminRoutes.PUT("/api/admin/content/archive/:id", server.archivePubContent)
+	adminRoutes.PUT("/api/admin/content/:id", server.updateContent)
 
 	// Auth Pages
 	router.GET("/login", server.loginPage)
