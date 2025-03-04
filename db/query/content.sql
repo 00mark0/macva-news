@@ -71,6 +71,45 @@ FROM content
 WHERE status = 'published'
   AND is_deleted = false;
 
+-- name: ListPublishedContentLimit :many
+SELECT
+  c.*,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+WHERE c.status = 'published'
+  AND c.is_deleted = false
+ORDER BY c.published_at DESC
+LIMIT $1;
+
+-- name: ListPublishedContentLimitOldest :many
+SELECT
+  c.*,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+WHERE c.status = 'published'
+  AND c.is_deleted = false
+ORDER BY c.published_at ASC
+LIMIT $1;
+
+-- name: ListPublishedContentLimitTitle :many
+SELECT
+  c.*,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+WHERE c.status = 'published'
+  AND c.is_deleted = false
+ORDER BY c.title ASC
+LIMIT $1;
+
 -- name: ListPublishedContent :many
 SELECT
   c.*,
@@ -83,6 +122,81 @@ WHERE c.status = 'published'
   AND c.is_deleted = false
 ORDER BY c.published_at DESC
 LIMIT $1 OFFSET $2;
+
+-- name: ListDraftContent :many
+SELECT
+  c.*,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+WHERE c.status = 'draft'
+  AND c.is_deleted = false
+ORDER BY c.published_at DESC
+LIMIT $1;
+
+-- name: ListDraftContentOldest :many
+SELECT
+  c.*,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+WHERE c.status = 'draft'
+  AND c.is_deleted = false
+ORDER BY c.published_at ASC
+LIMIT $1;
+
+-- name: ListDraftContentTitle :many
+SELECT
+  c.*,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+WHERE c.status = 'draft'
+  AND c.is_deleted = false
+ORDER BY c.title ASC
+LIMIT $1;
+
+-- name: ListDeletedContent :many
+SELECT
+  c.*,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+WHERE c.is_deleted = true
+ORDER BY c.published_at DESC
+LIMIT $1;
+
+-- name: ListDeletedContentOldest :many
+SELECT
+  c.*,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+WHERE c.is_deleted = true
+ORDER BY c.published_at ASC
+LIMIT $1;
+
+-- name: ListDeletedContentTitle :many
+SELECT
+  c.*,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+WHERE c.is_deleted = true
+ORDER BY c.title ASC
+LIMIT $1;
 
 -- name: GetContentByCategoryCount :one
 SELECT count(*)
@@ -102,6 +216,18 @@ WHERE c.category_id = $1
   AND c.is_deleted = false
 ORDER BY c.published_at DESC
 LIMIT $2 OFFSET $3;
+
+-- name: ListContentByCategoryLimit :many
+SELECT
+  c.*,
+  u.username
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+WHERE c.category_id = $1
+  AND c.status = 'published'
+  AND c.is_deleted = false
+ORDER BY c.published_at DESC
+LIMIT $2;
 
 -- name: GetContentByTagCount :one
 SELECT count(DISTINCT c.content_id)
@@ -127,6 +253,22 @@ WHERE t.tag_name = $1
   AND c.is_deleted = false
 ORDER BY c.published_at DESC
 LIMIT $2 OFFSET $3;
+
+-- name: ListContentByTagLimit :many
+SELECT DISTINCT
+  c.*,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+JOIN content_tag ct ON c.content_id = ct.content_id
+JOIN tag t ON ct.tag_id = t.tag_id
+WHERE t.tag_name = $1
+  AND c.status = 'published'
+  AND c.is_deleted = false
+ORDER BY c.published_at DESC
+LIMIT $2;
 
 -- name: GetSearchContentCount :one
 SELECT count(DISTINCT c.content_id)
@@ -161,7 +303,40 @@ WHERE c.status = 'published'
     OR t.tag_name ILIKE '%' || @search_term::text || '%'
   )
 ORDER BY c.published_at DESC
-LIMIT $1 OFFSET $2;
+LIMIT $1;
+
+-- name: SearchDraftContent :many
+SELECT
+  c.*,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+WHERE c.status = 'draft'
+  AND c.is_deleted = false
+  AND (
+    c.title ILIKE '%' || @search_term::text || '%'
+    OR c.content_description ILIKE '%' || @search_term::text || '%'
+  )
+ORDER BY c.published_at DESC
+LIMIT $1;
+
+-- name: SearchDelContent :many
+SELECT
+  c.*,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+WHERE c.is_deleted = true
+  AND (
+    c.title ILIKE '%' || @search_term::text || '%'
+    OR c.content_description ILIKE '%' || @search_term::text || '%'
+  )
+ORDER BY c.published_at DESC
+LIMIT $1;
 
 -- name: IncrementViewCount :one
 UPDATE content

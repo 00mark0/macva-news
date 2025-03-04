@@ -5,7 +5,7 @@ import fetch from './axios';
 export default function TrendingContent() {
 	const [trendingContent, setTrendingContent] = useState([]);
 	const [loading, setLoading] = useState(false);
-	const [limit, setLimit] = useState(6);
+	const [limit, setLimit] = useState(10);
 	const [dateFilter, setDateFilter] = useState('day');
 	const [hasMore, setHasMore] = useState(true);
 	const [error, setError] = useState(null);
@@ -73,12 +73,12 @@ export default function TrendingContent() {
 	}
 
 	const handleLoadMore = () => {
-		setLimit(prevLimit => prevLimit + 6);
+		setLimit(prevLimit => prevLimit + 10);
 	}
 
 	const handleDateFilterChange = (filter) => {
 		setDateFilter(filter);
-		setLimit(6);
+		setLimit(10);
 		// Reset content state when changing filters to prevent flash of old content
 		setTrendingContent([]);
 	}

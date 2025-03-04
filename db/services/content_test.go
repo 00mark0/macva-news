@@ -351,7 +351,6 @@ func TestSearchContent(t *testing.T) {
 
 	arg := SearchContentParams{
 		Limit:      10,
-		Offset:     0,
 		SearchTerm: titleSearchTerm,
 	}
 

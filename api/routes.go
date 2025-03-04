@@ -35,6 +35,9 @@ func (server *Server) setupRouter() {
 	adminRoutes.GET("/admin/update-cat-form/:id", server.updateCategoryForm)
 	// Admin articles
 	adminRoutes.GET("/admin/content", server.adminArts)
+	adminRoutes.GET("/admin/pub-content", server.publishedContentList)
+	adminRoutes.GET("/admin/draft-content", server.draftContentList)
+	adminRoutes.GET("/admin/del-content", server.deletedContentList)
 	// Admin users
 	adminRoutes.GET("/admin/users", server.adminUsers)
 	// Admin ads
@@ -50,6 +53,11 @@ func (server *Server) setupRouter() {
 	adminRoutes.POST("/api/admin/category", server.createCategory)
 	adminRoutes.DELETE("/api/admin/category/:id", server.deleteCategory)
 	adminRoutes.PUT("/api/admin/category/:id", server.updateCategory)
+
+	// Admin articles
+	adminRoutes.GET("/api/admin/content/published", server.listPubContent)
+	adminRoutes.GET("/api/admin/content/published/oldest", server.listPubContentOldest)
+	adminRoutes.GET("/api/admin/content/published/title", server.listPubContentTitle)
 
 	// Auth Pages
 	router.GET("/login", server.loginPage)

@@ -447,6 +447,86 @@ func (q *Queries) ListContentByCategory(ctx context.Context, arg ListContentByCa
 	return items, nil
 }
 
+const listContentByCategoryLimit = `-- name: ListContentByCategoryLimit :many
+SELECT
+  c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
+  u.username
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+WHERE c.category_id = $1
+  AND c.status = 'published'
+  AND c.is_deleted = false
+ORDER BY c.published_at DESC
+LIMIT $2
+`
+
+type ListContentByCategoryLimitParams struct {
+	CategoryID pgtype.UUID
+	Limit      int32
+}
+
+type ListContentByCategoryLimitRow struct {
+	ContentID           pgtype.UUID
+	UserID              pgtype.UUID
+	CategoryID          pgtype.UUID
+	Title               string
+	ContentDescription  string
+	CommentsEnabled     bool
+	ViewCountEnabled    bool
+	LikeCountEnabled    bool
+	DislikeCountEnabled bool
+	Status              string
+	ViewCount           int32
+	LikeCount           int32
+	DislikeCount        int32
+	CommentCount        int32
+	CreatedAt           pgtype.Timestamptz
+	UpdatedAt           pgtype.Timestamptz
+	PublishedAt         pgtype.Timestamptz
+	IsDeleted           pgtype.Bool
+	Username            string
+}
+
+func (q *Queries) ListContentByCategoryLimit(ctx context.Context, arg ListContentByCategoryLimitParams) ([]ListContentByCategoryLimitRow, error) {
+	rows, err := q.db.Query(ctx, listContentByCategoryLimit, arg.CategoryID, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListContentByCategoryLimitRow
+	for rows.Next() {
+		var i ListContentByCategoryLimitRow
+		if err := rows.Scan(
+			&i.ContentID,
+			&i.UserID,
+			&i.CategoryID,
+			&i.Title,
+			&i.ContentDescription,
+			&i.CommentsEnabled,
+			&i.ViewCountEnabled,
+			&i.LikeCountEnabled,
+			&i.DislikeCountEnabled,
+			&i.Status,
+			&i.ViewCount,
+			&i.LikeCount,
+			&i.DislikeCount,
+			&i.CommentCount,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.PublishedAt,
+			&i.IsDeleted,
+			&i.Username,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listContentByTag = `-- name: ListContentByTag :many
 SELECT DISTINCT
   c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
@@ -534,6 +614,557 @@ func (q *Queries) ListContentByTag(ctx context.Context, arg ListContentByTagPara
 	return items, nil
 }
 
+const listContentByTagLimit = `-- name: ListContentByTagLimit :many
+SELECT DISTINCT
+  c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+JOIN content_tag ct ON c.content_id = ct.content_id
+JOIN tag t ON ct.tag_id = t.tag_id
+WHERE t.tag_name = $1
+  AND c.status = 'published'
+  AND c.is_deleted = false
+ORDER BY c.published_at DESC
+LIMIT $2
+`
+
+type ListContentByTagLimitParams struct {
+	TagName string
+	Limit   int32
+}
+
+type ListContentByTagLimitRow struct {
+	ContentID           pgtype.UUID
+	UserID              pgtype.UUID
+	CategoryID          pgtype.UUID
+	Title               string
+	ContentDescription  string
+	CommentsEnabled     bool
+	ViewCountEnabled    bool
+	LikeCountEnabled    bool
+	DislikeCountEnabled bool
+	Status              string
+	ViewCount           int32
+	LikeCount           int32
+	DislikeCount        int32
+	CommentCount        int32
+	CreatedAt           pgtype.Timestamptz
+	UpdatedAt           pgtype.Timestamptz
+	PublishedAt         pgtype.Timestamptz
+	IsDeleted           pgtype.Bool
+	Username            string
+	CategoryName        string
+}
+
+func (q *Queries) ListContentByTagLimit(ctx context.Context, arg ListContentByTagLimitParams) ([]ListContentByTagLimitRow, error) {
+	rows, err := q.db.Query(ctx, listContentByTagLimit, arg.TagName, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListContentByTagLimitRow
+	for rows.Next() {
+		var i ListContentByTagLimitRow
+		if err := rows.Scan(
+			&i.ContentID,
+			&i.UserID,
+			&i.CategoryID,
+			&i.Title,
+			&i.ContentDescription,
+			&i.CommentsEnabled,
+			&i.ViewCountEnabled,
+			&i.LikeCountEnabled,
+			&i.DislikeCountEnabled,
+			&i.Status,
+			&i.ViewCount,
+			&i.LikeCount,
+			&i.DislikeCount,
+			&i.CommentCount,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.PublishedAt,
+			&i.IsDeleted,
+			&i.Username,
+			&i.CategoryName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDeletedContent = `-- name: ListDeletedContent :many
+SELECT
+  c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+WHERE c.is_deleted = true
+ORDER BY c.published_at DESC
+LIMIT $1
+`
+
+type ListDeletedContentRow struct {
+	ContentID           pgtype.UUID
+	UserID              pgtype.UUID
+	CategoryID          pgtype.UUID
+	Title               string
+	ContentDescription  string
+	CommentsEnabled     bool
+	ViewCountEnabled    bool
+	LikeCountEnabled    bool
+	DislikeCountEnabled bool
+	Status              string
+	ViewCount           int32
+	LikeCount           int32
+	DislikeCount        int32
+	CommentCount        int32
+	CreatedAt           pgtype.Timestamptz
+	UpdatedAt           pgtype.Timestamptz
+	PublishedAt         pgtype.Timestamptz
+	IsDeleted           pgtype.Bool
+	Username            string
+	CategoryName        string
+}
+
+func (q *Queries) ListDeletedContent(ctx context.Context, limit int32) ([]ListDeletedContentRow, error) {
+	rows, err := q.db.Query(ctx, listDeletedContent, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListDeletedContentRow
+	for rows.Next() {
+		var i ListDeletedContentRow
+		if err := rows.Scan(
+			&i.ContentID,
+			&i.UserID,
+			&i.CategoryID,
+			&i.Title,
+			&i.ContentDescription,
+			&i.CommentsEnabled,
+			&i.ViewCountEnabled,
+			&i.LikeCountEnabled,
+			&i.DislikeCountEnabled,
+			&i.Status,
+			&i.ViewCount,
+			&i.LikeCount,
+			&i.DislikeCount,
+			&i.CommentCount,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.PublishedAt,
+			&i.IsDeleted,
+			&i.Username,
+			&i.CategoryName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDeletedContentOldest = `-- name: ListDeletedContentOldest :many
+SELECT
+  c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+WHERE c.is_deleted = true
+ORDER BY c.published_at ASC
+LIMIT $1
+`
+
+type ListDeletedContentOldestRow struct {
+	ContentID           pgtype.UUID
+	UserID              pgtype.UUID
+	CategoryID          pgtype.UUID
+	Title               string
+	ContentDescription  string
+	CommentsEnabled     bool
+	ViewCountEnabled    bool
+	LikeCountEnabled    bool
+	DislikeCountEnabled bool
+	Status              string
+	ViewCount           int32
+	LikeCount           int32
+	DislikeCount        int32
+	CommentCount        int32
+	CreatedAt           pgtype.Timestamptz
+	UpdatedAt           pgtype.Timestamptz
+	PublishedAt         pgtype.Timestamptz
+	IsDeleted           pgtype.Bool
+	Username            string
+	CategoryName        string
+}
+
+func (q *Queries) ListDeletedContentOldest(ctx context.Context, limit int32) ([]ListDeletedContentOldestRow, error) {
+	rows, err := q.db.Query(ctx, listDeletedContentOldest, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListDeletedContentOldestRow
+	for rows.Next() {
+		var i ListDeletedContentOldestRow
+		if err := rows.Scan(
+			&i.ContentID,
+			&i.UserID,
+			&i.CategoryID,
+			&i.Title,
+			&i.ContentDescription,
+			&i.CommentsEnabled,
+			&i.ViewCountEnabled,
+			&i.LikeCountEnabled,
+			&i.DislikeCountEnabled,
+			&i.Status,
+			&i.ViewCount,
+			&i.LikeCount,
+			&i.DislikeCount,
+			&i.CommentCount,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.PublishedAt,
+			&i.IsDeleted,
+			&i.Username,
+			&i.CategoryName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDeletedContentTitle = `-- name: ListDeletedContentTitle :many
+SELECT
+  c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+WHERE c.is_deleted = true
+ORDER BY c.title ASC
+LIMIT $1
+`
+
+type ListDeletedContentTitleRow struct {
+	ContentID           pgtype.UUID
+	UserID              pgtype.UUID
+	CategoryID          pgtype.UUID
+	Title               string
+	ContentDescription  string
+	CommentsEnabled     bool
+	ViewCountEnabled    bool
+	LikeCountEnabled    bool
+	DislikeCountEnabled bool
+	Status              string
+	ViewCount           int32
+	LikeCount           int32
+	DislikeCount        int32
+	CommentCount        int32
+	CreatedAt           pgtype.Timestamptz
+	UpdatedAt           pgtype.Timestamptz
+	PublishedAt         pgtype.Timestamptz
+	IsDeleted           pgtype.Bool
+	Username            string
+	CategoryName        string
+}
+
+func (q *Queries) ListDeletedContentTitle(ctx context.Context, limit int32) ([]ListDeletedContentTitleRow, error) {
+	rows, err := q.db.Query(ctx, listDeletedContentTitle, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListDeletedContentTitleRow
+	for rows.Next() {
+		var i ListDeletedContentTitleRow
+		if err := rows.Scan(
+			&i.ContentID,
+			&i.UserID,
+			&i.CategoryID,
+			&i.Title,
+			&i.ContentDescription,
+			&i.CommentsEnabled,
+			&i.ViewCountEnabled,
+			&i.LikeCountEnabled,
+			&i.DislikeCountEnabled,
+			&i.Status,
+			&i.ViewCount,
+			&i.LikeCount,
+			&i.DislikeCount,
+			&i.CommentCount,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.PublishedAt,
+			&i.IsDeleted,
+			&i.Username,
+			&i.CategoryName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDraftContent = `-- name: ListDraftContent :many
+SELECT
+  c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+WHERE c.status = 'draft'
+  AND c.is_deleted = false
+ORDER BY c.published_at DESC
+LIMIT $1
+`
+
+type ListDraftContentRow struct {
+	ContentID           pgtype.UUID
+	UserID              pgtype.UUID
+	CategoryID          pgtype.UUID
+	Title               string
+	ContentDescription  string
+	CommentsEnabled     bool
+	ViewCountEnabled    bool
+	LikeCountEnabled    bool
+	DislikeCountEnabled bool
+	Status              string
+	ViewCount           int32
+	LikeCount           int32
+	DislikeCount        int32
+	CommentCount        int32
+	CreatedAt           pgtype.Timestamptz
+	UpdatedAt           pgtype.Timestamptz
+	PublishedAt         pgtype.Timestamptz
+	IsDeleted           pgtype.Bool
+	Username            string
+	CategoryName        string
+}
+
+func (q *Queries) ListDraftContent(ctx context.Context, limit int32) ([]ListDraftContentRow, error) {
+	rows, err := q.db.Query(ctx, listDraftContent, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListDraftContentRow
+	for rows.Next() {
+		var i ListDraftContentRow
+		if err := rows.Scan(
+			&i.ContentID,
+			&i.UserID,
+			&i.CategoryID,
+			&i.Title,
+			&i.ContentDescription,
+			&i.CommentsEnabled,
+			&i.ViewCountEnabled,
+			&i.LikeCountEnabled,
+			&i.DislikeCountEnabled,
+			&i.Status,
+			&i.ViewCount,
+			&i.LikeCount,
+			&i.DislikeCount,
+			&i.CommentCount,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.PublishedAt,
+			&i.IsDeleted,
+			&i.Username,
+			&i.CategoryName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDraftContentOldest = `-- name: ListDraftContentOldest :many
+SELECT
+  c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+WHERE c.status = 'draft'
+  AND c.is_deleted = false
+ORDER BY c.published_at ASC
+LIMIT $1
+`
+
+type ListDraftContentOldestRow struct {
+	ContentID           pgtype.UUID
+	UserID              pgtype.UUID
+	CategoryID          pgtype.UUID
+	Title               string
+	ContentDescription  string
+	CommentsEnabled     bool
+	ViewCountEnabled    bool
+	LikeCountEnabled    bool
+	DislikeCountEnabled bool
+	Status              string
+	ViewCount           int32
+	LikeCount           int32
+	DislikeCount        int32
+	CommentCount        int32
+	CreatedAt           pgtype.Timestamptz
+	UpdatedAt           pgtype.Timestamptz
+	PublishedAt         pgtype.Timestamptz
+	IsDeleted           pgtype.Bool
+	Username            string
+	CategoryName        string
+}
+
+func (q *Queries) ListDraftContentOldest(ctx context.Context, limit int32) ([]ListDraftContentOldestRow, error) {
+	rows, err := q.db.Query(ctx, listDraftContentOldest, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListDraftContentOldestRow
+	for rows.Next() {
+		var i ListDraftContentOldestRow
+		if err := rows.Scan(
+			&i.ContentID,
+			&i.UserID,
+			&i.CategoryID,
+			&i.Title,
+			&i.ContentDescription,
+			&i.CommentsEnabled,
+			&i.ViewCountEnabled,
+			&i.LikeCountEnabled,
+			&i.DislikeCountEnabled,
+			&i.Status,
+			&i.ViewCount,
+			&i.LikeCount,
+			&i.DislikeCount,
+			&i.CommentCount,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.PublishedAt,
+			&i.IsDeleted,
+			&i.Username,
+			&i.CategoryName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDraftContentTitle = `-- name: ListDraftContentTitle :many
+SELECT
+  c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+WHERE c.status = 'draft'
+  AND c.is_deleted = false
+ORDER BY c.title ASC
+LIMIT $1
+`
+
+type ListDraftContentTitleRow struct {
+	ContentID           pgtype.UUID
+	UserID              pgtype.UUID
+	CategoryID          pgtype.UUID
+	Title               string
+	ContentDescription  string
+	CommentsEnabled     bool
+	ViewCountEnabled    bool
+	LikeCountEnabled    bool
+	DislikeCountEnabled bool
+	Status              string
+	ViewCount           int32
+	LikeCount           int32
+	DislikeCount        int32
+	CommentCount        int32
+	CreatedAt           pgtype.Timestamptz
+	UpdatedAt           pgtype.Timestamptz
+	PublishedAt         pgtype.Timestamptz
+	IsDeleted           pgtype.Bool
+	Username            string
+	CategoryName        string
+}
+
+func (q *Queries) ListDraftContentTitle(ctx context.Context, limit int32) ([]ListDraftContentTitleRow, error) {
+	rows, err := q.db.Query(ctx, listDraftContentTitle, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListDraftContentTitleRow
+	for rows.Next() {
+		var i ListDraftContentTitleRow
+		if err := rows.Scan(
+			&i.ContentID,
+			&i.UserID,
+			&i.CategoryID,
+			&i.Title,
+			&i.ContentDescription,
+			&i.CommentsEnabled,
+			&i.ViewCountEnabled,
+			&i.LikeCountEnabled,
+			&i.DislikeCountEnabled,
+			&i.Status,
+			&i.ViewCount,
+			&i.LikeCount,
+			&i.DislikeCount,
+			&i.CommentCount,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.PublishedAt,
+			&i.IsDeleted,
+			&i.Username,
+			&i.CategoryName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listPublishedContent = `-- name: ListPublishedContent :many
 SELECT
   c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
@@ -585,6 +1216,240 @@ func (q *Queries) ListPublishedContent(ctx context.Context, arg ListPublishedCon
 	var items []ListPublishedContentRow
 	for rows.Next() {
 		var i ListPublishedContentRow
+		if err := rows.Scan(
+			&i.ContentID,
+			&i.UserID,
+			&i.CategoryID,
+			&i.Title,
+			&i.ContentDescription,
+			&i.CommentsEnabled,
+			&i.ViewCountEnabled,
+			&i.LikeCountEnabled,
+			&i.DislikeCountEnabled,
+			&i.Status,
+			&i.ViewCount,
+			&i.LikeCount,
+			&i.DislikeCount,
+			&i.CommentCount,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.PublishedAt,
+			&i.IsDeleted,
+			&i.Username,
+			&i.CategoryName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listPublishedContentLimit = `-- name: ListPublishedContentLimit :many
+SELECT
+  c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+WHERE c.status = 'published'
+  AND c.is_deleted = false
+ORDER BY c.published_at DESC
+LIMIT $1
+`
+
+type ListPublishedContentLimitRow struct {
+	ContentID           pgtype.UUID
+	UserID              pgtype.UUID
+	CategoryID          pgtype.UUID
+	Title               string
+	ContentDescription  string
+	CommentsEnabled     bool
+	ViewCountEnabled    bool
+	LikeCountEnabled    bool
+	DislikeCountEnabled bool
+	Status              string
+	ViewCount           int32
+	LikeCount           int32
+	DislikeCount        int32
+	CommentCount        int32
+	CreatedAt           pgtype.Timestamptz
+	UpdatedAt           pgtype.Timestamptz
+	PublishedAt         pgtype.Timestamptz
+	IsDeleted           pgtype.Bool
+	Username            string
+	CategoryName        string
+}
+
+func (q *Queries) ListPublishedContentLimit(ctx context.Context, limit int32) ([]ListPublishedContentLimitRow, error) {
+	rows, err := q.db.Query(ctx, listPublishedContentLimit, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListPublishedContentLimitRow
+	for rows.Next() {
+		var i ListPublishedContentLimitRow
+		if err := rows.Scan(
+			&i.ContentID,
+			&i.UserID,
+			&i.CategoryID,
+			&i.Title,
+			&i.ContentDescription,
+			&i.CommentsEnabled,
+			&i.ViewCountEnabled,
+			&i.LikeCountEnabled,
+			&i.DislikeCountEnabled,
+			&i.Status,
+			&i.ViewCount,
+			&i.LikeCount,
+			&i.DislikeCount,
+			&i.CommentCount,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.PublishedAt,
+			&i.IsDeleted,
+			&i.Username,
+			&i.CategoryName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listPublishedContentLimitOldest = `-- name: ListPublishedContentLimitOldest :many
+SELECT
+  c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+WHERE c.status = 'published'
+  AND c.is_deleted = false
+ORDER BY c.published_at ASC
+LIMIT $1
+`
+
+type ListPublishedContentLimitOldestRow struct {
+	ContentID           pgtype.UUID
+	UserID              pgtype.UUID
+	CategoryID          pgtype.UUID
+	Title               string
+	ContentDescription  string
+	CommentsEnabled     bool
+	ViewCountEnabled    bool
+	LikeCountEnabled    bool
+	DislikeCountEnabled bool
+	Status              string
+	ViewCount           int32
+	LikeCount           int32
+	DislikeCount        int32
+	CommentCount        int32
+	CreatedAt           pgtype.Timestamptz
+	UpdatedAt           pgtype.Timestamptz
+	PublishedAt         pgtype.Timestamptz
+	IsDeleted           pgtype.Bool
+	Username            string
+	CategoryName        string
+}
+
+func (q *Queries) ListPublishedContentLimitOldest(ctx context.Context, limit int32) ([]ListPublishedContentLimitOldestRow, error) {
+	rows, err := q.db.Query(ctx, listPublishedContentLimitOldest, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListPublishedContentLimitOldestRow
+	for rows.Next() {
+		var i ListPublishedContentLimitOldestRow
+		if err := rows.Scan(
+			&i.ContentID,
+			&i.UserID,
+			&i.CategoryID,
+			&i.Title,
+			&i.ContentDescription,
+			&i.CommentsEnabled,
+			&i.ViewCountEnabled,
+			&i.LikeCountEnabled,
+			&i.DislikeCountEnabled,
+			&i.Status,
+			&i.ViewCount,
+			&i.LikeCount,
+			&i.DislikeCount,
+			&i.CommentCount,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.PublishedAt,
+			&i.IsDeleted,
+			&i.Username,
+			&i.CategoryName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listPublishedContentLimitTitle = `-- name: ListPublishedContentLimitTitle :many
+SELECT
+  c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+WHERE c.status = 'published'
+  AND c.is_deleted = false
+ORDER BY c.title ASC
+LIMIT $1
+`
+
+type ListPublishedContentLimitTitleRow struct {
+	ContentID           pgtype.UUID
+	UserID              pgtype.UUID
+	CategoryID          pgtype.UUID
+	Title               string
+	ContentDescription  string
+	CommentsEnabled     bool
+	ViewCountEnabled    bool
+	LikeCountEnabled    bool
+	DislikeCountEnabled bool
+	Status              string
+	ViewCount           int32
+	LikeCount           int32
+	DislikeCount        int32
+	CommentCount        int32
+	CreatedAt           pgtype.Timestamptz
+	UpdatedAt           pgtype.Timestamptz
+	PublishedAt         pgtype.Timestamptz
+	IsDeleted           pgtype.Bool
+	Username            string
+	CategoryName        string
+}
+
+func (q *Queries) ListPublishedContentLimitTitle(ctx context.Context, limit int32) ([]ListPublishedContentLimitTitleRow, error) {
+	rows, err := q.db.Query(ctx, listPublishedContentLimitTitle, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListPublishedContentLimitTitleRow
+	for rows.Next() {
+		var i ListPublishedContentLimitTitleRow
 		if err := rows.Scan(
 			&i.ContentID,
 			&i.UserID,
@@ -810,17 +1675,16 @@ LEFT JOIN tag t ON ct.tag_id = t.tag_id
 WHERE c.status = 'published'
   AND c.is_deleted = false
   AND (
-    c.title ILIKE '%' || $3::text || '%'
-    OR c.content_description ILIKE '%' || $3::text || '%'
-    OR t.tag_name ILIKE '%' || $3::text || '%'
+    c.title ILIKE '%' || $2::text || '%'
+    OR c.content_description ILIKE '%' || $2::text || '%'
+    OR t.tag_name ILIKE '%' || $2::text || '%'
   )
 ORDER BY c.published_at DESC
-LIMIT $1 OFFSET $2
+LIMIT $1
 `
 
 type SearchContentParams struct {
 	Limit      int32
-	Offset     int32
 	SearchTerm string
 }
 
@@ -848,7 +1712,7 @@ type SearchContentRow struct {
 }
 
 func (q *Queries) SearchContent(ctx context.Context, arg SearchContentParams) ([]SearchContentRow, error) {
-	rows, err := q.db.Query(ctx, searchContent, arg.Limit, arg.Offset, arg.SearchTerm)
+	rows, err := q.db.Query(ctx, searchContent, arg.Limit, arg.SearchTerm)
 	if err != nil {
 		return nil, err
 	}
@@ -856,6 +1720,179 @@ func (q *Queries) SearchContent(ctx context.Context, arg SearchContentParams) ([
 	var items []SearchContentRow
 	for rows.Next() {
 		var i SearchContentRow
+		if err := rows.Scan(
+			&i.ContentID,
+			&i.UserID,
+			&i.CategoryID,
+			&i.Title,
+			&i.ContentDescription,
+			&i.CommentsEnabled,
+			&i.ViewCountEnabled,
+			&i.LikeCountEnabled,
+			&i.DislikeCountEnabled,
+			&i.Status,
+			&i.ViewCount,
+			&i.LikeCount,
+			&i.DislikeCount,
+			&i.CommentCount,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.PublishedAt,
+			&i.IsDeleted,
+			&i.Username,
+			&i.CategoryName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchDelContent = `-- name: SearchDelContent :many
+SELECT
+  c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+WHERE c.is_deleted = true
+  AND (
+    c.title ILIKE '%' || $2::text || '%'
+    OR c.content_description ILIKE '%' || $2::text || '%'
+  )
+ORDER BY c.published_at DESC
+LIMIT $1
+`
+
+type SearchDelContentParams struct {
+	Limit      int32
+	SearchTerm string
+}
+
+type SearchDelContentRow struct {
+	ContentID           pgtype.UUID
+	UserID              pgtype.UUID
+	CategoryID          pgtype.UUID
+	Title               string
+	ContentDescription  string
+	CommentsEnabled     bool
+	ViewCountEnabled    bool
+	LikeCountEnabled    bool
+	DislikeCountEnabled bool
+	Status              string
+	ViewCount           int32
+	LikeCount           int32
+	DislikeCount        int32
+	CommentCount        int32
+	CreatedAt           pgtype.Timestamptz
+	UpdatedAt           pgtype.Timestamptz
+	PublishedAt         pgtype.Timestamptz
+	IsDeleted           pgtype.Bool
+	Username            string
+	CategoryName        string
+}
+
+func (q *Queries) SearchDelContent(ctx context.Context, arg SearchDelContentParams) ([]SearchDelContentRow, error) {
+	rows, err := q.db.Query(ctx, searchDelContent, arg.Limit, arg.SearchTerm)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchDelContentRow
+	for rows.Next() {
+		var i SearchDelContentRow
+		if err := rows.Scan(
+			&i.ContentID,
+			&i.UserID,
+			&i.CategoryID,
+			&i.Title,
+			&i.ContentDescription,
+			&i.CommentsEnabled,
+			&i.ViewCountEnabled,
+			&i.LikeCountEnabled,
+			&i.DislikeCountEnabled,
+			&i.Status,
+			&i.ViewCount,
+			&i.LikeCount,
+			&i.DislikeCount,
+			&i.CommentCount,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.PublishedAt,
+			&i.IsDeleted,
+			&i.Username,
+			&i.CategoryName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchDraftContent = `-- name: SearchDraftContent :many
+SELECT
+  c.content_id, c.user_id, c.category_id, c.title, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
+  u.username,
+  cat.category_name
+FROM content c
+JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
+WHERE c.status = 'draft'
+  AND c.is_deleted = false
+  AND (
+    c.title ILIKE '%' || $2::text || '%'
+    OR c.content_description ILIKE '%' || $2::text || '%'
+  )
+ORDER BY c.published_at DESC
+LIMIT $1
+`
+
+type SearchDraftContentParams struct {
+	Limit      int32
+	SearchTerm string
+}
+
+type SearchDraftContentRow struct {
+	ContentID           pgtype.UUID
+	UserID              pgtype.UUID
+	CategoryID          pgtype.UUID
+	Title               string
+	ContentDescription  string
+	CommentsEnabled     bool
+	ViewCountEnabled    bool
+	LikeCountEnabled    bool
+	DislikeCountEnabled bool
+	Status              string
+	ViewCount           int32
+	LikeCount           int32
+	DislikeCount        int32
+	CommentCount        int32
+	CreatedAt           pgtype.Timestamptz
+	UpdatedAt           pgtype.Timestamptz
+	PublishedAt         pgtype.Timestamptz
+	IsDeleted           pgtype.Bool
+	Username            string
+	CategoryName        string
+}
+
+func (q *Queries) SearchDraftContent(ctx context.Context, arg SearchDraftContentParams) ([]SearchDraftContentRow, error) {
+	rows, err := q.db.Query(ctx, searchDraftContent, arg.Limit, arg.SearchTerm)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchDraftContentRow
+	for rows.Next() {
+		var i SearchDraftContentRow
 		if err := rows.Scan(
 			&i.ContentID,
 			&i.UserID,
