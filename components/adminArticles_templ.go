@@ -68,7 +68,7 @@ console.warn('No URL set for this sort option.');
 	}
 }
 
-func AdminArticles(overview db.GetContentOverviewRow, nextLimit int, content []ListPublishedContentRes) templ.Component {
+func AdminArticles(overview db.GetContentOverviewRow, nextLimit int, content []ListPublishedContentRes, url string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -132,7 +132,7 @@ func AdminArticles(overview db.GetContentOverviewRow, nextLimit int, content []L
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = PublishedContentSort(nextLimit, content).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = PublishedContentSort(nextLimit, content, url).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -144,7 +144,7 @@ func AdminArticles(overview db.GetContentOverviewRow, nextLimit int, content []L
 	})
 }
 
-func PublishedContentSort(nextLimit int, content []ListPublishedContentRes) templ.Component {
+func PublishedContentSort(nextLimit int, content []ListPublishedContentRes, url string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -225,7 +225,7 @@ func PublishedContentSort(nextLimit int, content []ListPublishedContentRes) temp
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = PublishedContent(nextLimit, content).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = PublishedContent(nextLimit, content, url).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -237,7 +237,7 @@ func PublishedContentSort(nextLimit int, content []ListPublishedContentRes) temp
 	})
 }
 
-func PublishedContent(nextLimit int, content []ListPublishedContentRes) templ.Component {
+func PublishedContent(nextLimit int, content []ListPublishedContentRes, url string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -589,9 +589,9 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes) templ.Co
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var28 string
-			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs("/api/admin/content/published?limit=" + fmt.Sprintf("%d", nextLimit))
+			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(url + fmt.Sprintf("%d", nextLimit))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 398, Col: 106}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 398, Col: 72}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 			if templ_7745c5c3_Err != nil {

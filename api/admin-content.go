@@ -50,7 +50,9 @@ func (server *Server) listPubContent(ctx echo.Context) error {
 		})
 	}
 
-	return Render(ctx, http.StatusOK, components.PublishedContent(int(nextLimit), content))
+	url := "/api/admin/content/published?limit="
+
+	return Render(ctx, http.StatusOK, components.PublishedContent(int(nextLimit), content, url))
 }
 
 func (server *Server) listPubContentOldest(ctx echo.Context) error {
@@ -96,7 +98,9 @@ func (server *Server) listPubContentOldest(ctx echo.Context) error {
 		})
 	}
 
-	return Render(ctx, http.StatusOK, components.PublishedContent(int(nextLimit), content))
+	url := "/api/admin/content/published/oldest?limit="
+
+	return Render(ctx, http.StatusOK, components.PublishedContent(int(nextLimit), content, url))
 }
 
 func (server *Server) listPubContentTitle(ctx echo.Context) error {
@@ -142,5 +146,7 @@ func (server *Server) listPubContentTitle(ctx echo.Context) error {
 		})
 	}
 
-	return Render(ctx, http.StatusOK, components.PublishedContent(int(nextLimit), content))
+	url := "/api/admin/content/published/title?limit="
+
+	return Render(ctx, http.StatusOK, components.PublishedContent(int(nextLimit), content, url))
 }

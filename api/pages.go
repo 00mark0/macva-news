@@ -160,7 +160,9 @@ func (server *Server) adminArts(ctx echo.Context) error {
 		})
 	}
 
-	return Render(ctx, http.StatusOK, components.AdminArticles(overview, int(nextLimit), content))
+	url := "/admin/pub-content?limit="
+
+	return Render(ctx, http.StatusOK, components.AdminArticles(overview, int(nextLimit), content, url))
 }
 
 func (server *Server) publishedContentList(ctx echo.Context) error {
@@ -201,7 +203,9 @@ func (server *Server) publishedContentList(ctx echo.Context) error {
 		})
 	}
 
-	return Render(ctx, http.StatusOK, components.PublishedContentSort(int(nextLimit), content))
+	url := "/admin/pub-content?limit="
+
+	return Render(ctx, http.StatusOK, components.PublishedContentSort(int(nextLimit), content, url))
 }
 
 func (server *Server) draftContentList(ctx echo.Context) error {

@@ -48,7 +48,7 @@ console.warn('No URL set for this sort option.');
 }
 }
 
-templ AdminArticles(overview db.GetContentOverviewRow, nextLimit int, content []ListPublishedContentRes) {
+templ AdminArticles(overview db.GetContentOverviewRow, nextLimit int, content []ListPublishedContentRes, url string) {
 <div class="w-full min-h-screen dark:bg-black bg-gray-50 sm:p-8 p-4">
 	<div class="flex justify-between items-center">
 		<h1 class="text-3xl font-semibold text-black dark:text-white mb-10">Artikli</h1>
@@ -108,12 +108,12 @@ templ AdminArticles(overview db.GetContentOverviewRow, nextLimit int, content []
 		</div>
 	</div>
 	<div id="nav-switch">
-		@PublishedContentSort(nextLimit, content)
+		@PublishedContentSort(nextLimit, content, url)
 	</div>
 </div>
 }
 
-templ PublishedContentSort(nextLimit int, content []ListPublishedContentRes) {
+templ PublishedContentSort(nextLimit int, content []ListPublishedContentRes, url string) {
 <div class="space-y-4">
 	<div class="flex flex-col sm:flex-row items-center justify-between pb-4 border-b dark:border-gray-700">
 		<h2 class="text-xl font-medium text-gray-800 dark:text-gray-200">Objavljeni Artikli</h2>
@@ -134,12 +134,12 @@ templ PublishedContentSort(nextLimit int, content []ListPublishedContentRes) {
 		</div>
 	</div>
 	<div id="admin-articles" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-		@PublishedContent(nextLimit, content)
+		@PublishedContent(nextLimit, content, url)
 	</div>
 </div>
 }
 
-templ PublishedContent(nextLimit int, content []ListPublishedContentRes) {
+templ PublishedContent(nextLimit int, content []ListPublishedContentRes, url string) {
 <div class="space-y-4">
 	<div class="overflow-x-auto">
 		<table class="min-w-full">
@@ -395,8 +395,8 @@ templ PublishedContent(nextLimit int, content []ListPublishedContentRes) {
 	</div>
 	if len(content) == nextLimit {
 	<div class="text-center">
-		<button hx-trigger="click" hx-get={ "/api/admin/content/published?limit=" + fmt.Sprintf("%d", nextLimit) }
-			hx-target="#admin-articles" hx-swap="innerHTML"
+		<button hx-trigger="click" hx-get={ url + fmt.Sprintf("%d", nextLimit) } hx-target="#admin-articles"
+			hx-swap="innerHTML"
 			class="cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
 			Učitaj više
 			<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24"
