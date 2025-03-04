@@ -58,6 +58,12 @@ func (server *Server) setupRouter() {
 	adminRoutes.GET("/api/admin/content/published", server.listPubContent)
 	adminRoutes.GET("/api/admin/content/published/oldest", server.listPubContentOldest)
 	adminRoutes.GET("/api/admin/content/published/title", server.listPubContentTitle)
+	adminRoutes.GET("/api/admin/content/draft", server.listDraftContent)
+	adminRoutes.GET("/api/admin/content/draft/oldest", server.listDraftContentOldest)
+	adminRoutes.GET("/api/admin/content/draft/title", server.listDraftContentTitle)
+	adminRoutes.GET("/api/admin/content/deleted", server.listDelContent)
+	adminRoutes.GET("/api/admin/content/deleted/oldest", server.listDelContentOldest)
+	adminRoutes.GET("/api/admin/content/deleted/title", server.listDelContentTitle)
 	adminRoutes.PUT("/api/admin/content/archive/:id", server.archivePubContent)
 	adminRoutes.PUT("/api/admin/content/:id", server.updateContent)
 

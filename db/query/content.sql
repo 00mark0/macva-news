@@ -133,7 +133,7 @@ JOIN "user" u ON c.user_id = u.user_id
 JOIN category cat ON c.category_id = cat.category_id
 WHERE c.status = 'draft'
   AND c.is_deleted = false
-ORDER BY c.published_at DESC
+ORDER BY c.created_at DESC
 LIMIT $1;
 
 -- name: ListDraftContentOldest :many
@@ -146,7 +146,7 @@ JOIN "user" u ON c.user_id = u.user_id
 JOIN category cat ON c.category_id = cat.category_id
 WHERE c.status = 'draft'
   AND c.is_deleted = false
-ORDER BY c.published_at ASC
+ORDER BY c.created_at ASC
 LIMIT $1;
 
 -- name: ListDraftContentTitle :many
@@ -171,7 +171,7 @@ FROM content c
 JOIN "user" u ON c.user_id = u.user_id
 JOIN category cat ON c.category_id = cat.category_id
 WHERE c.is_deleted = true
-ORDER BY c.published_at DESC
+ORDER BY c.created_at DESC
 LIMIT $1;
 
 -- name: ListDeletedContentOldest :many
@@ -183,7 +183,7 @@ FROM content c
 JOIN "user" u ON c.user_id = u.user_id
 JOIN category cat ON c.category_id = cat.category_id
 WHERE c.is_deleted = true
-ORDER BY c.published_at ASC
+ORDER BY c.created_at ASC
 LIMIT $1;
 
 -- name: ListDeletedContentTitle :many
