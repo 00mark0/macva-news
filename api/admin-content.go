@@ -646,6 +646,78 @@ func (server *Server) archivePubContent(ctx echo.Context) error {
 	return server.adminArts(ctx)
 }
 
+func (server *Server) deleteContent(ctx echo.Context) error {
+	id := ctx.Param("id")
+
+	// Parse string UUID into proper UUID format
+	parsedUUID, err := uuid.Parse(id)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, errorResponse("invalid content ID format", err))
+	}
+
+	// Create a pgtype.UUID with the parsed UUID
+	pgUUID := pgtype.UUID{
+		Bytes: parsedUUID,
+		Valid: true,
+	}
+
+	_, err = server.store.HardDeleteContent(ctx.Request().Context(), pgUUID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to delete content", err))
+		return err
+	}
+
+	return server.adminArts(ctx)
+}
+
+func (server *Server) publishDraftContent(ctx echo.Context) error {
+	id := ctx.Param("id")
+
+	// Parse string UUID into proper UUID format
+	parsedUUID, err := uuid.Parse(id)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, errorResponse("invalid content ID format", err))
+	}
+
+	// Create a pgtype.UUID with the parsed UUID
+	pgUUID := pgtype.UUID{
+		Bytes: parsedUUID,
+		Valid: true,
+	}
+
+	_, err = server.store.PublishContent(ctx.Request().Context(), pgUUID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to publish content", err))
+		return err
+	}
+
+	return server.adminArts(ctx)
+}
+
+func (server *Server) unarchiveContent(ctx echo.Context) error {
+	id := ctx.Param("id")
+
+	// Parse string UUID into proper UUID format
+	parsedUUID, err := uuid.Parse(id)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, errorResponse("invalid content ID format", err))
+	}
+
+	// Create a pgtype.UUID with the parsed UUID
+	pgUUID := pgtype.UUID{
+		Bytes: parsedUUID,
+		Valid: true,
+	}
+
+	_, err = server.store.UnarchiveContent(ctx.Request().Context(), pgUUID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to unarchive content", err))
+		return err
+	}
+
+	return server.adminArts(ctx)
+}
+
 type UpdateContentReq struct {
 	ContentID           string  `query:"content_id"`
 	Title               *string `form:"title" validate:"required"`

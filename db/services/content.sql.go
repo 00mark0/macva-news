@@ -1930,6 +1930,7 @@ const softDeleteContent = `-- name: SoftDeleteContent :one
 UPDATE content
 SET
     is_deleted = true,
+    published_at = null,
     updated_at = now()
 WHERE content_id = $1
 RETURNING content_id, user_id, category_id, title, content_description, comments_enabled, view_count_enabled, like_count_enabled, dislike_count_enabled, status, view_count, like_count, dislike_count, comment_count, created_at, updated_at, published_at, is_deleted
@@ -1937,6 +1938,43 @@ RETURNING content_id, user_id, category_id, title, content_description, comments
 
 func (q *Queries) SoftDeleteContent(ctx context.Context, contentID pgtype.UUID) (Content, error) {
 	row := q.db.QueryRow(ctx, softDeleteContent, contentID)
+	var i Content
+	err := row.Scan(
+		&i.ContentID,
+		&i.UserID,
+		&i.CategoryID,
+		&i.Title,
+		&i.ContentDescription,
+		&i.CommentsEnabled,
+		&i.ViewCountEnabled,
+		&i.LikeCountEnabled,
+		&i.DislikeCountEnabled,
+		&i.Status,
+		&i.ViewCount,
+		&i.LikeCount,
+		&i.DislikeCount,
+		&i.CommentCount,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.PublishedAt,
+		&i.IsDeleted,
+	)
+	return i, err
+}
+
+const unarchiveContent = `-- name: UnarchiveContent :one
+UPDATE content
+SET
+    status = 'draft',
+    is_deleted = false,
+    published_at = null,
+    updated_at = now()
+WHERE content_id = $1
+RETURNING content_id, user_id, category_id, title, content_description, comments_enabled, view_count_enabled, like_count_enabled, dislike_count_enabled, status, view_count, like_count, dislike_count, comment_count, created_at, updated_at, published_at, is_deleted
+`
+
+func (q *Queries) UnarchiveContent(ctx context.Context, contentID pgtype.UUID) (Content, error) {
+	row := q.db.QueryRow(ctx, unarchiveContent, contentID)
 	var i Content
 	err := row.Scan(
 		&i.ContentID,

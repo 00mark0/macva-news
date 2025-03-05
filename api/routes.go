@@ -72,6 +72,9 @@ func (server *Server) setupRouter() {
 	adminRoutes.GET("/api/admin/content/draft/search", server.listSearchDraftContent)
 	adminRoutes.GET("/api/admin/content/deleted/search", server.listSearchDelContent)
 	adminRoutes.PUT("/api/admin/content/archive/:id", server.archivePubContent)
+	adminRoutes.DELETE("/api/admin/content/:id", server.deleteContent)
+	adminRoutes.PUT("/api/admin/content/publish/:id", server.publishDraftContent)
+	adminRoutes.PUT("/api/admin/content/unarchive/:id", server.unarchiveContent)
 	adminRoutes.PUT("/api/admin/content/:id", server.updateContent)
 
 	// Auth Pages

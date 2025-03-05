@@ -36,10 +36,21 @@ SET
 WHERE content_id = $1
 RETURNING *;
 
+-- name: UnarchiveContent :one
+UPDATE content
+SET
+    status = 'draft',
+    is_deleted = false,
+    published_at = null,
+    updated_at = now()
+WHERE content_id = $1
+RETURNING *;
+
 -- name: SoftDeleteContent :one
 UPDATE content
 SET
     is_deleted = true,
+    published_at = null,
     updated_at = now()
 WHERE content_id = $1
 RETURNING *;
