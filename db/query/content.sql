@@ -298,7 +298,8 @@ LEFT JOIN tag t ON ct.tag_id = t.tag_id
 WHERE c.status = 'published'
   AND c.is_deleted = false
   AND (
-    c.title ILIKE '%' || @search_term::text || '%'
+    cat.category_name ILIKE '%' || @search_term::text || '%'
+    OR c.title ILIKE '%' || @search_term::text || '%'
     OR c.content_description ILIKE '%' || @search_term::text || '%'
     OR t.tag_name ILIKE '%' || @search_term::text || '%'
   )

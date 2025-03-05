@@ -1675,7 +1675,8 @@ LEFT JOIN tag t ON ct.tag_id = t.tag_id
 WHERE c.status = 'published'
   AND c.is_deleted = false
   AND (
-    c.title ILIKE '%' || $2::text || '%'
+    cat.category_name ILIKE '%' || $2::text || '%'
+    OR c.title ILIKE '%' || $2::text || '%'
     OR c.content_description ILIKE '%' || $2::text || '%'
     OR t.tag_name ILIKE '%' || $2::text || '%'
   )

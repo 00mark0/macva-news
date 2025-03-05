@@ -45,9 +45,9 @@ func (server *Server) listPubContent(ctx echo.Context) error {
 			LikeCount:           v.LikeCount,
 			DislikeCount:        v.DislikeCount,
 			CommentCount:        v.CommentCount,
-			CreatedAt:           v.CreatedAt.Time.Format("2006-01-02 15:04"),
-			UpdatedAt:           v.UpdatedAt.Time.Format("2006-01-02 15:04"),
-			PublishedAt:         v.PublishedAt.Time.Format("2006-01-02 15:04"),
+			CreatedAt:           v.CreatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			UpdatedAt:           v.UpdatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			PublishedAt:         v.PublishedAt.Time.In(Loc).Format("02-01-06 15:04"),
 			IsDeleted:           v.IsDeleted.Bool,
 			Username:            v.Username,
 			CategoryName:        v.CategoryName,
@@ -93,9 +93,9 @@ func (server *Server) listPubContentOldest(ctx echo.Context) error {
 			LikeCount:           v.LikeCount,
 			DislikeCount:        v.DislikeCount,
 			CommentCount:        v.CommentCount,
-			CreatedAt:           v.CreatedAt.Time.Format("2006-01-02 15:04"),
-			UpdatedAt:           v.UpdatedAt.Time.Format("2006-01-02 15:04"),
-			PublishedAt:         v.PublishedAt.Time.Format("2006-01-02 15:04"),
+			CreatedAt:           v.CreatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			UpdatedAt:           v.UpdatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			PublishedAt:         v.PublishedAt.Time.In(Loc).Format("02-01-06 15:04"),
 			IsDeleted:           v.IsDeleted.Bool,
 			Username:            v.Username,
 			CategoryName:        v.CategoryName,
@@ -141,9 +141,9 @@ func (server *Server) listPubContentTitle(ctx echo.Context) error {
 			LikeCount:           v.LikeCount,
 			DislikeCount:        v.DislikeCount,
 			CommentCount:        v.CommentCount,
-			CreatedAt:           v.CreatedAt.Time.Format("2006-01-02 15:04"),
-			UpdatedAt:           v.UpdatedAt.Time.Format("2006-01-02 15:04"),
-			PublishedAt:         v.PublishedAt.Time.Format("2006-01-02 15:04"),
+			CreatedAt:           v.CreatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			UpdatedAt:           v.UpdatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			PublishedAt:         v.PublishedAt.Time.In(Loc).Format("02-01-06 15:04"),
 			IsDeleted:           v.IsDeleted.Bool,
 			Username:            v.Username,
 			CategoryName:        v.CategoryName,
@@ -189,9 +189,9 @@ func (server *Server) listDraftContent(ctx echo.Context) error {
 			LikeCount:           v.LikeCount,
 			DislikeCount:        v.DislikeCount,
 			CommentCount:        v.CommentCount,
-			CreatedAt:           v.CreatedAt.Time.Format("2006-01-02 15:04"),
-			UpdatedAt:           v.UpdatedAt.Time.Format("2006-01-02 15:04"),
-			PublishedAt:         v.PublishedAt.Time.Format("2006-01-02 15:04"),
+			CreatedAt:           v.CreatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			UpdatedAt:           v.UpdatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			PublishedAt:         v.PublishedAt.Time.In(Loc).Format("02-01-06 15:04"),
 			IsDeleted:           v.IsDeleted.Bool,
 			Username:            v.Username,
 			CategoryName:        v.CategoryName,
@@ -237,9 +237,9 @@ func (server *Server) listDraftContentOldest(ctx echo.Context) error {
 			LikeCount:           v.LikeCount,
 			DislikeCount:        v.DislikeCount,
 			CommentCount:        v.CommentCount,
-			CreatedAt:           v.CreatedAt.Time.Format("2006-01-02 15:04"),
-			UpdatedAt:           v.UpdatedAt.Time.Format("2006-01-02 15:04"),
-			PublishedAt:         v.PublishedAt.Time.Format("2006-01-02 15:04"),
+			CreatedAt:           v.CreatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			UpdatedAt:           v.UpdatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			PublishedAt:         v.PublishedAt.Time.In(Loc).Format("02-01-06 15:04"),
 			IsDeleted:           v.IsDeleted.Bool,
 			Username:            v.Username,
 			CategoryName:        v.CategoryName,
@@ -285,9 +285,9 @@ func (server *Server) listDraftContentTitle(ctx echo.Context) error {
 			LikeCount:           v.LikeCount,
 			DislikeCount:        v.DislikeCount,
 			CommentCount:        v.CommentCount,
-			CreatedAt:           v.CreatedAt.Time.Format("2006-01-02 15:04"),
-			UpdatedAt:           v.UpdatedAt.Time.Format("2006-01-02 15:04"),
-			PublishedAt:         v.PublishedAt.Time.Format("2006-01-02 15:04"),
+			CreatedAt:           v.CreatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			UpdatedAt:           v.UpdatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			PublishedAt:         v.PublishedAt.Time.In(Loc).Format("02-01-06 15:04"),
 			IsDeleted:           v.IsDeleted.Bool,
 			Username:            v.Username,
 			CategoryName:        v.CategoryName,
@@ -333,9 +333,9 @@ func (server *Server) listDelContent(ctx echo.Context) error {
 			LikeCount:           v.LikeCount,
 			DislikeCount:        v.DislikeCount,
 			CommentCount:        v.CommentCount,
-			CreatedAt:           v.CreatedAt.Time.Format("2006-01-02 15:04"),
-			UpdatedAt:           v.UpdatedAt.Time.Format("2006-01-02 15:04"),
-			PublishedAt:         v.PublishedAt.Time.Format("2006-01-02 15:04"),
+			CreatedAt:           v.CreatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			UpdatedAt:           v.UpdatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			PublishedAt:         v.PublishedAt.Time.In(Loc).Format("02-01-06 15:04"),
 			IsDeleted:           v.IsDeleted.Bool,
 			Username:            v.Username,
 			CategoryName:        v.CategoryName,
@@ -381,9 +381,9 @@ func (server *Server) listDelContentOldest(ctx echo.Context) error {
 			LikeCount:           v.LikeCount,
 			DislikeCount:        v.DislikeCount,
 			CommentCount:        v.CommentCount,
-			CreatedAt:           v.CreatedAt.Time.Format("2006-01-02 15:04"),
-			UpdatedAt:           v.UpdatedAt.Time.Format("2006-01-02 15:04"),
-			PublishedAt:         v.PublishedAt.Time.Format("2006-01-02 15:04"),
+			CreatedAt:           v.CreatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			UpdatedAt:           v.UpdatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			PublishedAt:         v.PublishedAt.Time.In(Loc).Format("02-01-06 15:04"),
 			IsDeleted:           v.IsDeleted.Bool,
 			Username:            v.Username,
 			CategoryName:        v.CategoryName,
@@ -429,9 +429,9 @@ func (server *Server) listDelContentTitle(ctx echo.Context) error {
 			LikeCount:           v.LikeCount,
 			DislikeCount:        v.DislikeCount,
 			CommentCount:        v.CommentCount,
-			CreatedAt:           v.CreatedAt.Time.Format("2006-01-02 15:04"),
-			UpdatedAt:           v.UpdatedAt.Time.Format("2006-01-02 15:04"),
-			PublishedAt:         v.PublishedAt.Time.Format("2006-01-02 15:04"),
+			CreatedAt:           v.CreatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			UpdatedAt:           v.UpdatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			PublishedAt:         v.PublishedAt.Time.In(Loc).Format("02-01-06 15:04"),
 			IsDeleted:           v.IsDeleted.Bool,
 			Username:            v.Username,
 			CategoryName:        v.CategoryName,
@@ -439,6 +439,185 @@ func (server *Server) listDelContentTitle(ctx echo.Context) error {
 	}
 
 	url := "/api/admin/content/deleted/title?limit="
+
+	return Render(ctx, http.StatusOK, components.PublishedContent(int(nextLimit), content, url))
+}
+
+type SearchContentReq struct {
+	SearchTerm string `query:"search_term" validate:"required"`
+	Limit      int32  `query:"limit"`
+}
+
+func (server *Server) listSearchPubContent(ctx echo.Context) error {
+	var req SearchContentReq
+
+	if err := ctx.Bind(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		return err
+	}
+
+	if err := ctx.Validate(req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse("search term is required", err))
+		return err
+	}
+
+	nextLimit := req.Limit + 20
+
+	arg := db.SearchContentParams{
+		Limit:      nextLimit,
+		SearchTerm: req.SearchTerm,
+	}
+
+	data, err := server.store.SearchContent(ctx.Request().Context(), arg)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content", err))
+		return err
+	}
+
+	var content []components.ListPublishedContentRes
+
+	for _, v := range data {
+		content = append(content, components.ListPublishedContentRes{
+			ContentID:           v.ContentID.String(),
+			UserID:              v.UserID.String(),
+			CategoryID:          v.CategoryID.String(),
+			Title:               v.Title,
+			ContentDescription:  v.ContentDescription,
+			CommentsEnabled:     v.CommentsEnabled,
+			ViewCountEnabled:    v.ViewCountEnabled,
+			LikeCountEnabled:    v.LikeCountEnabled,
+			DislikeCountEnabled: v.DislikeCountEnabled,
+			Status:              v.Status,
+			ViewCount:           v.ViewCount,
+			LikeCount:           v.LikeCount,
+			DislikeCount:        v.DislikeCount,
+			CommentCount:        v.CommentCount,
+			CreatedAt:           v.CreatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			UpdatedAt:           v.UpdatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			PublishedAt:         v.PublishedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			IsDeleted:           v.IsDeleted.Bool,
+			Username:            v.Username,
+			CategoryName:        v.CategoryName,
+		})
+	}
+
+	url := "/api/admin/content/published/search?search_term=" + req.SearchTerm + "&limit="
+
+	return Render(ctx, http.StatusOK, components.PublishedContent(int(nextLimit), content, url))
+}
+
+func (server *Server) listSearchDraftContent(ctx echo.Context) error {
+	var req SearchContentReq
+
+	if err := ctx.Bind(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		return err
+	}
+
+	if err := ctx.Validate(req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse("search term is required", err))
+		return err
+	}
+
+	nextLimit := req.Limit + 20
+
+	arg := db.SearchDraftContentParams{
+		Limit:      nextLimit,
+		SearchTerm: req.SearchTerm,
+	}
+
+	data, err := server.store.SearchDraftContent(ctx.Request().Context(), arg)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content", err))
+		return err
+	}
+
+	var content []components.ListPublishedContentRes
+
+	for _, v := range data {
+		content = append(content, components.ListPublishedContentRes{
+			ContentID:           v.ContentID.String(),
+			UserID:              v.UserID.String(),
+			CategoryID:          v.CategoryID.String(),
+			Title:               v.Title,
+			ContentDescription:  v.ContentDescription,
+			CommentsEnabled:     v.CommentsEnabled,
+			ViewCountEnabled:    v.ViewCountEnabled,
+			LikeCountEnabled:    v.LikeCountEnabled,
+			DislikeCountEnabled: v.DislikeCountEnabled,
+			Status:              v.Status,
+			ViewCount:           v.ViewCount,
+			LikeCount:           v.LikeCount,
+			DislikeCount:        v.DislikeCount,
+			CommentCount:        v.CommentCount,
+			CreatedAt:           v.CreatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			UpdatedAt:           v.UpdatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			PublishedAt:         v.PublishedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			IsDeleted:           v.IsDeleted.Bool,
+			Username:            v.Username,
+			CategoryName:        v.CategoryName,
+		})
+	}
+
+	url := "/api/admin/content/draft/search?search_term=" + req.SearchTerm + "&limit="
+
+	return Render(ctx, http.StatusOK, components.PublishedContent(int(nextLimit), content, url))
+}
+
+func (server *Server) listSearchDelContent(ctx echo.Context) error {
+	var req SearchContentReq
+
+	if err := ctx.Bind(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		return err
+	}
+
+	if err := ctx.Validate(req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse("search term is required", err))
+		return err
+	}
+
+	nextLimit := req.Limit + 20
+
+	arg := db.SearchDelContentParams{
+		Limit:      nextLimit,
+		SearchTerm: req.SearchTerm,
+	}
+
+	data, err := server.store.SearchDelContent(ctx.Request().Context(), arg)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content", err))
+		return err
+	}
+
+	var content []components.ListPublishedContentRes
+
+	for _, v := range data {
+		content = append(content, components.ListPublishedContentRes{
+			ContentID:           v.ContentID.String(),
+			UserID:              v.UserID.String(),
+			CategoryID:          v.CategoryID.String(),
+			Title:               v.Title,
+			ContentDescription:  v.ContentDescription,
+			CommentsEnabled:     v.CommentsEnabled,
+			ViewCountEnabled:    v.ViewCountEnabled,
+			LikeCountEnabled:    v.LikeCountEnabled,
+			DislikeCountEnabled: v.DislikeCountEnabled,
+			Status:              v.Status,
+			ViewCount:           v.ViewCount,
+			LikeCount:           v.LikeCount,
+			DislikeCount:        v.DislikeCount,
+			CommentCount:        v.CommentCount,
+			CreatedAt:           v.CreatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			UpdatedAt:           v.UpdatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			PublishedAt:         v.PublishedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			IsDeleted:           v.IsDeleted.Bool,
+			Username:            v.Username,
+			CategoryName:        v.CategoryName,
+		})
+	}
+
+	url := "/api/admin/content/deleted/search?search_term=" + req.SearchTerm + "&limit="
 
 	return Render(ctx, http.StatusOK, components.PublishedContent(int(nextLimit), content, url))
 }

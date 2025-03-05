@@ -10,6 +10,10 @@ func (server *Server) setupRouter() {
 	router := echo.New()
 	// Initialize custom validator from validator.go
 	router.Validator = NewCustomValidator()
+
+	// Run cron job to create daily analytics
+	go server.scheduleDailyAnalytics()
+
 	// Serve static files
 	router.Static("/static", "static")
 
@@ -64,6 +68,9 @@ func (server *Server) setupRouter() {
 	adminRoutes.GET("/api/admin/content/deleted", server.listDelContent)
 	adminRoutes.GET("/api/admin/content/deleted/oldest", server.listDelContentOldest)
 	adminRoutes.GET("/api/admin/content/deleted/title", server.listDelContentTitle)
+	adminRoutes.GET("/api/admin/content/published/search", server.listSearchPubContent)
+	adminRoutes.GET("/api/admin/content/draft/search", server.listSearchDraftContent)
+	adminRoutes.GET("/api/admin/content/deleted/search", server.listSearchDelContent)
 	adminRoutes.PUT("/api/admin/content/archive/:id", server.archivePubContent)
 	adminRoutes.PUT("/api/admin/content/:id", server.updateContent)
 

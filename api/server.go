@@ -29,7 +29,6 @@ func NewServer(store *db.Store, symmetricKey string) (*Server, error) {
 	}
 
 	server.setupRouter()
-	go server.scheduleDailyAnalytics()
 
 	return server, nil
 }

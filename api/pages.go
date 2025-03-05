@@ -3,6 +3,7 @@ package api
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/token"
@@ -10,6 +11,8 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )
+
+var Loc, _ = time.LoadLocation("Europe/Belgrade")
 
 func (server *Server) homePage(ctx echo.Context) error {
 	return Render(ctx, http.StatusOK, components.Index())
@@ -151,9 +154,9 @@ func (server *Server) adminArts(ctx echo.Context) error {
 			LikeCount:           v.LikeCount,
 			DislikeCount:        v.DislikeCount,
 			CommentCount:        v.CommentCount,
-			CreatedAt:           v.CreatedAt.Time.Format("2006-01-02 15:04"),
-			UpdatedAt:           v.UpdatedAt.Time.Format("2006-01-02 15:04"),
-			PublishedAt:         v.PublishedAt.Time.Format("2006-01-02 15:04"),
+			CreatedAt:           v.CreatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			UpdatedAt:           v.UpdatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			PublishedAt:         v.PublishedAt.Time.In(Loc).Format("02-01-06 15:04"),
 			IsDeleted:           v.IsDeleted.Bool,
 			Username:            v.Username,
 			CategoryName:        v.CategoryName,
@@ -194,9 +197,9 @@ func (server *Server) publishedContentList(ctx echo.Context) error {
 			LikeCount:           v.LikeCount,
 			DislikeCount:        v.DislikeCount,
 			CommentCount:        v.CommentCount,
-			CreatedAt:           v.CreatedAt.Time.Format("02-01-06 15:04"),
-			UpdatedAt:           v.UpdatedAt.Time.Format("02-01-06 15:04"),
-			PublishedAt:         v.PublishedAt.Time.Format("02-01-06 15:04"),
+			CreatedAt:           v.CreatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			UpdatedAt:           v.UpdatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			PublishedAt:         v.PublishedAt.Time.In(Loc).Format("02-01-06 15:04"),
 			IsDeleted:           v.IsDeleted.Bool,
 			Username:            v.Username,
 			CategoryName:        v.CategoryName,
@@ -237,9 +240,9 @@ func (server *Server) draftContentList(ctx echo.Context) error {
 			LikeCount:           v.LikeCount,
 			DislikeCount:        v.DislikeCount,
 			CommentCount:        v.CommentCount,
-			CreatedAt:           v.CreatedAt.Time.Format("02-01-06 15:04"),
-			UpdatedAt:           v.UpdatedAt.Time.Format("02-01-06 15:04"),
-			PublishedAt:         v.PublishedAt.Time.Format("02-01-06 15:04"),
+			CreatedAt:           v.CreatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			UpdatedAt:           v.UpdatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			PublishedAt:         v.PublishedAt.Time.In(Loc).Format("02-01-06 15:04"),
 			IsDeleted:           v.IsDeleted.Bool,
 			Username:            v.Username,
 			CategoryName:        v.CategoryName,
@@ -280,9 +283,9 @@ func (server *Server) deletedContentList(ctx echo.Context) error {
 			LikeCount:           v.LikeCount,
 			DislikeCount:        v.DislikeCount,
 			CommentCount:        v.CommentCount,
-			CreatedAt:           v.CreatedAt.Time.Format("02-01-06 15:04"),
-			UpdatedAt:           v.UpdatedAt.Time.Format("02-01-06 15:04"),
-			PublishedAt:         v.PublishedAt.Time.Format("02-01-06 15:04"),
+			CreatedAt:           v.CreatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			UpdatedAt:           v.UpdatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			PublishedAt:         v.PublishedAt.Time.In(Loc).Format("02-01-06 15:04"),
 			IsDeleted:           v.IsDeleted.Bool,
 			Username:            v.Username,
 			CategoryName:        v.CategoryName,
