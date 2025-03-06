@@ -10,14 +10,14 @@ export default function TrendingContent() {
 	const [hasMore, setHasMore] = useState(true);
 	const [error, setError] = useState(null);
 
-	function getCookie(name) {
+	/*function getCookie(name) {
 		const value = `; ${document.cookie}`;
 		const parts = value.split(`; ${name}=`);
 		if (parts.length === 2) return parts.pop().split(';').shift();
 		return null;
-	}
+	}*/
 
-	const token = getCookie('access_token')
+	//const token = getCookie('access_token')
 
 	const getPublishedAtDate = () => {
 		const now = new Date();
@@ -47,11 +47,7 @@ export default function TrendingContent() {
 		setError(null);
 		try {
 			const publishedAt = getPublishedAtDate();
-			const res = await fetch.get(`/api/admin/trending?published_at=${publishedAt}&limit=${limit}`, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
+			const res = await fetch.get(`/api/admin/trending?published_at=${publishedAt}&limit=${limit}`);
 
 			// Handle null response by setting to empty array
 			if (res.data === null) {

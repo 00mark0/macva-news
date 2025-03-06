@@ -10,25 +10,21 @@ export default function DailyAnalytics() {
 	const [endDate, setEndDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 	const [limit, setLimit] = useState(30);
 
-	function getCookie(name) {
+	/*function getCookie(name) {
 		const value = `; ${document.cookie}`;
 		const parts = value.split(`; ${name}=`);
 		if (parts.length === 2) return parts.pop().split(';').shift();
 		return null;
-	}
+	}*/
 
-	const token = getCookie('access_token');
+	//const token = getCookie('access_token');
 
 	const fetchAnalytics = async () => {
 		setLoading(true);
 		setError(null);
 
 		try {
-			const res = await fetch.get(`/api/admin/analytics?start_date=${startDate}&end_date=${endDate}&limit=${limit}`, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
+			const res = await fetch.get(`/api/admin/analytics?start_date=${startDate}&end_date=${endDate}&limit=${limit}`);
 
 			// Handle null response by setting to empty array
 			if (res.data === null) {
@@ -78,7 +74,7 @@ export default function DailyAnalytics() {
 		// Trigger fetch immediately after state updates by using the values directly
 		//setLoading(true);
 		//setTimeout(() => {
-		//	fetchAnalytics();
+		//fetchAnalytics();
 		//}, 0);
 	};
 

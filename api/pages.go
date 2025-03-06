@@ -310,3 +310,19 @@ func (server *Server) loginPage(ctx echo.Context) error {
 
 	return Render(ctx, http.StatusOK, components.Login(loginErr))
 }
+
+func (server *Server) createArticlePage(ctx echo.Context) error {
+	categories, err := server.store.ListCategories(ctx.Request().Context(), 100)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get categories for create article page", err))
+		return err
+	}
+
+	tags, err := server.store.ListTags(ctx.Request().Context(), 1000)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get tags for create article page", err))
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.CreateArticle(categories, tags))
+}

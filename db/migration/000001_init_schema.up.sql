@@ -42,12 +42,12 @@ CREATE TABLE "views" (
 
 CREATE TABLE "category" (
   "category_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  "category_name" VARCHAR(50) NOT NULL
+  "category_name" VARCHAR(50) NOT NULL UNIQUE
 );
 
 CREATE TABLE "tag" (
   "tag_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  "tag_name" VARCHAR(50) NOT NULL
+  "tag_name" VARCHAR(50) NOT NULL UNIQUE
 );
 
 CREATE TABLE "content_tag" (

@@ -109,10 +109,11 @@ func (server *Server) login(ctx echo.Context) error {
 
 	// Set token as a secure, HTTP-only cookie
 	ctx.SetCookie(&http.Cookie{
-		Name:    "access_token",
-		Value:   accessToken,
-		Expires: time.Now().Add(duration),
-		Path:    "/",
+		Name:     "access_token",
+		Value:    accessToken,
+		Expires:  time.Now().Add(duration),
+		Path:     "/",
+		HttpOnly: true,
 	})
 
 	ctx.Response().Header().Set("HX-Redirect", "/")

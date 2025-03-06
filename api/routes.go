@@ -39,6 +39,7 @@ func (server *Server) setupRouter() {
 	adminRoutes.GET("/admin/update-cat-form/:id", server.updateCategoryForm)
 	// Admin articles
 	adminRoutes.GET("/admin/content", server.adminArts)
+	adminRoutes.GET("/admin/content/create", server.createArticlePage)
 	adminRoutes.GET("/admin/pub-content", server.publishedContentList)
 	adminRoutes.GET("/admin/draft-content", server.draftContentList)
 	adminRoutes.GET("/admin/del-content", server.deletedContentList)
