@@ -97,81 +97,87 @@ templ AdminArticles(overview db.GetContentOverviewRow, nextLimit int, content []
 			</a>
 		</div>
 		<!-- Floating Nav Container -->
-		<div class="flex justify-center w-full mb-8">
-			<div
-				class="flex flex-col sm:flex-row items-center gap-4 sm:gap-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-xl shadow-lg p-2 sm:p-1 border border-gray-200 dark:border-gray-700"
-			>
-				<button
-					hx-trigger="click"
-					hx-get="/admin/pub-content"
-					hx-target="#nav-switch"
-					hx-swap="innerHTML"
-					class="cursor-pointer relative px-6 py-3 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600 group bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 w-full sm:w-auto"
-					id="published-btn"
-					_="on click add .active to me remove .active from #draft-btn remove .active from #deleted-btn"
-				>
-					<span class="flex items-center justify-center">
-						<span
-							class="inline-flex items-center justify-center w-6 h-6 mr-2 rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs"
-						>
-							{ fmt.Sprintf("%d", overview.PublishedCount) }
-						</span>
-						<span>Objavljeni</span>
-					</span>
-					<span
-						class="absolute bottom-0 left-0 w-full h-1 bg-blue-500 rounded-b-lg opacity-0 transition-all duration-200 group-[.active]:opacity-100"
-					></span>
-				</button>
-				<div class="hidden sm:block h-6 w-px bg-gray-300 dark:bg-gray-600 mx-1"></div>
-				<button
-					hx-trigger="click"
-					hx-get="/admin/draft-content"
-					hx-target="#nav-switch"
-					hx-swap="innerHTML"
-					class="cursor-pointer relative px-6 py-3 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600 group bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 w-full sm:w-auto"
-					id="draft-btn"
-					_="on click add .active to me remove .active from #published-btn remove .active from #deleted-btn"
-				>
-					<span class="flex items-center justify-center">
-						<span
-							class="inline-flex items-center justify-center w-6 h-6 mr-2 rounded-full bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs"
-						>
-							{ fmt.Sprintf("%d", overview.DraftCount) }
-						</span>
-						<span>Neobjavljeni</span>
-					</span>
-					<span
-						class="absolute bottom-0 left-0 w-full h-1 bg-blue-500 rounded-b-lg opacity-0 transition-all duration-200 group-[.active]:opacity-100"
-					></span>
-				</button>
-				<div class="hidden sm:block h-6 w-px bg-gray-300 dark:bg-gray-600 mx-1"></div>
-				<button
-					hx-trigger="click"
-					hx-get="/admin/del-content"
-					hx-target="#nav-switch"
-					hx-swap="innerHTML"
-					class="cursor-pointer relative px-6 py-3 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600 group bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 w-full sm:w-auto"
-					id="deleted-btn"
-					_="on click add .active to me remove .active from #published-btn remove .active from #draft-btn"
-				>
-					<span class="flex items-center justify-center">
-						<span
-							class="inline-flex items-center justify-center w-6 h-6 mr-2 rounded-full bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs"
-						>
-							{ fmt.Sprintf("%d", overview.DeletedCount) }
-						</span>
-						<span>Arhivirani</span>
-					</span>
-					<span
-						class="absolute bottom-0 left-0 w-full h-1 bg-blue-500 rounded-b-lg opacity-0 transition-all duration-200 group-[.active]:opacity-100"
-					></span>
-				</button>
-			</div>
+		<div id="article-nav">
+			@ArticleNav(overview)
 		</div>
 		<div id="nav-switch">
 			@PublishedContentSort(nextLimit, content, url)
 		</div>
 	</div>
+}
+
+templ ArticleNav(overview db.GetContentOverviewRow) {
+	<nav class="flex justify-center w-full mb-8">
+		<div
+			class="flex flex-col sm:flex-row items-center gap-4 sm:gap-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-xl shadow-lg p-2 sm:p-1 border border-gray-200 dark:border-gray-700"
+		>
+			<button
+				hx-trigger="click"
+				hx-get="/admin/pub-content"
+				hx-target="#nav-switch"
+				hx-swap="innerHTML"
+				class="cursor-pointer relative px-6 py-3 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600 group bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 w-full sm:w-auto"
+				id="published-btn"
+				_="on click add .active to me remove .active from #draft-btn remove .active from #deleted-btn"
+			>
+				<span class="flex items-center justify-center">
+					<span
+						class="inline-flex items-center justify-center w-6 h-6 mr-2 rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs"
+					>
+						{ fmt.Sprintf("%d", overview.PublishedCount) }
+					</span>
+					<span>Objavljeni</span>
+				</span>
+				<span
+					class="absolute bottom-0 left-0 w-full h-1 bg-blue-500 rounded-b-lg opacity-0 transition-all duration-200 group-[.active]:opacity-100"
+				></span>
+			</button>
+			<div class="hidden sm:block h-6 w-px bg-gray-300 dark:bg-gray-600 mx-1"></div>
+			<button
+				hx-trigger="click"
+				hx-get="/admin/draft-content"
+				hx-target="#nav-switch"
+				hx-swap="innerHTML"
+				class="cursor-pointer relative px-6 py-3 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600 group bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 w-full sm:w-auto"
+				id="draft-btn"
+				_="on click add .active to me remove .active from #published-btn remove .active from #deleted-btn"
+			>
+				<span class="flex items-center justify-center">
+					<span
+						class="inline-flex items-center justify-center w-6 h-6 mr-2 rounded-full bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs"
+					>
+						{ fmt.Sprintf("%d", overview.DraftCount) }
+					</span>
+					<span>Neobjavljeni</span>
+				</span>
+				<span
+					class="absolute bottom-0 left-0 w-full h-1 bg-blue-500 rounded-b-lg opacity-0 transition-all duration-200 group-[.active]:opacity-100"
+				></span>
+			</button>
+			<div class="hidden sm:block h-6 w-px bg-gray-300 dark:bg-gray-600 mx-1"></div>
+			<button
+				hx-trigger="click"
+				hx-get="/admin/del-content"
+				hx-target="#nav-switch"
+				hx-swap="innerHTML"
+				class="cursor-pointer relative px-6 py-3 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600 group bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 w-full sm:w-auto"
+				id="deleted-btn"
+				_="on click add .active to me remove .active from #published-btn remove .active from #draft-btn"
+			>
+				<span class="flex items-center justify-center">
+					<span
+						class="inline-flex items-center justify-center w-6 h-6 mr-2 rounded-full bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs"
+					>
+						{ fmt.Sprintf("%d", overview.DeletedCount) }
+					</span>
+					<span>Arhivirani</span>
+				</span>
+				<span
+					class="absolute bottom-0 left-0 w-full h-1 bg-blue-500 rounded-b-lg opacity-0 transition-all duration-200 group-[.active]:opacity-100"
+				></span>
+			</button>
+		</div>
+	</nav>
 }
 
 templ PublishedContentSort(nextLimit int, content []ListPublishedContentRes, url string) {
@@ -494,29 +500,33 @@ templ PublishedContent(nextLimit int, content []ListPublishedContentRes, url str
 									if v.Status == "draft" && v.IsDeleted == false {
 										<button
 											hx-put={ fmt.Sprintf("/api/admin/content/publish/%v", v.ContentID) }
-											hx-target="#admin-content"
+											hx-target="#article-nav"
 											hx-trigger="click"
+											onclick="this.parentElement.parentElement.classList.add('hidden')"
 											class="cursor-pointer text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 mr-3"
 										>Objavi</button>
 									}
 									if v.IsDeleted == true {
 										<button
 											hx-put={ fmt.Sprintf("/api/admin/content/unarchive/%v", v.ContentID) }
-											hx-target="#admin-content"
+											hx-target="#article-nav"
 											hx-trigger="click"
+											onclick="this.parentElement.parentElement.classList.add('hidden')"
 											class="cursor-pointer text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 mr-3"
 										>Obnovi</button>
 										<button
 											hx-delete={ fmt.Sprintf("/api/admin/content/%v", v.ContentID) }
-											hx-target="#admin-content"
+											hx-target="#article-nav"
 											hx-trigger="click"
+											onclick="this.parentElement.parentElement.classList.add('hidden')"
 											class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
 										>Obriši</button>
 									} else {
 										<button
 											hx-put={ fmt.Sprintf("/api/admin/content/archive/%v", v.ContentID) }
-											hx-target="#admin-content"
+											hx-target="#article-nav"
 											hx-trigger="click"
+											onclick="this.parentElement.parentElement.classList.add('hidden')"
 											class="cursor-pointer text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
 										>Arhiviraj</button>
 									}
@@ -863,6 +873,7 @@ templ CreateArticle(categories []db.Category, tags []db.Tag) {
 			<link href="/static/css/output.css" rel="stylesheet"/>
 			<!-- TinyMCE CDN -->
 			<script src="https://cdn.tiny.cloud/1/zg40kx0ha6mahvkb69fetcvauvyy8qkro8ig11uzb6jzf0cl/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+			<script src="/static/js/htmx.min.js"></script>
 		</head>
 		<body class="bg-gray-50 text-gray-900 dark:bg-black dark:text-gray-100 min-h-screen p-4 sm:p-12">
 			<!-- Theme Toggle Button -->
@@ -916,7 +927,13 @@ templ CreateArticle(categories []db.Category, tags []db.Tag) {
 					<!-- Page Title -->
 					<h1 class="text-3xl font-semibold text-black dark:text-white mb-10">Novi Artikl</h1>
 					<!-- Form -->
-					<form class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+					<form
+						hx-post="/api/admin/content/draft"
+						hx-target="#create-article-modal"
+						hx-swap="innerHTML"
+						hx-on::after-request="if(event.detail.successful) this.reset()"
+						class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6"
+					>
 						<!-- Title Field -->
 						<div class="mb-6">
 							<label
@@ -958,7 +975,7 @@ templ CreateArticle(categories []db.Category, tags []db.Tag) {
 							<div class="relative">
 								<select
 									id="category"
-									name="category"
+									name="category_id"
 									class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none dark:bg-gray-700 dark:text-white transition-colors duration-200"
 								>
 									<option value="">Izaberite kategoriju</option>
@@ -980,10 +997,6 @@ templ CreateArticle(categories []db.Category, tags []db.Tag) {
 								</div>
 							</div>
 						</div>
-						<!-- Tags section (new) -->
-						<div id="admin-tags">
-							@AdminTags(tags)
-						</div>
 						<div class="mb-6 mt-6">
 							<label
 								for="editor"
@@ -991,48 +1004,43 @@ templ CreateArticle(categories []db.Category, tags []db.Tag) {
 							>Sadržaj</label>
 							<div class="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
 								<!-- TinyMCE will replace this textarea -->
-								<textarea id="editor" name="content" class="w-full min-h-[400px]"></textarea>
+								<textarea id="editor" name="content_description" class="w-full min-h-[400px]"></textarea>
 							</div>
 							<p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
 								Koristite alate za formatiranje za bolju
 								čitljivost
 							</p>
 						</div>
-						<div class="form-group">
-							<label class="form-label">Medije</label>
-							<div
-								class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-700 border-dashed rounded-md"
-							>
-								<div class="space-y-1 text-center">
-									<svg
-										class="mx-auto h-12 w-12 text-gray-400"
-										stroke="currentColor"
-										fill="none"
-										viewBox="0 0 48 48"
-									>
-										<path
-											d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-											stroke-width="2"
-											stroke-linecap="round"
-											stroke-linejoin="round"
-										></path>
-									</svg>
-									<div class="flex text-sm text-gray-600 dark:text-gray-400">
-										<label
-											for="file-upload"
-											class="relative cursor-pointer rounded-md font-medium text-primary hover:text-blue-700"
-										>
-											<span>Upload a file</span>
-											<input id="file-upload" name="file-upload" type="file" class="sr-only"/>
-										</label>
-										<p class="pl-1">or drag and drop</p>
-									</div>
-									<p class="text-xs text-gray-500 dark:text-gray-400">
-										PNG, JPG, GIF up to 10MB
-									</p>
-								</div>
+						/*<div class="form-group">
+					<label class="form-label">Medije</label>
+					<div
+						class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-700 border-dashed rounded-md">
+						<div class="space-y-1 text-center">
+							<svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none"
+								viewBox="0 0 48 48">
+								<path
+									d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+									stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+							</svg>
+							<div class="flex text-sm text-gray-600 dark:text-gray-400">
+								<label for="file-upload"
+									class="relative cursor-pointer rounded-md font-medium text-primary hover:text-blue-700">
+									<span>Upload a file</span>
+									<input id="file-upload" name="file-upload" type="file" class="sr-only" />
+								</label>
+								<p class="pl-1">or drag and drop</p>
 							</div>
+							<p class="text-xs text-gray-500 dark:text-gray-400">
+								PNG, JPG, GIF up to 10MB
+							</p>
 						</div>
+					</div>
+				</div>*/
+						<!-- Tags section (new) -->
+						/*
+				<div id="admin-tags" class="mt-6">
+					@AdminTags(tags)
+				</div>*/
 						<div class="flex gap-4 pt-4">
 							<button
 								type="submit"
@@ -1041,7 +1049,8 @@ templ CreateArticle(categories []db.Category, tags []db.Tag) {
 								Objavi
 							</button>
 							<button
-								type="button"
+								type="submit"
+								onclick="document.getElementById('create-article-modal').classList.remove('hidden')"
 								class="cursor-pointer py-2 px-4 rounded-lg bg-yellow-800 hover:bg-yellow-900 text-white"
 							>
 								Sačuvaj
@@ -1049,10 +1058,10 @@ templ CreateArticle(categories []db.Category, tags []db.Tag) {
 						</div>
 					</form>
 				</div>
+				<div id="create-article-modal" class="fixed top-1/6 left-1/2 transform -translate-x-1/2 -translate-y-1/6"></div>
 			</main>
 			<!-- TinyMCE Initialization -->
 			<script>
-
 		const getThemePreference = () => {
 			if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
 				return localStorage.getItem('theme');
@@ -1093,8 +1102,8 @@ templ CreateArticle(categories []db.Category, tags []db.Tag) {
 				skin: 'oxide-dark',
 				content_css: 'dark',
 				setup: function (editor) {
-					editor.on('init', function () {
-						console.log('TinyMCE initialized');
+					editor.on('change', function (e) {
+						editor.save();
 					});
 				}
 			});
@@ -1102,6 +1111,90 @@ templ CreateArticle(categories []db.Category, tags []db.Tag) {
 	</script>
 		</body>
 	</html>
+}
+
+templ ArticleSuccess(message string) {
+	<div
+		class="bg-green-100 border-l-4 border-green-500 rounded-md shadow-md transform transition-all duration-300 ease-out animate-fadeIn"
+	>
+		<div class="flex flex-col gap-2 sm:gap-0 sm:flex-row justify-center items-center p-3">
+			<div>
+				<svg
+					class="h-5 w-5 text-green-500"
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 20 20"
+					fill="currentColor"
+				>
+					<path
+						fill-rule="evenodd"
+						d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+						clip-rule="evenodd"
+					></path>
+				</svg>
+			</div>
+			<div class="ml-3 mr-7">
+				<p class="text-sm text-center font-medium text-green-800">{ message }</p>
+			</div>
+			<div class="sm:ml-auto sm:pl-3">
+				<div class="flex space-x-2">
+					<a
+						href="/admin"
+						class="inline-flex text-xs bg-green-50 hover:bg-green-100 text-green-700 font-medium py-1 px-2 rounded-md transition-colors duration-150"
+					>
+						Nazad
+					</a>
+					<button
+						onclick="document.getElementById('create-article-modal').classList.add('hidden')"
+						class="inline-flex text-xs bg-green-50 hover:bg-green-100 text-green-700 font-medium py-1 px-2 rounded-md transition-colors duration-150"
+					>
+						Zatvori
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ ArticleError(message string) {
+	<div
+		class="bg-red-100 border-l-4 border-red-500 rounded-md shadow-md transform transition-all duration-300 ease-out animate-fadeIn"
+	>
+		<div class="flex flex-col gap-2 sm:gap-0 sm:flex-row justify-center items-center p-3">
+			<div>
+				<svg
+					class="h-5 w-5 text-red-500"
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 20 20"
+					fill="currentColor"
+				>
+					<path
+						fill-rule="evenodd"
+						d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+						clip-rule="evenodd"
+					></path>
+				</svg>
+			</div>
+			<div class="ml-3 mr-7">
+				<p class="text-sm font-medium text-red-800">{ message }</p>
+			</div>
+			<div class="sm:ml-auto sm:pl-3">
+				<div class="flex space-x-2">
+					<a
+						href="/admin"
+						class="inline-flex text-xs bg-red-50 hover:bg-red-100 text-red-700 font-medium py-1 px-2 rounded-md transition-colors duration-150"
+					>
+						Nazad
+					</a>
+					<button
+						onclick="document.getElementById('create-article-modal').classList.add('hidden')"
+						class="inline-flex text-xs bg-red-50 hover:bg-red-100 text-red-700 font-medium py-1 px-2 rounded-md transition-colors duration-150"
+					>
+						Zatvori
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
 }
 
 templ AdminTags(tags []db.Tag) {

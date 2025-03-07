@@ -77,6 +77,7 @@ func (server *Server) setupRouter() {
 	adminRoutes.PUT("/api/admin/content/publish/:id", server.publishDraftContent)
 	adminRoutes.PUT("/api/admin/content/unarchive/:id", server.unarchiveContent)
 	adminRoutes.PUT("/api/admin/content/:id", server.updateContent)
+	adminRoutes.POST("/api/admin/content/draft", server.createContent)
 
 	// Auth Pages
 	router.GET("/login", server.loginPage)

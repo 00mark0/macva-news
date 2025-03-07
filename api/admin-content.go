@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -643,7 +644,13 @@ func (server *Server) archivePubContent(ctx echo.Context) error {
 		return err
 	}
 
-	return server.adminArts(ctx)
+	overview, err := server.store.GetContentOverview(ctx.Request().Context())
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content overview", err))
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.ArticleNav(overview))
 }
 
 func (server *Server) deleteContent(ctx echo.Context) error {
@@ -667,7 +674,13 @@ func (server *Server) deleteContent(ctx echo.Context) error {
 		return err
 	}
 
-	return server.adminArts(ctx)
+	overview, err := server.store.GetContentOverview(ctx.Request().Context())
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content overview", err))
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.ArticleNav(overview))
 }
 
 func (server *Server) publishDraftContent(ctx echo.Context) error {
@@ -691,7 +704,13 @@ func (server *Server) publishDraftContent(ctx echo.Context) error {
 		return err
 	}
 
-	return server.adminArts(ctx)
+	overview, err := server.store.GetContentOverview(ctx.Request().Context())
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content overview", err))
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.ArticleNav(overview))
 }
 
 func (server *Server) unarchiveContent(ctx echo.Context) error {
@@ -715,7 +734,13 @@ func (server *Server) unarchiveContent(ctx echo.Context) error {
 		return err
 	}
 
-	return server.adminArts(ctx)
+	overview, err := server.store.GetContentOverview(ctx.Request().Context())
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content overview", err))
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.ArticleNav(overview))
 }
 
 type UpdateContentReq struct {
@@ -825,4 +850,96 @@ func (server *Server) updateContent(ctx echo.Context) error {
 	}
 
 	return ctx.NoContent(http.StatusOK)
+}
+
+type CreateContentReq struct {
+	CategoryID         string `form:"category_id"`
+	Title              string `form:"title"`
+	ContentDescription string `form:"content_description"`
+}
+
+func (server *Server) createContent(ctx echo.Context) error {
+	var req CreateContentReq
+
+	if err := ctx.Bind(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		return err
+	}
+
+	if req.Title == "" {
+		message := "Naslov je obavezan."
+
+		return Render(ctx, http.StatusOK, components.ArticleError(message))
+	}
+
+	if req.CategoryID == "" {
+		message := "Kategorija je obavezna."
+
+		return Render(ctx, http.StatusOK, components.ArticleError(message))
+	}
+
+	if req.ContentDescription == "" {
+		message := "Sadržaj je obavezan."
+
+		return Render(ctx, http.StatusOK, components.ArticleError(message))
+	}
+
+	cookie, err := ctx.Cookie("access_token")
+	if err != nil {
+		// No cookie found; redirect to login page
+		return ctx.Redirect(http.StatusTemporaryRedirect, "/")
+	}
+
+	accessToken := cookie.Value
+	payload, err := server.tokenMaker.VerifyToken(accessToken)
+	if err != nil {
+		// Invalid token; redirect to login page
+		return ctx.Redirect(http.StatusTemporaryRedirect, "/")
+	}
+
+	parsedUserID, err := uuid.Parse(payload.UserID)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, errorResponse("invalid content ID format", err))
+	}
+
+	// Create a pgtype.UUID with the parsed UUID
+	userID := pgtype.UUID{
+		Bytes: parsedUserID,
+		Valid: true,
+	}
+
+	parsedCategoryID, err := uuid.Parse(req.CategoryID)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, errorResponse("invalid content ID format", err))
+	}
+
+	// Create a pgtype.UUID with the parsed UUID
+	categoryID := pgtype.UUID{
+		Bytes: parsedCategoryID,
+		Valid: true,
+	}
+
+	fmt.Printf("UserID: %v, Username: %v, Email: %v, Pfp: %v, Role: %v", payload.UserID, payload.Username, payload.Email, payload.Pfp, payload.Role)
+
+	arg := db.CreateContentParams{
+		UserID:              userID,
+		CategoryID:          categoryID,
+		Title:               req.Title,
+		ContentDescription:  req.ContentDescription,
+		CommentsEnabled:     true,
+		ViewCountEnabled:    true,
+		LikeCountEnabled:    true,
+		DislikeCountEnabled: false,
+	}
+
+	_, err = server.store.CreateContent(ctx.Request().Context(), arg)
+	if err != nil {
+		message := "Failed to create content"
+
+		return Render(ctx, http.StatusInternalServerError, components.ArticleError(message))
+	}
+
+	message := "Uspešno ste sačuvali novi sadržaj."
+
+	return Render(ctx, http.StatusOK, components.ArticleSuccess(message))
 }

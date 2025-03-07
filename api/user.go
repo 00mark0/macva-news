@@ -14,6 +14,7 @@ import (
 )
 
 type userResponse struct {
+	UserID   string `json:"user_id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Pfp      string `json:"pfp"`
@@ -22,6 +23,7 @@ type userResponse struct {
 
 func newUserResponse(payload *token.Payload) userResponse {
 	return userResponse{
+		UserID:   payload.UserID,
 		Username: payload.Username,
 		Email:    payload.Email,
 		Pfp:      payload.Pfp,
@@ -87,6 +89,7 @@ func (server *Server) login(ctx echo.Context) error {
 	}
 
 	accessToken, payload, err := server.tokenMaker.CreateToken(
+		user.UserID.String(),
 		user.Username,
 		user.Email,
 		user.Pfp,
