@@ -1,3 +1,7 @@
 # .gitignore
 node_modules/
 .env*
+tmp/
+static/css/output.css
+static/react/main.js
+
