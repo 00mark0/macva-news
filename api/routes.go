@@ -78,6 +78,15 @@ func (server *Server) setupRouter() {
 	adminRoutes.PUT("/api/admin/content/unarchive/:id", server.unarchiveContent)
 	adminRoutes.PUT("/api/admin/content/:id", server.updateContent)
 	adminRoutes.POST("/api/admin/content/draft", server.createContent)
+	adminRoutes.POST("/api/admin/content/publish", server.createAndPublishContent)
+
+	// Admin Tags
+	adminRoutes.POST("/api/admin/tags", server.createTag)
+	adminRoutes.POST("/api/admin/tags/add", server.addTagToContent)
+	adminRoutes.DELETE("/api/admin/tags/content/remove/:id", server.removeTagFromContent)
+
+	// Cookie
+	adminRoutes.DELETE("/api/cookie", server.deleteCookie)
 
 	// Auth Pages
 	router.GET("/login", server.loginPage)

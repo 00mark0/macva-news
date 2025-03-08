@@ -13,6 +13,8 @@ import (
 	"github.com/00mark0/macva-news/db/services"
 )
 
+var contentTags []db.Tag
+
 type ListPublishedContentRes struct {
 	ContentID           string
 	UserID              string
@@ -135,6 +137,18 @@ delSelect.classList.add('hidden');
 	}
 }
 
+func clearArticleModal() templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_clearArticleModal_ca3f`,
+		Function: `function __templ_clearArticleModal_ca3f(){const articleModal = document.getElementById('create-article-modal');
+articleModal.classList.remove('hidden');
+articleModal.innerHTML = '';
+}`,
+		Call:       templ.SafeScript(`__templ_clearArticleModal_ca3f`),
+		CallInline: templ.SafeScriptInline(`__templ_clearArticleModal_ca3f`),
+	}
+}
+
 func AdminArticles(overview db.GetContentOverviewRow, nextLimit int, content []ListPublishedContentRes, url string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -208,7 +222,7 @@ func ArticleNav(overview db.GetContentOverviewRow) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", overview.PublishedCount))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 127, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 126, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -221,7 +235,7 @@ func ArticleNav(overview db.GetContentOverviewRow) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", overview.DraftCount))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 149, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 141, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -234,7 +248,7 @@ func ArticleNav(overview db.GetContentOverviewRow) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", overview.DeletedCount))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 171, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 156, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -276,7 +290,7 @@ func PublishedContentSort(nextLimit int, content []ListPublishedContentRes, url 
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 204, Col: 78}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 179, Col: 77}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -323,7 +337,7 @@ func PublishedContentSort(nextLimit int, content []ListPublishedContentRes, url 
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/content/published?limit=%d", nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 235, Col: 90}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 193, Col: 89}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -336,7 +350,7 @@ func PublishedContentSort(nextLimit int, content []ListPublishedContentRes, url 
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/content/published/oldest?limit=%d", nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 238, Col: 97}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 196, Col: 96}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -349,7 +363,7 @@ func PublishedContentSort(nextLimit int, content []ListPublishedContentRes, url 
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/content/published/title?limit=%d", nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 241, Col: 96}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 199, Col: 95}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -399,7 +413,7 @@ func DraftContentSort(nextLimit int, content []ListPublishedContentRes, url stri
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 275, Col: 78}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 224, Col: 77}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -446,7 +460,7 @@ func DraftContentSort(nextLimit int, content []ListPublishedContentRes, url stri
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/content/draft?limit=%d", nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 306, Col: 86}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 238, Col: 85}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -459,7 +473,7 @@ func DraftContentSort(nextLimit int, content []ListPublishedContentRes, url stri
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/content/draft/oldest?limit=%d", nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 309, Col: 93}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 241, Col: 92}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -472,7 +486,7 @@ func DraftContentSort(nextLimit int, content []ListPublishedContentRes, url stri
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/content/draft/title?limit=%d", nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 312, Col: 92}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 244, Col: 91}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
@@ -522,7 +536,7 @@ func DeletedContentSort(nextLimit int, content []ListPublishedContentRes, url st
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 346, Col: 78}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 269, Col: 77}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -569,7 +583,7 @@ func DeletedContentSort(nextLimit int, content []ListPublishedContentRes, url st
 		var templ_7745c5c3_Var24 string
 		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/content/deleted?limit=%d", nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 377, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 283, Col: 87}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
@@ -582,7 +596,7 @@ func DeletedContentSort(nextLimit int, content []ListPublishedContentRes, url st
 		var templ_7745c5c3_Var25 string
 		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/content/deleted/oldest?limit=%d", nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 380, Col: 95}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 286, Col: 94}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 		if templ_7745c5c3_Err != nil {
@@ -595,7 +609,7 @@ func DeletedContentSort(nextLimit int, content []ListPublishedContentRes, url st
 		var templ_7745c5c3_Var26 string
 		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/content/deleted/title?limit=%d", nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 383, Col: 94}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 289, Col: 93}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 		if templ_7745c5c3_Err != nil {
@@ -666,7 +680,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 				var templ_7745c5c3_Var28 string
 				templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(v.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 442, Col: 43}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 342, Col: 40}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 				if templ_7745c5c3_Err != nil {
@@ -684,7 +698,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 					var templ_7745c5c3_Var29 string
 					templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(v.CategoryName)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 446, Col: 26}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 346, Col: 22}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 					if templ_7745c5c3_Err != nil {
@@ -714,7 +728,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 					templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(
 						v.PublishedAt)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 460, Col: 19}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 360, Col: 19}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 					if templ_7745c5c3_Err != nil {
@@ -733,7 +747,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 					templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(
 						v.CreatedAt)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 465, Col: 17}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 365, Col: 17}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 					if templ_7745c5c3_Err != nil {
@@ -752,7 +766,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 				templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(
 					v.Username)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 470, Col: 16}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 370, Col: 16}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 				if templ_7745c5c3_Err != nil {
@@ -765,7 +779,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 				var templ_7745c5c3_Var33 string
 				templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs("dropdown-container-" + fmt.Sprint(i))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 473, Col: 96}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 373, Col: 93}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 				if templ_7745c5c3_Err != nil {
@@ -779,7 +793,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "<button type=\"button\" class=\"text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3 flex items-center\" onClick=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "<button type=\"button\" class=\"cursor-pointer text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3 flex items-center\" onClick=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -806,7 +820,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 					var templ_7745c5c3_Var35 string
 					templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/content/publish/%v", v.ContentID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 502, Col: 77}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 389, Col: 80}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 					if templ_7745c5c3_Err != nil {
@@ -825,7 +839,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 					var templ_7745c5c3_Var36 string
 					templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/content/unarchive/%v", v.ContentID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 511, Col: 79}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 395, Col: 82}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 					if templ_7745c5c3_Err != nil {
@@ -838,13 +852,13 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 					var templ_7745c5c3_Var37 string
 					templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/content/%v", v.ContentID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 518, Col: 72}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 399, Col: 75}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 62, "\" hx-target=\"#article-nav\" hx-trigger=\"click\" onclick=\"this.parentElement.parentElement.classList.add(&#39;hidden&#39;)\" class=\"text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300\">Obriši</button>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 62, "\" hx-target=\"#article-nav\" hx-trigger=\"click\" onclick=\"this.parentElement.parentElement.classList.add(&#39;hidden&#39;)\" class=\"cursor-pointer text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300\">Obriši</button>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -856,7 +870,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 					var templ_7745c5c3_Var38 string
 					templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/content/archive/%v", v.ContentID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 526, Col: 77}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 403, Col: 80}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 					if templ_7745c5c3_Err != nil {
@@ -874,7 +888,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 				var templ_7745c5c3_Var39 string
 				templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs("dropdown-" + fmt.Sprint(i))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 538, Col: 42}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 412, Col: 43}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 				if templ_7745c5c3_Err != nil {
@@ -888,7 +902,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 				templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(
 					v.ContentDescription)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 553, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 426, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 				if templ_7745c5c3_Err != nil {
@@ -937,7 +951,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 				templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(
 					v.ContentID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 603, Col: 23}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 471, Col: 23}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 				if templ_7745c5c3_Err != nil {
@@ -951,7 +965,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 				templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(
 					fmt.Sprint(v.ViewCount))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 617, Col: 36}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 485, Col: 36}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
 				if templ_7745c5c3_Err != nil {
@@ -965,7 +979,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 				templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs(
 					fmt.Sprint(v.CommentCount))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 624, Col: 39}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 492, Col: 39}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var43))
 				if templ_7745c5c3_Err != nil {
@@ -979,7 +993,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 				templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs(
 					fmt.Sprint(v.LikeCount))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 631, Col: 36}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 499, Col: 36}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
 				if templ_7745c5c3_Err != nil {
@@ -993,7 +1007,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 				templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.JoinStringErrs(
 					fmt.Sprint(v.DislikeCount))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 638, Col: 39}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 506, Col: 39}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var45))
 				if templ_7745c5c3_Err != nil {
@@ -1007,7 +1021,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 				templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinStringErrs(
 					v.CreatedAt)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 647, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 515, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var46))
 				if templ_7745c5c3_Err != nil {
@@ -1021,7 +1035,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 				templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(
 					v.UpdatedAt)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 651, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 519, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
 				if templ_7745c5c3_Err != nil {
@@ -1035,7 +1049,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 				templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs(
 					v.PublishedAt)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 655, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 523, Col: 26}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
 				if templ_7745c5c3_Err != nil {
@@ -1053,7 +1067,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 					var templ_7745c5c3_Var49 string
 					templ_7745c5c3_Var49, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/content/%v", v.ContentID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 674, Col: 75}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 541, Col: 76}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var49))
 					if templ_7745c5c3_Err != nil {
@@ -1076,7 +1090,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 					var templ_7745c5c3_Var50 string
 					templ_7745c5c3_Var50, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/content/%v", v.ContentID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 708, Col: 75}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 561, Col: 76}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var50))
 					if templ_7745c5c3_Err != nil {
@@ -1099,7 +1113,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 					var templ_7745c5c3_Var51 string
 					templ_7745c5c3_Var51, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/content/%v", v.ContentID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 742, Col: 75}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 581, Col: 76}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var51))
 					if templ_7745c5c3_Err != nil {
@@ -1122,7 +1136,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 					var templ_7745c5c3_Var52 string
 					templ_7745c5c3_Var52, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/content/%v", v.ContentID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 776, Col: 75}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 601, Col: 76}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var52))
 					if templ_7745c5c3_Err != nil {
@@ -1160,7 +1174,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 				var templ_7745c5c3_Var53 string
 				templ_7745c5c3_Var53, templ_7745c5c3_Err = templ.JoinStringErrs(url + fmt.Sprintf("%d", nextLimit))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 819, Col: 49}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 629, Col: 72}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var53))
 				if templ_7745c5c3_Err != nil {
@@ -1206,7 +1220,7 @@ func CreateArticle(categories []db.Category, tags []db.Tag) templ.Component {
 			templ_7745c5c3_Var54 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 102, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Novi Artikl | Mačva News</title><link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin><link href=\"https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&amp;display=swap\" rel=\"stylesheet\"><link href=\"/static/css/output.css\" rel=\"stylesheet\"><!-- TinyMCE CDN --><script src=\"https://cdn.tiny.cloud/1/zg40kx0ha6mahvkb69fetcvauvyy8qkro8ig11uzb6jzf0cl/tinymce/7/tinymce.min.js\" referrerpolicy=\"origin\"></script><script src=\"/static/js/htmx.min.js\"></script></head><body class=\"bg-gray-50 text-gray-900 dark:bg-black dark:text-gray-100 min-h-screen p-4 sm:p-12\"><!-- Theme Toggle Button --><div class=\"fixed top-4 right-4 z-10\"><button id=\"create-theme-toggle\" class=\"cursor-pointer p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200\"><svg id=\"sun-icon\" class=\"w-6 h-6 hidden dark:block\" fill=\"currentColor\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z\"></path></svg> <svg id=\"moon-icon\" class=\"w-6 h-6 block dark:hidden\" fill=\"currentColor\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z\"></path></svg></button></div><!-- Main Content --><main class=\"min-h-screen\"><div class=\"content-container\"><!-- Breadcrumbs --><nav class=\"text-sm mb-6\"><ol class=\"list-none p-0 flex\"><li class=\"flex items-center\"><a href=\"/admin\" class=\"text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary\">Admin</a> <svg class=\"h-4 w-4 mx-2 text-gray-400\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 5l7 7-7 7\"></path></svg></li><li><span class=\"text-gray-700 dark:text-gray-300\">Novi Artikl</span></li></ol></nav><!-- Page Title --><h1 class=\"text-3xl font-semibold text-black dark:text-white mb-10\">Novi Artikl</h1><!-- Form --><form hx-post=\"/api/admin/content/draft\" hx-target=\"#create-article-modal\" hx-swap=\"innerHTML\" hx-on::after-request=\"if(event.detail.successful) this.reset()\" class=\"bg-white dark:bg-gray-800 shadow-md rounded-lg p-6\"><!-- Title Field --><div class=\"mb-6\"><label for=\"title\" class=\"block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2\">Naslov</label><div class=\"relative\"><input type=\"text\" id=\"title\" name=\"title\" class=\"w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors duration-200\" placeholder=\"Unesite naslov artikla\"><div class=\"absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400\"><svg class=\"h-5 w-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z\"></path></svg></div></div><p class=\"mt-1 text-xs text-gray-500 dark:text-gray-400\">Jasan i koncizan naslov koji privlači pažnju</p></div><!-- Category Field with enhanced dropdown --><div class=\"mb-6\"><label for=\"category\" class=\"block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2\">Kategorija</label><div class=\"relative\"><select id=\"category\" name=\"category_id\" class=\"w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none dark:bg-gray-700 dark:text-white transition-colors duration-200\"><option value=\"\">Izaberite kategoriju</option> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 102, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Novi Artikl | Mačva News</title><meta name=\"description\" content=\"Mačva News Novi Artikl\"><link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin><link href=\"https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&amp;display=swap\" rel=\"stylesheet\"><link href=\"/static/css/output.css\" rel=\"stylesheet\"><!-- TinyMCE CDN --><script src=\"https://cdn.tiny.cloud/1/zg40kx0ha6mahvkb69fetcvauvyy8qkro8ig11uzb6jzf0cl/tinymce/7/tinymce.min.js\" referrerpolicy=\"origin\"></script><script src=\"/static/js/htmx.min.js\"></script></head><body class=\"bg-gray-50 text-gray-900 dark:bg-black dark:text-gray-100 min-h-screen p-4 sm:p-12\"><!-- Theme Toggle Button --><div class=\"fixed top-4 right-4 z-10\"><button id=\"create-theme-toggle\" class=\"cursor-pointer p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200\"><svg id=\"sun-icon\" class=\"w-6 h-6 hidden dark:block\" fill=\"currentColor\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z\"></path></svg> <svg id=\"moon-icon\" class=\"w-6 h-6 block dark:hidden\" fill=\"currentColor\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z\"></path></svg></button></div><!-- Main Content --><main class=\"min-h-screen\"><div class=\"content-container\"><!-- Breadcrumbs --><nav class=\"text-sm mb-6\"><ol class=\"list-none p-0 flex\"><li class=\"flex items-center\"><a href=\"/admin\" class=\"text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary\">Admin</a> <svg class=\"h-4 w-4 mx-2 text-gray-400\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 5l7 7-7 7\"></path></svg></li><li><span class=\"text-gray-700 dark:text-gray-300\">Novi Artikl</span></li></ol></nav><!-- Page Title --><h1 class=\"text-3xl font-semibold text-black dark:text-white mb-10\">Novi Artikl</h1><!-- Form --><form class=\"bg-white dark:bg-gray-800 shadow-md rounded-lg p-6\"><!-- Title Field --><div class=\"mb-6\"><label for=\"title\" class=\"block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2\">Naslov</label><div class=\"relative\"><input type=\"text\" id=\"title\" name=\"title\" class=\"w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors duration-200\" placeholder=\"Unesite naslov artikla\"><div class=\"absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400\"><svg class=\"h-5 w-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z\"></path></svg></div></div><p class=\"mt-1 text-xs text-gray-500 dark:text-gray-400\">Jasan i koncizan naslov koji privlači pažnju</p></div><!-- Category Field with enhanced dropdown --><div class=\"mb-6\"><label for=\"category\" class=\"block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2\">Kategorija</label><div class=\"relative\"><select id=\"category\" name=\"category_id\" class=\"w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none dark:bg-gray-700 dark:text-white transition-colors duration-200\"><option value=\"\">Izaberite kategoriju</option> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1218,7 +1232,7 @@ func CreateArticle(categories []db.Category, tags []db.Tag) templ.Component {
 			var templ_7745c5c3_Var55 string
 			templ_7745c5c3_Var55, templ_7745c5c3_Err = templ.JoinStringErrs(v.CategoryID.String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 983, Col: 47}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 747, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var55))
 			if templ_7745c5c3_Err != nil {
@@ -1231,7 +1245,7 @@ func CreateArticle(categories []db.Category, tags []db.Tag) templ.Component {
 			var templ_7745c5c3_Var56 string
 			templ_7745c5c3_Var56, templ_7745c5c3_Err = templ.JoinStringErrs(v.CategoryName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 983, Col: 66}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 747, Col: 63}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var56))
 			if templ_7745c5c3_Err != nil {
@@ -1242,7 +1256,49 @@ func CreateArticle(categories []db.Category, tags []db.Tag) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 106, "</select><div class=\"absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500 dark:text-gray-400\"><svg class=\"h-5 w-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 9l-7 7-7-7\"></path></svg></div></div></div><div class=\"mb-6 mt-6\"><label for=\"editor\" class=\"block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2\">Sadržaj</label><div class=\"border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden\"><!-- TinyMCE will replace this textarea --><textarea id=\"editor\" name=\"content_description\" class=\"w-full min-h-[400px]\"></textarea></div><p class=\"mt-1 text-xs text-gray-500 dark:text-gray-400\">Koristite alate za formatiranje za bolju čitljivost</p></div><!-- Tags section (new) --><div class=\"flex gap-4 pt-4\"><button type=\"submit\" class=\"cursor-pointer bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2 rounded-lg\">Objavi</button> <button type=\"submit\" onclick=\"document.getElementById(&#39;create-article-modal&#39;).classList.remove(&#39;hidden&#39;)\" class=\"cursor-pointer py-2 px-4 rounded-lg bg-yellow-800 hover:bg-yellow-900 text-white\">Sačuvaj</button></div></form></div><div id=\"create-article-modal\" class=\"fixed top-1/6 left-1/2 transform -translate-x-1/2 -translate-y-1/6\"></div></main><!-- TinyMCE Initialization --><script>\n\t\tconst getThemePreference = () => {\n\t\t\tif (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {\n\t\t\t\treturn localStorage.getItem('theme');\n\t\t\t}\n\t\t\treturn window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';\n\t\t};\n\n\t\t// Apply the current theme\n\t\tconst applyTheme = (theme) => {\n\t\t\tif (theme === 'dark') {\n\t\t\t\tdocument.documentElement.classList.add('dark');\n\t\t\t} else {\n\t\t\t\tdocument.documentElement.classList.remove('dark');\n\t\t\t}\n\t\t\tlocalStorage.setItem('theme', theme);\n\t\t};\n\n\t\tapplyTheme(getThemePreference());\n\n\t\tconst createThemeToggle = document.getElementById('create-theme-toggle');\n\n\t\tcreateThemeToggle.addEventListener(\"click\", () => {\n\t\t\tconst isDark = document.documentElement.classList.contains('dark');\n\t\t\tapplyTheme(isDark ? 'light' : 'dark');\n\t\t})\n\n\t\t// Initialize TinyMCE\n\t\tdocument.addEventListener('DOMContentLoaded', function () {\n\t\t\tinitTinyMCE();\n\t\t});\n\n\t\tfunction initTinyMCE() {\n\t\t\ttinymce.init({\n\t\t\t\tselector: '#editor',\n\t\t\t\tplugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',\n\t\t\t\ttoolbar: 'undo redo | blocks | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',\n\t\t\t\theight: 800,\n\t\t\t\tskin: 'oxide-dark',\n\t\t\t\tcontent_css: 'dark',\n\t\t\t\tsetup: function (editor) {\n\t\t\t\t\teditor.on('change', function (e) {\n\t\t\t\t\t\teditor.save();\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t});\n\t\t}\n\t</script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 106, "</select><div class=\"absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500 dark:text-gray-400\"><svg class=\"h-5 w-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 9l-7 7-7-7\"></path></svg></div></div></div><div class=\"mb-6 mt-6\"><label for=\"editor\" class=\"block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2\">Sadržaj</label><div class=\"border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden\"><!-- TinyMCE will replace this textarea --><textarea id=\"editor\" name=\"content_description\" class=\"w-full min-h-[400px]\"></textarea></div><p class=\"mt-1 text-xs text-gray-500 dark:text-gray-400\">Koristite alate za formatiranje za bolju čitljivost</p></div><div class=\"flex gap-4 pt-4\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, clearArticleModal())
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 107, "<button hx-post=\"/api/admin/content/publish\" hx-target=\"#create-article-modal\" hx-swap=\"innerHTML\" onClick=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var57 templ.ComponentScript = clearArticleModal()
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var57.Call)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 108, "\" type=\"submit\" class=\"cursor-pointer bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2 rounded-lg\">Objavi</button> ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, clearArticleModal())
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 109, "<button hx-post=\"/api/admin/content/draft\" hx-target=\"#create-article-modal\" hx-swap=\"innerHTML\" type=\"submit\" onClick=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var58 templ.ComponentScript = clearArticleModal()
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var58.Call)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 110, "\" class=\"cursor-pointer py-2 px-4 rounded-lg bg-yellow-800 hover:bg-yellow-900 text-white\">Sačuvaj</button> <a href=\"/admin\" class=\"cursor-pointer bg-gray-600 hover:bg-gray-400 text-white px-4 py-2 rounded-lg\">Nazad</a></div></form><!-- Tags section --><div id=\"admin-tags\" class=\"mt-6\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = AdminTags(tags, contentTags).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 111, "</div></div><div id=\"create-article-modal\" class=\"fixed top-1/6 left-1/2 transform -translate-x-1/2 -translate-y-1/6\"></div></main><!-- TinyMCE Initialization --><script>\n\t\tconst getThemePreference = () => {\n\t\t\tif (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {\n\t\t\t\treturn localStorage.getItem('theme');\n\t\t\t}\n\t\t\treturn window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';\n\t\t};\n\n\t\t// Apply the current theme\n\t\tconst applyTheme = (theme) => {\n\t\t\tif (theme === 'dark') {\n\t\t\t\tdocument.documentElement.classList.add('dark');\n\t\t\t} else {\n\t\t\t\tdocument.documentElement.classList.remove('dark');\n\t\t\t}\n\t\t\tlocalStorage.setItem('theme', theme);\n\t\t};\n\n\t\tapplyTheme(getThemePreference());\n\n\t\tconst createThemeToggle = document.getElementById('create-theme-toggle');\n\n\t\tcreateThemeToggle.addEventListener(\"click\", () => {\n\t\t\tconst isDark = document.documentElement.classList.contains('dark');\n\t\t\tapplyTheme(isDark ? 'light' : 'dark');\n\t\t})\n\n\t\t// Initialize TinyMCE\n\t\tdocument.addEventListener('DOMContentLoaded', function () {\n\t\t\tinitTinyMCE();\n\t\t});\n\n\t\tdocument.body.addEventListener('htmx:beforeSwap', function (evt) {\n\t\t\t// Check if there's an HX-Retarget header\n\t\t\tconst retargetHeader = evt.detail.xhr.getResponseHeader(\"HX-Retarget\");\n\n\t\t\tif (retargetHeader) {\n\t\t\t\t// Change the target of the swap\n\t\t\t\tevt.detail.target = document.querySelector(retargetHeader);\n\t\t\t}\n\t\t});\n\n\t\twindow.addEventListener(\"beforeunload\", function () {\n\t\t\tfetch(\"/api/cookie\", {method: \"DELETE\", keepalive: true});\n\t\t});\n\n\t\tfunction initTinyMCE() {\n\t\t\ttinymce.init({\n\t\t\t\tselector: '#editor',\n\t\t\t\tplugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',\n\t\t\t\ttoolbar: 'undo redo | blocks | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',\n\t\t\t\theight: 800,\n\t\t\t\tskin: 'oxide-dark',\n\t\t\t\tcontent_css: 'dark',\n\t\t\t\tsetup: function (editor) {\n\t\t\t\t\teditor.on('change', function (e) {\n\t\t\t\t\t\teditor.save();\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t});\n\t\t}\n\t</script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1266,25 +1322,25 @@ func ArticleSuccess(message string) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var57 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var57 == nil {
-			templ_7745c5c3_Var57 = templ.NopComponent
+		templ_7745c5c3_Var59 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var59 == nil {
+			templ_7745c5c3_Var59 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 107, "<div class=\"bg-green-100 border-l-4 border-green-500 rounded-md shadow-md transform transition-all duration-300 ease-out animate-fadeIn\"><div class=\"flex flex-col gap-2 sm:gap-0 sm:flex-row justify-center items-center p-3\"><div><svg class=\"h-5 w-5 text-green-500\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z\" clip-rule=\"evenodd\"></path></svg></div><div class=\"ml-3 mr-7\"><p class=\"text-sm text-center font-medium text-green-800\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 112, "<div class=\"bg-green-100 border-l-4 border-green-500 rounded-md shadow-md transform transition-all duration-300 ease-out animate-fadeIn\"><div class=\"flex flex-col gap-2 sm:gap-0 sm:flex-row justify-center items-center p-3\"><div><svg class=\"h-5 w-5 text-green-500\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z\" clip-rule=\"evenodd\"></path></svg></div><div class=\"ml-3 mr-7\"><p class=\"text-sm text-center font-medium text-green-800\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var58 string
-		templ_7745c5c3_Var58, templ_7745c5c3_Err = templ.JoinStringErrs(message)
+		var templ_7745c5c3_Var60 string
+		templ_7745c5c3_Var60, templ_7745c5c3_Err = templ.JoinStringErrs(message)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 1136, Col: 71}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 901, Col: 70}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var58))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var60))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 108, "</p></div><div class=\"sm:ml-auto sm:pl-3\"><div class=\"flex space-x-2\"><a href=\"/admin\" class=\"inline-flex text-xs bg-green-50 hover:bg-green-100 text-green-700 font-medium py-1 px-2 rounded-md transition-colors duration-150\">Nazad</a> <button onclick=\"document.getElementById(&#39;create-article-modal&#39;).classList.add(&#39;hidden&#39;)\" class=\"inline-flex text-xs bg-green-50 hover:bg-green-100 text-green-700 font-medium py-1 px-2 rounded-md transition-colors duration-150\">Zatvori</button></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 113, "</p></div><div class=\"sm:ml-auto sm:pl-3\"><div class=\"flex space-x-2\"><a href=\"/admin\" class=\"inline-flex text-xs bg-green-50 hover:bg-green-100 text-green-700 font-medium py-1 px-2 rounded-md transition-colors duration-150\">Nazad</a> <button onclick=\"document.getElementById(&#39;create-article-modal&#39;).classList.add(&#39;hidden&#39;)\" class=\"cursor-pointer inline-flex text-xs bg-green-50 hover:bg-green-100 text-green-700 font-medium py-1 px-2 rounded-md transition-colors duration-150\">Zatvori</button></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1308,25 +1364,25 @@ func ArticleError(message string) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var59 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var59 == nil {
-			templ_7745c5c3_Var59 = templ.NopComponent
+		templ_7745c5c3_Var61 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var61 == nil {
+			templ_7745c5c3_Var61 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 109, "<div class=\"bg-red-100 border-l-4 border-red-500 rounded-md shadow-md transform transition-all duration-300 ease-out animate-fadeIn\"><div class=\"flex flex-col gap-2 sm:gap-0 sm:flex-row justify-center items-center p-3\"><div><svg class=\"h-5 w-5 text-red-500\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z\" clip-rule=\"evenodd\"></path></svg></div><div class=\"ml-3 mr-7\"><p class=\"text-sm font-medium text-red-800\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 114, "<div class=\"bg-red-100 border-l-4 border-red-500 rounded-md shadow-md transform transition-all duration-300 ease-out animate-fadeIn\"><div class=\"flex flex-col gap-2 sm:gap-0 sm:flex-row justify-center items-center p-3\"><div><svg class=\"h-5 w-5 text-red-500\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z\" clip-rule=\"evenodd\"></path></svg></div><div class=\"ml-3 mr-7\"><p class=\"text-sm font-medium text-red-800\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var60 string
-		templ_7745c5c3_Var60, templ_7745c5c3_Err = templ.JoinStringErrs(message)
+		var templ_7745c5c3_Var62 string
+		templ_7745c5c3_Var62, templ_7745c5c3_Err = templ.JoinStringErrs(message)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 1178, Col: 57}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 932, Col: 56}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var60))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var62))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 110, "</p></div><div class=\"sm:ml-auto sm:pl-3\"><div class=\"flex space-x-2\"><a href=\"/admin\" class=\"inline-flex text-xs bg-red-50 hover:bg-red-100 text-red-700 font-medium py-1 px-2 rounded-md transition-colors duration-150\">Nazad</a> <button onclick=\"document.getElementById(&#39;create-article-modal&#39;).classList.add(&#39;hidden&#39;)\" class=\"inline-flex text-xs bg-red-50 hover:bg-red-100 text-red-700 font-medium py-1 px-2 rounded-md transition-colors duration-150\">Zatvori</button></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 115, "</p></div><div class=\"sm:ml-auto sm:pl-3\"><div class=\"flex space-x-2\"><a href=\"/admin\" class=\"inline-flex text-xs bg-red-50 hover:bg-red-100 text-red-700 font-medium py-1 px-2 rounded-md transition-colors duration-150\">Nazad</a> <button onclick=\"document.getElementById(&#39;create-article-modal&#39;).classList.add(&#39;hidden&#39;)\" class=\"cursor-pointer inline-flex text-xs bg-red-50 hover:bg-red-100 text-red-700 font-medium py-1 px-2 rounded-md transition-colors duration-150\">Zatvori</button></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1334,7 +1390,7 @@ func ArticleError(message string) templ.Component {
 	})
 }
 
-func AdminTags(tags []db.Tag) templ.Component {
+func AdminTags(tags []db.Tag, contentTags []db.Tag) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -1350,48 +1406,120 @@ func AdminTags(tags []db.Tag) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var61 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var61 == nil {
-			templ_7745c5c3_Var61 = templ.NopComponent
+		templ_7745c5c3_Var63 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var63 == nil {
+			templ_7745c5c3_Var63 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 111, "<div class=\"mb-6\"><label class=\"block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2\">Tagovi</label><div class=\"flex flex-col gap-2\"><div class=\"flex flex-wrap gap-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 min-h-[30px]\"><!-- Example tags - you can make these dynamic --><span class=\"inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-100\"><span>Web</span> <button type=\"button\" class=\"ml-1 inline-flex text-blue-600 dark:text-blue-300 focus:outline-none\"><svg class=\"h-4 w-4\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button></span> <span class=\"inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100\"><span>Dizajn</span> <button type=\"button\" class=\"ml-1 inline-flex text-green-600 dark:text-green-300 focus:outline-none\"><svg class=\"h-4 w-4\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button></span></div><div class=\"flex flex-col gap-2 sm:flex-row sm:gap-8\"><div class=\"relative\"><select id=\"category\" name=\"category\" class=\"w-full sm:mr-6 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none dark:bg-gray-700 dark:text-white transition-colors duration-200\"><option value=\"\">Dodajte postojeće tagove</option> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 116, "<div class=\"mb-6\"><label class=\"block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2\">Tagovi</label><div class=\"flex flex-col gap-2\"><div class=\"flex flex-wrap gap-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 min-h-[30px]\"><!-- Example tags - you can make these dynamic -->")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if len(contentTags) > 0 {
+			for _, v := range contentTags {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 117, "<span class=\"inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-100\"><span>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var64 string
+				templ_7745c5c3_Var64, templ_7745c5c3_Err = templ.JoinStringErrs(v.TagName)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 961, Col: 21}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var64))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 118, "</span> <button type=\"button\" hx-delete=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var65 string
+				templ_7745c5c3_Var65, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/tags/content/remove/%v", v.TagID))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 962, Col: 95}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var65))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 119, "\" hx-trigger=\"click\" class=\"cursor-pointer ml-1 inline-flex text-blue-600 dark:text-blue-300 focus:outline-none\"><svg class=\"h-4 w-4\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button></span>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 120, "</div><div class=\"flex flex-col gap-2 sm:flex-row sm:gap-8\"><form hx-post=\"/api/admin/tags/add\" class=\"flex\"><div class=\"relative\"><select id=\"tag\" name=\"tag_id\" class=\"w-full sm:mr-6 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none dark:bg-gray-700 dark:text-white transition-colors duration-200\"><option value=\"\">Dodajte postojeće tagove</option> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for _, v := range tags {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 112, "<option value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 121, "<option value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var62 string
-			templ_7745c5c3_Var62, templ_7745c5c3_Err = templ.JoinStringErrs(v.TagID.String())
+			var templ_7745c5c3_Var66 string
+			templ_7745c5c3_Var66, templ_7745c5c3_Err = templ.JoinStringErrs(v.TagID.String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 1238, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 981, Col: 38}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var62))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 113, "\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var66))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var63 string
-			templ_7745c5c3_Var63, templ_7745c5c3_Err = templ.JoinStringErrs(v.TagName)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 1238, Col: 53}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var63))
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 122, "\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 114, "</option>")
+			var templ_7745c5c3_Var67 string
+			templ_7745c5c3_Var67, templ_7745c5c3_Err = templ.JoinStringErrs(v.TagName)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminArticles.templ`, Line: 982, Col: 18}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var67))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 123, "</option>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 115, "</select><div class=\"absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500 dark:text-gray-400\"><svg class=\"h-5 w-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 9l-7 7-7-7\"></path></svg></div></div><!-- Input for new tag --><div class=\"flex items-center border rounded-md overflow-hidden bg-white dark:bg-gray-800 shadow-sm hover:shadow focus-within:ring-2 focus-within:ring-blue-500 max-w-md\"><form class=\"flex\"><input type=\"text\" class=\"flex-grow px-3 py-2 bg-transparent focus:outline-none dark:text-white\" placeholder=\"Dodajte nove tagove...\"> <button type=\"submit\" class=\"cursor-pointer px-3 py-2 rounded-lg flex items-center gap-2 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors\" aria-label=\"Add tag\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"feather feather-plus\"><line x1=\"12\" y1=\"5\" x2=\"12\" y2=\"19\"></line> <line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"></line></svg></button></form></div></div></div><p class=\"mt-1 text-xs text-gray-500 dark:text-gray-400\">Dodajte relevantne tagove za bolju vidljivost</p></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 124, "</select><div class=\"absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500 dark:text-gray-400\"><svg class=\"h-5 w-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 9l-7 7-7-7\"></path></svg></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, clearArticleModal())
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 125, "<button type=\"submit\" onClick=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var68 templ.ComponentScript = clearArticleModal()
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var68.Call)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 126, "\" class=\" cursor-pointer px-3 py-2 rounded-lg flex items-center gap-2 text-gray-600 hover:text-gray-900\n\t\t\t\t\tdark:text-gray-300 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors\" aria-label=\"Add tag\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"feather feather-plus\"><line x1=\"12\" y1=\"5\" x2=\"12\" y2=\"19\"></line> <line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"></line></svg></button></form><!-- Input for new tag --><div class=\"flex items-center border rounded-md overflow-hidden bg-white dark:bg-gray-800 shadow-sm hover:shadow focus-within:ring-2 focus-within:ring-blue-500 max-w-md\"><form class=\"flex\"><input type=\"text\" name=\"tag_name\" class=\"flex-grow px-3 py-2 bg-transparent focus:outline-none dark:text-white\" placeholder=\"Dodajte nove tagove...\"> ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, clearArticleModal())
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 127, "<button hx-post=\"/api/admin/tags\" onClick=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var69 templ.ComponentScript = clearArticleModal()
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var69.Call)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 128, "\" class=\"cursor-pointer px-3 py-2 rounded-lg flex items-center gap-2 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors\" aria-label=\"Add tag\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"feather feather-plus\"><line x1=\"12\" y1=\"5\" x2=\"12\" y2=\"19\"></line> <line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"></line></svg></button></form></div></div></div><p class=\"mt-1 text-xs text-gray-500 dark:text-gray-400\">Dodajte relevantne tagove za bolju vidljivost</p></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

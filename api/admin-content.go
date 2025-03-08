@@ -1,8 +1,8 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -919,7 +919,97 @@ func (server *Server) createContent(ctx echo.Context) error {
 		Valid: true,
 	}
 
-	fmt.Printf("UserID: %v, Username: %v, Email: %v, Pfp: %v, Role: %v", payload.UserID, payload.Username, payload.Email, payload.Pfp, payload.Role)
+	arg := db.CreateContentParams{
+		UserID:              userID,
+		CategoryID:          categoryID,
+		Title:               req.Title,
+		ContentDescription:  req.ContentDescription,
+		CommentsEnabled:     true,
+		ViewCountEnabled:    true,
+		LikeCountEnabled:    true,
+		DislikeCountEnabled: false,
+	}
+
+	content, err := server.store.CreateContent(ctx.Request().Context(), arg)
+	if err != nil {
+		message := "Failed to create content"
+
+		return Render(ctx, http.StatusInternalServerError, components.ArticleError(message))
+	}
+
+	ctx.SetCookie(&http.Cookie{
+		Name:    "content_id",
+		Value:   content.ContentID.String(),
+		MaxAge:  60 * 60 * 24 * 365,
+		Path:    "/",
+		Expires: time.Now().Add(time.Hour),
+	})
+
+	message := "Uspešno ste sačuvali novi sadržaj."
+
+	return Render(ctx, http.StatusOK, components.ArticleSuccess(message))
+}
+
+func (server *Server) createAndPublishContent(ctx echo.Context) error {
+	var req CreateContentReq
+
+	if err := ctx.Bind(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		return err
+	}
+
+	if req.Title == "" {
+		message := "Naslov je obavezan."
+
+		return Render(ctx, http.StatusOK, components.ArticleError(message))
+	}
+
+	if req.CategoryID == "" {
+		message := "Kategorija je obavezna."
+
+		return Render(ctx, http.StatusOK, components.ArticleError(message))
+	}
+
+	if req.ContentDescription == "" {
+		message := "Sadržaj je obavezan."
+
+		return Render(ctx, http.StatusOK, components.ArticleError(message))
+	}
+
+	cookie, err := ctx.Cookie("access_token")
+	if err != nil {
+		// No cookie found; redirect to login page
+		return ctx.Redirect(http.StatusTemporaryRedirect, "/")
+	}
+
+	accessToken := cookie.Value
+	payload, err := server.tokenMaker.VerifyToken(accessToken)
+	if err != nil {
+		// Invalid token; redirect to login page
+		return ctx.Redirect(http.StatusTemporaryRedirect, "/")
+	}
+
+	parsedUserID, err := uuid.Parse(payload.UserID)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, errorResponse("invalid content ID format", err))
+	}
+
+	// Create a pgtype.UUID with the parsed UUID
+	userID := pgtype.UUID{
+		Bytes: parsedUserID,
+		Valid: true,
+	}
+
+	parsedCategoryID, err := uuid.Parse(req.CategoryID)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, errorResponse("invalid content ID format", err))
+	}
+
+	// Create a pgtype.UUID with the parsed UUID
+	categoryID := pgtype.UUID{
+		Bytes: parsedCategoryID,
+		Valid: true,
+	}
 
 	arg := db.CreateContentParams{
 		UserID:              userID,
@@ -932,14 +1022,29 @@ func (server *Server) createContent(ctx echo.Context) error {
 		DislikeCountEnabled: false,
 	}
 
-	_, err = server.store.CreateContent(ctx.Request().Context(), arg)
+	content, err := server.store.CreateContent(ctx.Request().Context(), arg)
 	if err != nil {
-		message := "Failed to create content"
+		message := "Greška prilikom cuvanja sadržaja."
 
 		return Render(ctx, http.StatusInternalServerError, components.ArticleError(message))
 	}
 
-	message := "Uspešno ste sačuvali novi sadržaj."
+	_, err = server.store.PublishContent(ctx.Request().Context(), content.ContentID)
+	if err != nil {
+		message := "Greška prilikom objavljivanja sadržaja."
+
+		return Render(ctx, http.StatusInternalServerError, components.ArticleError(message))
+	}
+
+	ctx.SetCookie(&http.Cookie{
+		Name:    "content_id",
+		Value:   content.ContentID.String(),
+		MaxAge:  60 * 60 * 24 * 365,
+		Path:    "/",
+		Expires: time.Now().Add(time.Hour),
+	})
+
+	message := "Uspešno ste sačuvali i objavili novi sadržaj."
 
 	return Render(ctx, http.StatusOK, components.ArticleSuccess(message))
 }
