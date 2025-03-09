@@ -81,9 +81,13 @@ func (server *Server) setupRouter() {
 	adminRoutes.POST("/api/admin/content/publish", server.createAndPublishContent)
 
 	// Admin Tags
+	adminRoutes.GET("/api/admin/tags", server.listTags)
+	adminRoutes.GET("/api/admin/tags/search", server.listSearchTags)
+	adminRoutes.GET("/api/admin/tags/:id", server.listTagsByContent)
 	adminRoutes.POST("/api/admin/tags", server.createTag)
 	adminRoutes.POST("/api/admin/tags/add", server.addTagToContent)
 	adminRoutes.DELETE("/api/admin/tags/content/remove/:id", server.removeTagFromContent)
+	adminRoutes.DELETE("/api/admin/tags/remove/:id", server.deleteTag)
 
 	// Cookie
 	adminRoutes.DELETE("/api/cookie", server.deleteCookie)
