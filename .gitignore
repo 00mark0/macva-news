@@ -2,6 +2,7 @@
 node_modules/
 .env*
 tmp/
+static/uploads/
+static/react/
 static/css/output.css
-static/react/main.js
-
+static/assets/

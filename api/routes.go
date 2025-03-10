@@ -80,6 +80,10 @@ func (server *Server) setupRouter() {
 	adminRoutes.POST("/api/admin/content/draft", server.createContent)
 	adminRoutes.POST("/api/admin/content/publish", server.createAndPublishContent)
 
+	// Admin Media
+	adminRoutes.GET("/api/admin/media", server.listMediaForContent)
+	adminRoutes.POST("/api/admin/media/upload/new", server.addMediaToNewContent)
+
 	// Admin Tags
 	adminRoutes.GET("/api/admin/tags", server.listTags)
 	adminRoutes.GET("/api/admin/tags/search", server.listSearchTags)
