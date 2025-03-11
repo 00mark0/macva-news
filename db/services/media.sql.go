@@ -51,6 +51,26 @@ func (q *Queries) DeleteMedia(ctx context.Context, mediaID pgtype.UUID) error {
 	return err
 }
 
+const getMediaByID = `-- name: GetMediaByID :one
+SELECT media_id, content_id, media_type, media_url, media_caption, media_order
+FROM media
+WHERE media_id = $1
+`
+
+func (q *Queries) GetMediaByID(ctx context.Context, mediaID pgtype.UUID) (Medium, error) {
+	row := q.db.QueryRow(ctx, getMediaByID, mediaID)
+	var i Medium
+	err := row.Scan(
+		&i.MediaID,
+		&i.ContentID,
+		&i.MediaType,
+		&i.MediaUrl,
+		&i.MediaCaption,
+		&i.MediaOrder,
+	)
+	return i, err
+}
+
 const insertMedia = `-- name: InsertMedia :one
 INSERT INTO media (content_id, media_type, media_url, media_caption, media_order)
 VALUES ($1, $2, $3, $4, $5)

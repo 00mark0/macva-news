@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -19,8 +20,10 @@ import (
 func (server *Server) addMediaToNewContent(ctx echo.Context) error {
 	contentIDCookie, err := ctx.Cookie("content_id")
 	if err != nil {
-		log.Println("No content ID cookie found")
-		return err
+		message := "Sadržaj nije pronađen. Dodajte medije sa uredi stranice."
+
+		ctx.Response().Header().Set("HX-Retarget", "#create-article-modal")
+		return Render(ctx, http.StatusOK, components.ArticleError(message))
 	}
 
 	// Parse content ID from cookie
@@ -145,4 +148,92 @@ func (server *Server) listMediaForContent(ctx echo.Context) error {
 	}
 
 	return Render(ctx, http.StatusOK, components.InsertMedia(media, contentIDCookie.Value))
+}
+
+func (server *Server) deleteMedia(ctx echo.Context) error {
+	mediaIDStr := ctx.Param("id")
+
+	// Parse media ID from the URL parameter
+	mediaIDUUID, err := uuid.Parse(mediaIDStr)
+	if err != nil {
+		log.Println("Invalid media ID:", err)
+		return err
+	}
+
+	mediaID := pgtype.UUID{
+		Bytes: mediaIDUUID,
+		Valid: true,
+	}
+
+	// Get the media record to find the file path before deleting
+	media, err := server.store.GetMediaByID(ctx.Request().Context(), mediaID)
+	if err != nil {
+		log.Println("Error getting media record:", err)
+		return err
+	}
+
+	// Get the content ID to use for rendering updated media list
+	contentID := media.ContentID
+	contentIDStr := contentID.String()
+
+	// Remove the file from filesystem
+	// The filepath is stored with leading slash, so trim it for filesystem operations
+	filePath := strings.TrimPrefix(media.MediaUrl, "/")
+	if err := os.Remove(filePath); err != nil {
+		log.Println("Error removing file from filesystem:", err)
+		// Continue with DB deletion even if file removal fails
+	}
+
+	// Delete the media record from the database
+	if err := server.store.DeleteMedia(ctx.Request().Context(), mediaID); err != nil {
+		log.Println("Error deleting media record:", err)
+		return err
+	}
+
+	// Get updated media list for rendering
+	updatedMedia, err := server.store.ListMediaForContent(ctx.Request().Context(), contentID)
+	if err != nil {
+		log.Println("Error listing updated media:", err)
+		return err
+	}
+
+	// Render the updated media list component
+	return Render(ctx, http.StatusOK, components.InsertMedia(updatedMedia, contentIDStr))
+}
+
+func (server *Server) deleteMediaFunc(id string) error {
+	// Parse media ID from the URL parameter
+	mediaIDUUID, err := uuid.Parse(id)
+	if err != nil {
+		log.Println("Invalid media ID:", err)
+		return err
+	}
+
+	mediaID := pgtype.UUID{
+		Bytes: mediaIDUUID,
+		Valid: true,
+	}
+
+	media, err := server.store.GetMediaByID(context.Background(), mediaID)
+	if err != nil {
+		log.Println("Error getting media record:", err)
+		return err
+	}
+
+	// Remove the file from filesystem
+	// The filepath is stored with leading slash, so trim it for filesystem operations
+	filePath := strings.TrimPrefix(media.MediaUrl, "/")
+	if err := os.Remove(filePath); err != nil {
+		log.Println("Error removing file from filesystem:", err)
+	}
+
+	err = server.store.DeleteMedia(context.Background(), mediaID)
+	if err != nil {
+		log.Println("Error deleting media record:", err)
+		return err
+	}
+
+	log.Println("Media record deleted successfully.")
+
+	return nil
 }

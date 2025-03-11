@@ -15,6 +15,11 @@ RETURNING media_id, content_id, media_type, media_url, media_caption, media_orde
 DELETE FROM media
 WHERE media_id = $1;
 
+-- name: GetMediaByID :one
+SELECT media_id, content_id, media_type, media_url, media_caption, media_order
+FROM media
+WHERE media_id = $1;
+
 -- name: ListMediaForContent :many
 SELECT media_id, content_id, media_type, media_url, media_caption, media_order
 FROM media

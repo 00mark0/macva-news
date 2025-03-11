@@ -83,6 +83,7 @@ func (server *Server) setupRouter() {
 	// Admin Media
 	adminRoutes.GET("/api/admin/media", server.listMediaForContent)
 	adminRoutes.POST("/api/admin/media/upload/new", server.addMediaToNewContent)
+	adminRoutes.DELETE("/api/admin/media/remove/:id", server.deleteMedia)
 
 	// Admin Tags
 	adminRoutes.GET("/api/admin/tags", server.listTags)

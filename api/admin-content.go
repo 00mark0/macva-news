@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"net/http"
 	"time"
 
@@ -678,6 +679,22 @@ func (server *Server) deleteContent(ctx echo.Context) error {
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content overview", err))
 		return err
+	}
+
+	// delete media associated with content
+	media, err := server.store.ListMediaForContent(ctx.Request().Context(), pgUUID)
+	if err != nil {
+		log.Println("Error listing media while deleting content:", err)
+		return err
+	}
+
+	if len(media) > 0 {
+		for _, v := range media {
+			if err := server.deleteMediaFunc(v.MediaID.String()); err != nil {
+				log.Println("Error deleting media deleting media while deleting content:", err)
+				return err
+			}
+		}
 	}
 
 	return Render(ctx, http.StatusOK, components.ArticleNav(overview))
