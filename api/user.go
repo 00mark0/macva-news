@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"net/http"
 	"time"
 
@@ -45,7 +46,7 @@ func (server *Server) login(ctx echo.Context) error {
 	var req loginUserReq
 	var loginErr components.LoginErr
 	if err := ctx.Bind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		log.Println("Error binding request in login:", err)
 		return err
 	}
 
@@ -84,7 +85,7 @@ func (server *Server) login(ctx echo.Context) error {
 	durationStr := os.Getenv("ACCESS_TOKEN_DURATION")
 	duration, err := time.ParseDuration(durationStr)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to parse duration", err))
+		log.Println("Error parsing duration in login:", err)
 		return err
 	}
 
@@ -97,7 +98,7 @@ func (server *Server) login(ctx echo.Context) error {
 		duration,
 	)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to create access token", err))
+		log.Println("Error creating token in login:", err)
 		return err
 	}
 

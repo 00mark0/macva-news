@@ -37,11 +37,3 @@ func NewServer(store *db.Store, symmetricKey string) (*Server, error) {
 func (server *Server) Start(address string) error {
 	return server.router.Start(address)
 }
-
-// errorResponse is a helper function to format error messages.
-func errorResponse(message string, err error) echo.Map {
-	return echo.Map{
-		"message": message,
-		"error":   err.Error(),
-	}
-}

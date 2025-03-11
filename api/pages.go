@@ -42,7 +42,7 @@ func (server *Server) adminCats(ctx echo.Context) error {
 	var req ListCatsReq
 
 	if err := ctx.Bind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		log.Println("Error binding request in adminCats:", err)
 		return err
 	}
 
@@ -50,7 +50,7 @@ func (server *Server) adminCats(ctx echo.Context) error {
 
 	categories, err := server.store.ListCategories(ctx.Request().Context(), nextLimit)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get categories", err))
+		log.Println("Error listing categories in adminCats:", err)
 		return err
 	}
 
@@ -69,7 +69,8 @@ func (server *Server) deleteCategoryModal(ctx echo.Context) error {
 	// Parse string UUID into proper UUID format
 	parsedUUID, err := uuid.Parse(categoryID)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, errorResponse("invalid category ID format", err))
+		log.Println("Invalid category ID format in deleteCategoryModal:", err)
+		return err
 	}
 
 	// Create a pgtype.UUID with the parsed UUID
@@ -80,8 +81,7 @@ func (server *Server) deleteCategoryModal(ctx echo.Context) error {
 
 	category, err := server.store.GetCategoryByID(ctx.Request().Context(), pgUUID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get category", err))
-		log.Println("Category error:", err)
+		log.Println("Error getting category in deleteCategoryModal:", err)
 		return err
 	}
 
@@ -96,7 +96,8 @@ func (server *Server) updateCategoryForm(ctx echo.Context) error {
 	// Parse string UUID into proper UUID format
 	parsedUUID, err := uuid.Parse(categoryID)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, errorResponse("invalid category ID format", err))
+		log.Println("Invalid category ID format in updateCategoryForm:", err)
+		return err
 	}
 
 	// Create a pgtype.UUID with the parsed UUID
@@ -107,8 +108,7 @@ func (server *Server) updateCategoryForm(ctx echo.Context) error {
 
 	category, err := server.store.GetCategoryByID(ctx.Request().Context(), pgUUID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get category", err))
-		log.Println("Category error:", err)
+		log.Println("Error getting category in updateCategoryForm:", err)
 		return err
 	}
 
@@ -124,7 +124,7 @@ func (server *Server) adminArts(ctx echo.Context) error {
 
 	overview, err := server.store.GetContentOverview(ctx.Request().Context())
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content overview", err))
+		log.Println("Error getting content overview in adminArts:", err)
 		return err
 	}
 
@@ -132,7 +132,7 @@ func (server *Server) adminArts(ctx echo.Context) error {
 
 	data, err := server.store.ListPublishedContentLimit(ctx.Request().Context(), nextLimit)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content", err))
+		log.Println("Error listing published content in adminArts:", err)
 		return err
 	}
 
@@ -175,7 +175,7 @@ func (server *Server) publishedContentList(ctx echo.Context) error {
 
 	data, err := server.store.ListPublishedContentLimit(ctx.Request().Context(), nextLimit)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content", err))
+		log.Println("Error listing published content in publishedContentList:", err)
 		return err
 	}
 
@@ -218,7 +218,7 @@ func (server *Server) draftContentList(ctx echo.Context) error {
 
 	data, err := server.store.ListDraftContent(ctx.Request().Context(), nextLimit)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content", err))
+		log.Println("Error listing draft content in draftContentList:", err)
 		return err
 	}
 
@@ -261,7 +261,7 @@ func (server *Server) deletedContentList(ctx echo.Context) error {
 
 	data, err := server.store.ListDeletedContent(ctx.Request().Context(), nextLimit)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content", err))
+		log.Println("Error listing deleted content in deletedContentList:", err)
 		return err
 	}
 
@@ -314,15 +314,64 @@ func (server *Server) loginPage(ctx echo.Context) error {
 func (server *Server) createArticlePage(ctx echo.Context) error {
 	categories, err := server.store.ListCategories(ctx.Request().Context(), 100)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get categories for create article page", err))
+		log.Println("Failed to get create article page in createArticlePage:", err)
 		return err
 	}
 
 	tags, err := server.store.ListTags(ctx.Request().Context(), 1000)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get tags for create article page", err))
+		log.Println("Failed to get tags for create article page in createArticlePage:", err)
 		return err
 	}
 
 	return Render(ctx, http.StatusOK, components.CreateArticle(categories, tags))
+}
+
+func (server *Server) updateArticlePage(ctx echo.Context) error {
+	contentIDStr := ctx.Param("id")
+
+	// Parse string UUID into proper UUID format
+	parsedUUID, err := uuid.Parse(contentIDStr)
+	if err != nil {
+		log.Println("Invalid content ID format in updateArticlePage:", err)
+		return err
+	}
+
+	// Create a pgtype.UUID with the parsed UUID
+	pgUUID := pgtype.UUID{
+		Bytes: parsedUUID,
+		Valid: true,
+	}
+
+	content, err := server.store.GetContentDetails(ctx.Request().Context(), pgUUID)
+	if err != nil {
+		log.Println("Failed to get content for update article page in updateArticlePage:", err)
+		return err
+	}
+
+	categories, err := server.store.ListCategories(ctx.Request().Context(), 100)
+	if err != nil {
+		log.Println("Failed to get update article page in updateArticlePage:", err)
+		return err
+	}
+
+	media, err := server.store.ListMediaForContent(ctx.Request().Context(), pgUUID)
+	if err != nil {
+		log.Println("Failed to get media for update article page in updateArticlePage:", err)
+		return err
+	}
+
+	tags, err := server.store.ListTags(ctx.Request().Context(), 1000)
+	if err != nil {
+		log.Println("Failed to get tags for update article page in updateArticlePage:", err)
+		return err
+	}
+
+	contentTags, err := server.store.GetTagsByContent(ctx.Request().Context(), pgUUID)
+	if err != nil {
+		log.Println("Failed to get tags for update article page in updateArticlePage:", err)
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.UpdateArticle(content, categories, media, tags, contentTags))
 }

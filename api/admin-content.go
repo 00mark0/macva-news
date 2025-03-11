@@ -3,6 +3,8 @@ package api
 import (
 	"log"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -17,7 +19,7 @@ func (server *Server) listPubContent(ctx echo.Context) error {
 	var req ListPublishedLimitReq
 
 	if err := ctx.Bind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		log.Println("Error binding request in listPubContent:", err)
 		return err
 	}
 
@@ -25,7 +27,7 @@ func (server *Server) listPubContent(ctx echo.Context) error {
 
 	data, err := server.store.ListPublishedContentLimit(ctx.Request().Context(), nextLimit)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content", err))
+		log.Println("Error listing published content in listPubContent:", err)
 		return err
 	}
 
@@ -65,7 +67,7 @@ func (server *Server) listPubContentOldest(ctx echo.Context) error {
 	var req ListPublishedLimitReq
 
 	if err := ctx.Bind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		log.Println("Error binding request in listPubContentOldest:", err)
 		return err
 	}
 
@@ -73,7 +75,7 @@ func (server *Server) listPubContentOldest(ctx echo.Context) error {
 
 	data, err := server.store.ListPublishedContentLimitOldest(ctx.Request().Context(), nextLimit)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content", err))
+		log.Println("Error listing published content in listPubContentOldest:", err)
 		return err
 	}
 
@@ -113,7 +115,7 @@ func (server *Server) listPubContentTitle(ctx echo.Context) error {
 	var req ListPublishedLimitReq
 
 	if err := ctx.Bind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		log.Println("Error binding request in listPubContentTitle:", err)
 		return err
 	}
 
@@ -121,7 +123,7 @@ func (server *Server) listPubContentTitle(ctx echo.Context) error {
 
 	data, err := server.store.ListPublishedContentLimitTitle(ctx.Request().Context(), nextLimit)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content", err))
+		log.Println("Error listing published content in listPubContentTitle:", err)
 		return err
 	}
 
@@ -161,7 +163,7 @@ func (server *Server) listDraftContent(ctx echo.Context) error {
 	var req ListPublishedLimitReq
 
 	if err := ctx.Bind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		log.Println("Error binding request in listDraftContent:", err)
 		return err
 	}
 
@@ -169,7 +171,7 @@ func (server *Server) listDraftContent(ctx echo.Context) error {
 
 	data, err := server.store.ListDraftContent(ctx.Request().Context(), nextLimit)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content", err))
+		log.Println("Error listing draft content in listDraftContent:", err)
 		return err
 	}
 
@@ -209,7 +211,7 @@ func (server *Server) listDraftContentOldest(ctx echo.Context) error {
 	var req ListPublishedLimitReq
 
 	if err := ctx.Bind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		log.Println("Error binding request in listDraftContentOldest:", err)
 		return err
 	}
 
@@ -217,7 +219,7 @@ func (server *Server) listDraftContentOldest(ctx echo.Context) error {
 
 	data, err := server.store.ListDraftContentOldest(ctx.Request().Context(), nextLimit)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content", err))
+		log.Println("Error listing draft content in listDraftContentOldest:", err)
 		return err
 	}
 
@@ -257,7 +259,7 @@ func (server *Server) listDraftContentTitle(ctx echo.Context) error {
 	var req ListPublishedLimitReq
 
 	if err := ctx.Bind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		log.Println("Error binding request in listDraftContentTitle:", err)
 		return err
 	}
 
@@ -265,7 +267,7 @@ func (server *Server) listDraftContentTitle(ctx echo.Context) error {
 
 	data, err := server.store.ListDraftContentTitle(ctx.Request().Context(), nextLimit)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content", err))
+		log.Println("Error listing draft content in listDraftContentTitle:", err)
 		return err
 	}
 
@@ -305,7 +307,7 @@ func (server *Server) listDelContent(ctx echo.Context) error {
 	var req ListPublishedLimitReq
 
 	if err := ctx.Bind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		log.Println("Error binding request in listDelContent:", err)
 		return err
 	}
 
@@ -313,7 +315,7 @@ func (server *Server) listDelContent(ctx echo.Context) error {
 
 	data, err := server.store.ListDeletedContent(ctx.Request().Context(), nextLimit)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content", err))
+		log.Println("Error listing deleted content in listDelContent:", err)
 		return err
 	}
 
@@ -353,7 +355,7 @@ func (server *Server) listDelContentOldest(ctx echo.Context) error {
 	var req ListPublishedLimitReq
 
 	if err := ctx.Bind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		log.Println("Error binding request in listDelContentOldest:", err)
 		return err
 	}
 
@@ -361,7 +363,7 @@ func (server *Server) listDelContentOldest(ctx echo.Context) error {
 
 	data, err := server.store.ListDeletedContentOldest(ctx.Request().Context(), nextLimit)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content", err))
+		log.Println("Error listing deleted content in listDelContentOldest:", err)
 		return err
 	}
 
@@ -401,7 +403,7 @@ func (server *Server) listDelContentTitle(ctx echo.Context) error {
 	var req ListPublishedLimitReq
 
 	if err := ctx.Bind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		log.Println("Error binding request in listDelContentTitle:", err)
 		return err
 	}
 
@@ -409,7 +411,7 @@ func (server *Server) listDelContentTitle(ctx echo.Context) error {
 
 	data, err := server.store.ListDeletedContentTitle(ctx.Request().Context(), nextLimit)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content", err))
+		log.Println("Error listing deleted content in listDelContentTitle:", err)
 		return err
 	}
 
@@ -454,12 +456,12 @@ func (server *Server) listSearchPubContent(ctx echo.Context) error {
 	var req SearchContentReq
 
 	if err := ctx.Bind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		log.Println("Error binding request in listSearchPubContent:", err)
 		return err
 	}
 
 	if err := ctx.Validate(req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("search term is required", err))
+		log.Println("Error validating request in listSearchPubContent:", err)
 		return err
 	}
 
@@ -472,7 +474,7 @@ func (server *Server) listSearchPubContent(ctx echo.Context) error {
 
 	data, err := server.store.SearchContent(ctx.Request().Context(), arg)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content", err))
+		log.Println("Error searching content in listSearchPubContent:", err)
 		return err
 	}
 
@@ -512,12 +514,12 @@ func (server *Server) listSearchDraftContent(ctx echo.Context) error {
 	var req SearchContentReq
 
 	if err := ctx.Bind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		log.Println("Error binding request in listSearchDraftContent:", err)
 		return err
 	}
 
 	if err := ctx.Validate(req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("search term is required", err))
+		log.Println("Error validating request in listSearchDraftContent:", err)
 		return err
 	}
 
@@ -530,7 +532,7 @@ func (server *Server) listSearchDraftContent(ctx echo.Context) error {
 
 	data, err := server.store.SearchDraftContent(ctx.Request().Context(), arg)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content", err))
+		log.Println("Error searching content in listSearchDraftContent:", err)
 		return err
 	}
 
@@ -570,12 +572,12 @@ func (server *Server) listSearchDelContent(ctx echo.Context) error {
 	var req SearchContentReq
 
 	if err := ctx.Bind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		log.Println("Error binding request in listSearchDelContent:", err)
 		return err
 	}
 
 	if err := ctx.Validate(req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("search term is required", err))
+		log.Println("Error validating request in listSearchDelContent:", err)
 		return err
 	}
 
@@ -588,7 +590,7 @@ func (server *Server) listSearchDelContent(ctx echo.Context) error {
 
 	data, err := server.store.SearchDelContent(ctx.Request().Context(), arg)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content", err))
+		log.Println("Error searching content in listSearchDelContent:", err)
 		return err
 	}
 
@@ -630,7 +632,8 @@ func (server *Server) archivePubContent(ctx echo.Context) error {
 	// Parse string UUID into proper UUID format
 	parsedUUID, err := uuid.Parse(id)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, errorResponse("invalid content ID format", err))
+		log.Println("Invalid content ID format in archivePubContent:", err)
+		return err
 	}
 
 	// Create a pgtype.UUID with the parsed UUID
@@ -641,13 +644,13 @@ func (server *Server) archivePubContent(ctx echo.Context) error {
 
 	_, err = server.store.SoftDeleteContent(ctx.Request().Context(), pgUUID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to archive content", err))
+		log.Println("Error archiving content in archivePubContent:", err)
 		return err
 	}
 
 	overview, err := server.store.GetContentOverview(ctx.Request().Context())
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content overview", err))
+		log.Println("Error getting content overview in archivePubContent:", err)
 		return err
 	}
 
@@ -660,7 +663,8 @@ func (server *Server) deleteContent(ctx echo.Context) error {
 	// Parse string UUID into proper UUID format
 	parsedUUID, err := uuid.Parse(id)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, errorResponse("invalid content ID format", err))
+		log.Println("Invalid content ID format in deleteContent:", err)
+		return err
 	}
 
 	// Create a pgtype.UUID with the parsed UUID
@@ -669,19 +673,7 @@ func (server *Server) deleteContent(ctx echo.Context) error {
 		Valid: true,
 	}
 
-	_, err = server.store.HardDeleteContent(ctx.Request().Context(), pgUUID)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to delete content", err))
-		return err
-	}
-
-	overview, err := server.store.GetContentOverview(ctx.Request().Context())
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content overview", err))
-		return err
-	}
-
-	// delete media associated with content
+	// delete media files associated with content
 	media, err := server.store.ListMediaForContent(ctx.Request().Context(), pgUUID)
 	if err != nil {
 		log.Println("Error listing media while deleting content:", err)
@@ -690,11 +682,27 @@ func (server *Server) deleteContent(ctx echo.Context) error {
 
 	if len(media) > 0 {
 		for _, v := range media {
-			if err := server.deleteMediaFunc(v.MediaID.String()); err != nil {
-				log.Println("Error deleting media deleting media while deleting content:", err)
+			// Remove the file from filesystem
+			// The filepath is stored with leading slash, so trim it for filesystem operations
+			filePath := strings.TrimPrefix(v.MediaUrl, "/")
+			if err := os.Remove(filePath); err != nil {
+				log.Printf("Error removing file from filesystem at %s: %v", filePath, err)
+				// Consider whether to return this error or continue
 				return err
 			}
 		}
+	}
+
+	_, err = server.store.HardDeleteContent(ctx.Request().Context(), pgUUID)
+	if err != nil {
+		log.Println("Error deleting content in deleteContent:", err)
+		return err
+	}
+
+	overview, err := server.store.GetContentOverview(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error getting content overview in deleteContent:", err)
+		return err
 	}
 
 	return Render(ctx, http.StatusOK, components.ArticleNav(overview))
@@ -706,7 +714,8 @@ func (server *Server) publishDraftContent(ctx echo.Context) error {
 	// Parse string UUID into proper UUID format
 	parsedUUID, err := uuid.Parse(id)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, errorResponse("invalid content ID format", err))
+		log.Println("Invalid content ID format in publishDraftContent:", err)
+		return err
 	}
 
 	// Create a pgtype.UUID with the parsed UUID
@@ -717,13 +726,13 @@ func (server *Server) publishDraftContent(ctx echo.Context) error {
 
 	_, err = server.store.PublishContent(ctx.Request().Context(), pgUUID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to publish content", err))
+		log.Println("Error publishing content in publishDraftContent:", err)
 		return err
 	}
 
 	overview, err := server.store.GetContentOverview(ctx.Request().Context())
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content overview", err))
+		log.Println("Error getting content overview in publishDraftContent:", err)
 		return err
 	}
 
@@ -736,7 +745,8 @@ func (server *Server) unarchiveContent(ctx echo.Context) error {
 	// Parse string UUID into proper UUID format
 	parsedUUID, err := uuid.Parse(id)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, errorResponse("invalid content ID format", err))
+		log.Println("Invalid content ID format in unarchiveContent:", err)
+		return err
 	}
 
 	// Create a pgtype.UUID with the parsed UUID
@@ -747,13 +757,13 @@ func (server *Server) unarchiveContent(ctx echo.Context) error {
 
 	_, err = server.store.UnarchiveContent(ctx.Request().Context(), pgUUID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to unarchive content", err))
+		log.Println("Error unarchiving content in unarchiveContent:", err)
 		return err
 	}
 
 	overview, err := server.store.GetContentOverview(ctx.Request().Context())
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content overview", err))
+		log.Println("Error getting content overview in unarchiveContent:", err)
 		return err
 	}
 
@@ -777,7 +787,8 @@ func (server *Server) updateContent(ctx echo.Context) error {
 	// Parse string UUID into proper UUID format
 	parsedContentID, err := uuid.Parse(contentIDString)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, errorResponse("invalid content ID format", err))
+		log.Println("Invalid content ID format in updateContent:", err)
+		return err
 	}
 
 	// Create a pgtype.UUID with the parsed UUID
@@ -789,13 +800,13 @@ func (server *Server) updateContent(ctx echo.Context) error {
 	var req UpdateContentReq
 
 	if err := ctx.Bind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		log.Println("Error binding request in updateContent:", err)
 		return err
 	}
 
 	content, err := server.store.GetContentDetails(ctx.Request().Context(), contentID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get content", err))
+		log.Println("Error getting content details in updateContent:", err)
 		return err
 	}
 
@@ -804,7 +815,8 @@ func (server *Server) updateContent(ctx echo.Context) error {
 	if req.CategoryID != nil {
 		parsedCategoryID, err = uuid.Parse(*req.CategoryID)
 		if err != nil {
-			return ctx.JSON(http.StatusBadRequest, errorResponse("invalid category ID format", err))
+			log.Println("Invalid category ID format in updateContent:", err)
+			return err
 		}
 		categoryID = pgtype.UUID{
 			Bytes: parsedCategoryID,
@@ -820,6 +832,7 @@ func (server *Server) updateContent(ctx echo.Context) error {
 			if req.Title != nil {
 				return *req.Title
 			}
+
 			return content.Title
 		}(),
 		ContentDescription: func() string {
@@ -860,13 +873,32 @@ func (server *Server) updateContent(ctx echo.Context) error {
 		}(),
 	}
 
+	if *req.Title == "" {
+		message := "Naslov je obavezan."
+
+		return Render(ctx, http.StatusOK, components.ArticleError(message))
+	}
+
+	if *req.CategoryID == "" {
+		message := "Kategorija je obavezna."
+
+		return Render(ctx, http.StatusOK, components.ArticleError(message))
+	}
+
+	if *req.ContentDescription == "" {
+		message := "Sadržaj je obavezan."
+
+		return Render(ctx, http.StatusOK, components.ArticleError(message))
+	}
+
 	_, err = server.store.UpdateContent(ctx.Request().Context(), arg)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to update content", err))
+		log.Println("Error updating content in updateContent:", err)
 		return err
 	}
 
-	return ctx.NoContent(http.StatusOK)
+	message := "Sadržaj uspešno ažuriran."
+	return Render(ctx, http.StatusOK, components.ArticleSuccess(message))
 }
 
 type CreateContentReq struct {
@@ -879,7 +911,7 @@ func (server *Server) createContent(ctx echo.Context) error {
 	var req CreateContentReq
 
 	if err := ctx.Bind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		log.Println("Error binding request in createContent:", err)
 		return err
 	}
 
@@ -916,7 +948,8 @@ func (server *Server) createContent(ctx echo.Context) error {
 
 	parsedUserID, err := uuid.Parse(payload.UserID)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, errorResponse("invalid content ID format", err))
+		log.Println("Invalid user ID format in createContent:", err)
+		return err
 	}
 
 	// Create a pgtype.UUID with the parsed UUID
@@ -927,7 +960,8 @@ func (server *Server) createContent(ctx echo.Context) error {
 
 	parsedCategoryID, err := uuid.Parse(req.CategoryID)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, errorResponse("invalid content ID format", err))
+		log.Println("Invalid category ID format in createContent:", err)
+		return err
 	}
 
 	// Create a pgtype.UUID with the parsed UUID
@@ -971,7 +1005,7 @@ func (server *Server) createAndPublishContent(ctx echo.Context) error {
 	var req CreateContentReq
 
 	if err := ctx.Bind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		log.Println("Error binding request in createAndPublishContent:", err)
 		return err
 	}
 
@@ -1008,7 +1042,8 @@ func (server *Server) createAndPublishContent(ctx echo.Context) error {
 
 	parsedUserID, err := uuid.Parse(payload.UserID)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, errorResponse("invalid content ID format", err))
+		log.Println("Invalid user ID format in createAndPublishContent:", err)
+		return err
 	}
 
 	// Create a pgtype.UUID with the parsed UUID
@@ -1019,7 +1054,8 @@ func (server *Server) createAndPublishContent(ctx echo.Context) error {
 
 	parsedCategoryID, err := uuid.Parse(req.CategoryID)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, errorResponse("invalid content ID format", err))
+		log.Println("Invalid category ID format in createAndPublishContent:", err)
+		return err
 	}
 
 	// Create a pgtype.UUID with the parsed UUID

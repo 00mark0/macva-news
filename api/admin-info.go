@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"net/http"
 	"time"
 
@@ -40,14 +41,14 @@ func (server *Server) listTrendingContent(ctx echo.Context) error {
 	var req TrendingContentReq
 
 	if err := ctx.Bind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		log.Println("Error binding request in listTrendingContent:", err)
 		return err
 	}
 
 	// Parse the incoming date (expected format: "2006-01-02")
 	publishedDate, err := time.Parse("2006-01-02", req.PublishedAt)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid date format for published_at, expected YYYY-MM-DD", err))
+		log.Println("Error parsing date in listTrendingContent:", err)
 		return err
 	}
 
@@ -70,7 +71,7 @@ func (server *Server) listTrendingContent(ctx echo.Context) error {
 
 	data, err := server.store.ListTrendingContent(ctx.Request().Context(), arg)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to list trending content", err))
+		log.Println("Error listing trending content in listTrendingContent:", err)
 		return err
 	}
 
@@ -127,19 +128,19 @@ func (server *Server) getDailyAnalytics(ctx echo.Context) error {
 	var req DailyAnalyticsReq
 
 	if err := ctx.Bind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		log.Println("Error binding request in getDailyAnalytics:", err)
 		return err
 	}
 
 	analyticsDate, err := time.Parse("2006-01-02", req.AnalyticsDate)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid date format for analytics_date, expected YYYY-MM-DD", err))
+		log.Println("Error parsing date in getDailyAnalytics:", err)
 		return err
 	}
 
 	analyticsDate2, err := time.Parse("2006-01-02", req.AnalyticsDate2)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid date format for analytics_date_2, expected YYYY-MM-DD", err))
+		log.Println("Error parsing date in getDailyAnalytics:", err)
 		return err
 	}
 
@@ -151,7 +152,7 @@ func (server *Server) getDailyAnalytics(ctx echo.Context) error {
 
 	data, err := server.store.GetDailyAnalytics(ctx.Request().Context(), arg)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get daily analytics", err))
+		log.Println("Error getting daily analytics in getDailyAnalytics:", err)
 		return err
 	}
 

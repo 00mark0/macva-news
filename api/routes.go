@@ -3,11 +3,15 @@ package api
 import (
 	"github.com/00mark0/macva-news/utils"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"os"
 )
 
 func (server *Server) setupRouter() {
 	router := echo.New()
+
+	router.Use(middleware.Gzip())
+
 	// Initialize custom validator from validator.go
 	router.Validator = NewCustomValidator()
 
@@ -40,6 +44,7 @@ func (server *Server) setupRouter() {
 	// Admin articles
 	adminRoutes.GET("/admin/content", server.adminArts)
 	adminRoutes.GET("/admin/content/create", server.createArticlePage)
+	adminRoutes.GET("/admin/content/update/:id", server.updateArticlePage)
 	adminRoutes.GET("/admin/pub-content", server.publishedContentList)
 	adminRoutes.GET("/admin/draft-content", server.draftContentList)
 	adminRoutes.GET("/admin/del-content", server.deletedContentList)
@@ -83,6 +88,7 @@ func (server *Server) setupRouter() {
 	// Admin Media
 	adminRoutes.GET("/api/admin/media", server.listMediaForContent)
 	adminRoutes.POST("/api/admin/media/upload/new", server.addMediaToNewContent)
+	adminRoutes.POST("/api/admin/media/upload/:id", server.addMediaToUpdateContent)
 	adminRoutes.DELETE("/api/admin/media/remove/:id", server.deleteMedia)
 
 	// Admin Tags
@@ -91,7 +97,9 @@ func (server *Server) setupRouter() {
 	adminRoutes.GET("/api/admin/tags/:id", server.listTagsByContent)
 	adminRoutes.POST("/api/admin/tags", server.createTag)
 	adminRoutes.POST("/api/admin/tags/add", server.addTagToContent)
+	adminRoutes.POST("/api/admin/tags/add/:id", server.addTagToContentUpdate)
 	adminRoutes.DELETE("/api/admin/tags/content/remove/:id", server.removeTagFromContent)
+	adminRoutes.DELETE("/api/admin/tags/content/remove/:content_id/:tag_id", server.removeTagFromContentUpdate)
 	adminRoutes.DELETE("/api/admin/tags/remove/:id", server.deleteTag)
 
 	// Cookie

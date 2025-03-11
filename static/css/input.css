@@ -7,6 +7,30 @@ body {
     font-family: 'Merriweather', sans-serif;
 }
 
+/* Hide content until fonts are loaded or timeout occurs */
+.hide-until-fonts-loaded {
+    visibility: hidden;
+}
+
+.fonts-loaded .hide-until-fonts-loaded {
+    visibility: visible;
+}
+
+/* Reserve space for text elements with specific sizes */
+.font-reserved-space {
+    min-height: 1.25em;
+    /* Adjust based on your largest expected line height */
+}
+
+/* Set fallback fonts with similar metrics to Merriweather */
+body,
+button,
+input,
+select,
+textarea {
+    font-family: Merriweather, Georgia, serif;
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;

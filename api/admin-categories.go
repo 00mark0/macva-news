@@ -20,7 +20,7 @@ func (server *Server) listCats(ctx echo.Context) error {
 	var req ListCatsReq
 
 	if err := ctx.Bind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		log.Println("Error binding request in listCats:", err)
 		return err
 	}
 
@@ -28,7 +28,7 @@ func (server *Server) listCats(ctx echo.Context) error {
 
 	categories, err := server.store.ListCategories(ctx.Request().Context(), nextLimit)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get categories", err))
+		log.Println("Error listing categories in listCats:", err)
 		return err
 	}
 
@@ -44,7 +44,7 @@ func (server *Server) createCategory(ctx echo.Context) error {
 	var createCatErr components.CreateCategoryErr
 
 	if err := ctx.Bind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		log.Println("Error binding request in createCategory:", err)
 		return err
 	}
 
@@ -70,7 +70,7 @@ func (server *Server) createCategory(ctx echo.Context) error {
 	matched, err := regexp.MatchString(`^[A-Za-z ]+$`, req.CategoryName)
 	if err != nil {
 		// Log error but don't expose internal issues to users
-		ctx.JSON(http.StatusInternalServerError, errorResponse("internal server error", err))
+		log.Println("Error matching regex in createCategory:", err)
 		return err
 	}
 
@@ -81,7 +81,7 @@ func (server *Server) createCategory(ctx echo.Context) error {
 
 	_, err = server.store.CreateCategory(ctx.Request().Context(), req.CategoryName)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to create category", err))
+		log.Println("Error creating category in createCategory:", err)
 		return err
 	}
 
@@ -95,7 +95,8 @@ func (server *Server) deleteCategory(ctx echo.Context) error {
 	// Parse string UUID into proper UUID format
 	parsedUUID, err := uuid.Parse(categoryID)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, errorResponse("invalid category ID format", err))
+		log.Println("Invalid category ID format in deleteCategory:", err)
+		return err
 	}
 
 	// Create a pgtype.UUID with the parsed UUID
@@ -106,7 +107,7 @@ func (server *Server) deleteCategory(ctx echo.Context) error {
 
 	_, err = server.store.DeleteCategory(ctx.Request().Context(), pgUUID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to delete category", err))
+		log.Println("Error deleting category in deleteCategory:", err)
 		return err
 	}
 
@@ -125,7 +126,8 @@ func (server *Server) updateCategory(ctx echo.Context) error {
 	// Parse string UUID into proper UUID format
 	parsedUUID, err := uuid.Parse(categoryID)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, errorResponse("invalid category ID format", err))
+		log.Println("Invalid category ID format in updateCategory:", err)
+		return err
 	}
 
 	// Create a pgtype.UUID with the parsed UUID
@@ -136,13 +138,12 @@ func (server *Server) updateCategory(ctx echo.Context) error {
 
 	category, err := server.store.GetCategoryByID(ctx.Request().Context(), pgUUID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to get category", err))
-		log.Println("Category error:", err)
+		log.Println("Error getting category in updateCategory:", err)
 		return err
 	}
 
 	if err := ctx.Bind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse("invalid request body", err))
+		log.Println("Error binding request in updateCategory:", err)
 		return err
 	}
 
@@ -168,7 +169,7 @@ func (server *Server) updateCategory(ctx echo.Context) error {
 	matched, err := regexp.MatchString(`^[A-Za-z ]+$`, req.CategoryName)
 	if err != nil {
 		// Log error but don't expose internal issues to users
-		ctx.JSON(http.StatusInternalServerError, errorResponse("internal server error", err))
+		log.Println("Error matching regex in updateCategory:", err)
 		return err
 	}
 
@@ -184,7 +185,7 @@ func (server *Server) updateCategory(ctx echo.Context) error {
 
 	_, err = server.store.UpdateCategory(ctx.Request().Context(), arg)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse("failed to update category", err))
+		log.Println("Error updating category in updateCategory:", err)
 		return err
 	}
 
