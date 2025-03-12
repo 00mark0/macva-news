@@ -1,0 +1,1 @@
+<div data-react-component=\"Widget\"></div><script defer src=\"/static/react/main.js\"></script>

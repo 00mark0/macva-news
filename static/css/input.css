@@ -6,17 +6,17 @@
 @font-face {
     font-family: 'Merriweather';
     src: url('/static/fonts/Merriweather-VariableFont_opsz\,wdth\,wght.woff2') format('woff2');
-    font-weight: 600;
+    font-weight: 500;
     font-style: normal;
 }
 
-html {
+/*html {
     font-size: 18px;
-}
+}*/
 
 body {
     font-family: 'Merriweather', sans-serif;
-    font-weight: 600;
+    font-weight: 500;
     font-style: normal;
 }
 

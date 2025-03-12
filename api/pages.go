@@ -373,5 +373,12 @@ func (server *Server) updateArticlePage(ctx echo.Context) error {
 		return err
 	}
 
+	ctx.SetCookie(&http.Cookie{
+		Name:   "content_id",
+		Value:  contentIDStr,
+		Path:   "/",
+		MaxAge: 0,
+	})
+
 	return Render(ctx, http.StatusOK, components.UpdateArticle(content, categories, media, tags, contentTags))
 }

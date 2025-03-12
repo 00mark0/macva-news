@@ -183,12 +183,12 @@ func AdminCategoriesDisplay(nextLimit int, categories []db.Category) templ.Compo
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" hx-get=\"/admin/create-cat-form\" hx-target=\"#create-category-modal\" class=\"cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-md font-medium transition duration-150 ease-in-out\">Dodaj kategoriju</button></div><div class=\"overflow-auto rounded-lg border border-gray-200 dark:border-gray-700 mb-6\"><table class=\"min-w-full divide-y divide-gray-200 dark:divide-gray-700\"><thead class=\"bg-gray-50 dark:bg-gray-900\"><tr><th scope=\"col\" class=\"px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider\">Naziv kategorije</th><th scope=\"col\" class=\"px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider\">Akcije</th></tr></thead> <tbody class=\"bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" hx-get=\"/admin/create-cat-form\" hx-target=\"#create-category-modal\" class=\"cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out\">Dodaj kategoriju</button></div><div class=\"overflow-auto rounded-lg border border-gray-200 dark:border-gray-700 mb-6\"><table class=\"min-w-full divide-y divide-gray-200 dark:divide-gray-700\"><thead class=\"bg-gray-50 dark:bg-gray-900\"><tr><th scope=\"col\" class=\"px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider\">Naziv kategorije</th><th scope=\"col\" class=\"px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider\">Akcije</th></tr></thead> <tbody class=\"bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for _, category := range categories {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<tr class=\"hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-150 ease-in-out\"><td class=\"px-6 py-4 whitespace-nowrap text-md font-medium text-gray-900 dark:text-white\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<tr class=\"hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-150 ease-in-out\"><td class=\"px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -201,7 +201,7 @@ func AdminCategoriesDisplay(nextLimit int, categories []db.Category) templ.Compo
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</td><td class=\"px-6 py-4 whitespace-nowrap text-right text-md font-medium\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</td><td class=\"px-6 py-4 whitespace-nowrap text-right text-sm font-medium\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -269,7 +269,7 @@ func AdminCategoriesDisplay(nextLimit int, categories []db.Category) templ.Compo
 			}
 		}
 		if len(categories) == 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<tr><td colspan=\"2\" class=\"px-6 py-4 text-md text-center text-gray-500 dark:text-gray-400\">Trenutno nema kategorija. Kliknite \"Dodaj kategoriju\" za dodavanje nove.</td></tr>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<tr><td colspan=\"2\" class=\"px-6 py-4 text-sm text-center text-gray-500 dark:text-gray-400\">Trenutno nema kategorija. Kliknite \"Dodaj kategoriju\" za dodavanje nove.</td></tr>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -292,7 +292,7 @@ func AdminCategoriesDisplay(nextLimit int, categories []db.Category) templ.Compo
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" hx-target=\"#admin-categories-display\" hx-swap=\"innerHTML\" class=\"cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-md font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out\">Učitaj više <svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-4 w-4 ml-2\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 9l-7 7-7-7\"></path></svg></button></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" hx-target=\"#admin-categories-display\" hx-swap=\"innerHTML\" class=\"cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out\">Učitaj više <svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-4 w-4 ml-2\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 9l-7 7-7-7\"></path></svg></button></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -348,7 +348,7 @@ func CreateCategoryForm(err CreateCategoryErr) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if string(err) != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div class=\"bg-red-100 border border-red-400 mb-4 text-center text-md text-red-700 px-4 py-2 rounded relative\" role=\"alert\"><span class=\"block sm:inline\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div class=\"bg-red-100 border border-red-400 mb-4 text-center text-sm text-red-700 px-4 py-2 rounded relative\" role=\"alert\"><span class=\"block sm:inline\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -379,7 +379,7 @@ func CreateCategoryForm(err CreateCategoryErr) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\"><div class=\"mb-6\"><label for=\"category_name\" class=\"block text-md font-medium text-gray-700 dark:text-gray-300 mb-2\">Naziv kategorije</label> <input type=\"text\" id=\"category_name\" name=\"category_name\" required class=\"w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white\" placeholder=\"Unesite naziv kategorije\"></div><div class=\"flex justify-center space-x-3\"><button type=\"submit\" class=\"cursor-pointer px-4 py-2 border border-transparent rounded-md shadow-sm text-md font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out\">Dodaj</button> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\"><div class=\"mb-6\"><label for=\"category_name\" class=\"block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2\">Naziv kategorije</label> <input type=\"text\" id=\"category_name\" name=\"category_name\" required class=\"w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white\" placeholder=\"Unesite naziv kategorije\"></div><div class=\"flex justify-center space-x-3\"><button type=\"submit\" class=\"cursor-pointer px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out\">Dodaj</button> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -396,7 +396,7 @@ func CreateCategoryForm(err CreateCategoryErr) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\" class=\"cursor-pointer px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-md font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out\">Odustani</button></div></form></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\" class=\"cursor-pointer px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out\">Odustani</button></div></form></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -425,7 +425,7 @@ func DeleteCategoryModal(category db.Category) templ.Component {
 			templ_7745c5c3_Var15 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "<div class=\"bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50\" id=\"delete-modal-overlay\"><div class=\"mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800\"><div class=\"mt-3 text-center\"><div class=\"mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-6 w-6 text-red-600 dark:text-red-400\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z\"></path></svg></div><h3 class=\"text-lg leading-6 font-medium text-gray-900 dark:text-white mt-2\">Upozorenje!</h3><div class=\"mt-2 px-7 py-3\"><p class=\"text-md text-gray-500 dark:text-gray-400\">Brisanje kategorije <span class=\"font-medium text-gray-700 dark:text-gray-300\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "<div class=\"bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50\" id=\"delete-modal-overlay\"><div class=\"mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800\"><div class=\"mt-3 text-center\"><div class=\"mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-6 w-6 text-red-600 dark:text-red-400\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z\"></path></svg></div><h3 class=\"text-lg leading-6 font-medium text-gray-900 dark:text-white mt-2\">Upozorenje!</h3><div class=\"mt-2 px-7 py-3\"><p class=\"text-sm text-gray-500 dark:text-gray-400\">Brisanje kategorije <span class=\"font-medium text-gray-700 dark:text-gray-300\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -537,7 +537,7 @@ func UpdateCategoryForm(category db.Category, err UpdateCategoryErr) templ.Compo
 			return templ_7745c5c3_Err
 		}
 		if string(err) != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "<div class=\"bg-red-100 border border-red-400 mb-4 text-center text-md text-red-700 px-4 py-2 rounded relative\" role=\"alert\"><span class=\"block sm:inline\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "<div class=\"bg-red-100 border border-red-400 mb-4 text-center text-sm text-red-700 px-4 py-2 rounded relative\" role=\"alert\"><span class=\"block sm:inline\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -581,7 +581,7 @@ func UpdateCategoryForm(category db.Category, err UpdateCategoryErr) templ.Compo
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "\"><div class=\"mb-6\"><label for=\"category_name\" class=\"block text-md font-medium text-gray-700 dark:text-gray-300 mb-2\">Naziv kategorije</label> <input type=\"text\" id=\"category_name\" name=\"category_name\" required class=\"w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white\" placeholder=\"Unesite naziv kategorije\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "\"><div class=\"mb-6\"><label for=\"category_name\" class=\"block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2\">Naziv kategorije</label> <input type=\"text\" id=\"category_name\" name=\"category_name\" required class=\"w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white\" placeholder=\"Unesite naziv kategorije\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -594,7 +594,7 @@ func UpdateCategoryForm(category db.Category, err UpdateCategoryErr) templ.Compo
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "\"></div><div class=\"flex justify-center space-x-3\"><button type=\"submit\" class=\"cursor-pointer px-4 py-2 border border-transparent rounded-md shadow-sm text-md font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out\">Ažuriraj</button> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "\"></div><div class=\"flex justify-center space-x-3\"><button type=\"submit\" class=\"cursor-pointer px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out\">Ažuriraj</button> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -611,7 +611,7 @@ func UpdateCategoryForm(category db.Category, err UpdateCategoryErr) templ.Compo
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "\" class=\"cursor-pointer px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-md font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out\">Odustani</button></div></form></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "\" class=\"cursor-pointer px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out\">Odustani</button></div></form></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

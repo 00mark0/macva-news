@@ -117,7 +117,7 @@ templ AdminArticles(overview db.GetContentOverviewRow, nextLimit int, content []
 			<h1 class="text-3xl font-semibold text-black dark:text-white mb-10">Artikli</h1>
 			<a
 				href="/admin/content/create"
-				class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-md font-medium transition-colors duration-200 mb-10"
+				class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 mb-10"
 			>
 				Novi Artikl
 			</a>
@@ -147,7 +147,7 @@ templ AdminArticles(overview db.GetContentOverviewRow, nextLimit int, content []
 							id="tag-search"
 							name="search_term"
 							class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl 
-                        px-3 py-2 text-md focus:outline-none focus:ring-2 focus:ring-blue-500 
+                        px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 
                         dark:text-gray-200 w-64"
 						/>
 						<button
@@ -298,7 +298,7 @@ templ PublishedContentSort(nextLimit int, content []ListPublishedContentRes, url
 						id="article-pub-search"
 						name="search_term"
 						class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl 
-							   px-3 py-2 text-md focus:outline-none focus:ring-2 focus:ring-blue-500 
+							   px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 
 							   dark:text-gray-200 w-64"
 					/>
 					<input
@@ -335,7 +335,7 @@ templ PublishedContentSort(nextLimit int, content []ListPublishedContentRes, url
 					id="pub-sort-select"
 					onChange={ handlePubSort() }
 					class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2
-				text-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200"
+				text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200"
 				>
 					<option data-url={ fmt.Sprintf("/api/admin/content/published?limit=%d", nextLimit-20) }>
 						Najnovije
@@ -380,7 +380,7 @@ templ DraftContentSort(nextLimit int, content []ListPublishedContentRes, url str
 						id="article-draft-search"
 						name="search_term"
 						class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl 
-							   px-3 py-2 text-md focus:outline-none focus:ring-2 focus:ring-blue-500 
+							   px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 
 							   dark:text-gray-200 w-64"
 					/>
 					<input
@@ -417,7 +417,7 @@ templ DraftContentSort(nextLimit int, content []ListPublishedContentRes, url str
 					id="draft-sort-select"
 					onChange={ handleDraftSort() }
 					class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2
-				text-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200"
+				text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200"
 				>
 					<option data-url={ fmt.Sprintf("/api/admin/content/draft?limit=%d", nextLimit-20) }>
 						Najnovije
@@ -460,7 +460,7 @@ templ DeletedContentSort(nextLimit int, content []ListPublishedContentRes, url s
 						id="article-del-search"
 						name="search_term"
 						class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl 
-							   px-3 py-2 text-md focus:outline-none focus:ring-2 focus:ring-blue-500 
+							   px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 
 							   dark:text-gray-200 w-64"
 					/>
 					<input
@@ -497,7 +497,7 @@ templ DeletedContentSort(nextLimit int, content []ListPublishedContentRes, url s
 					id="del-sort-select"
 					onChange={ handleDelSort() }
 					class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2
-				text-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200"
+				text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200"
 				>
 					<option data-url={ fmt.Sprintf("/api/admin/content/deleted?limit=%d", nextLimit-20) }>
 						Najnovije
@@ -569,38 +569,38 @@ templ PublishedContent(nextLimit int, content []ListPublishedContentRes, url str
 					<tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
 						for i, v := range content {
 							<tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-								<td class="px-6 py-4 whitespace-nowrap text-md font-medium text-gray-900 dark:text-white">
+								<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
 									<p class="w-64 truncate">{ v.Title }</p>
 								</td>
 								if v.Status == "published" && v.IsDeleted == false {
-									<td class="px-6 py-4 whitespace-nowrap text-md text-gray-500 dark:text-gray-300">
+									<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
 										{ v.CategoryName }
 									</td>
 								} else if v.Status == "draft" && v.IsDeleted == false {
-									<td class="px-6 py-4 whitespace-nowrap text-md text-gray-500 dark:text-gray-300">
+									<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
 										Neobjavljeno
 									</td>
 								} else {
-									<td class="px-6 py-4 whitespace-nowrap text-md text-gray-500 dark:text-gray-300">
+									<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
 										Arhivirano
 									</td>
 								}
 								if content[0].Status == "published" && content[0].IsDeleted == false {
-									<td class="px-6 py-4 whitespace-nowrap text-md text-gray-500 dark:text-gray-300">
+									<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
 										{ 
 						v.PublishedAt }
 									</td>
 								} else {
-									<td class="px-6 py-4 whitespace-nowrap text-md text-gray-500 dark:text-gray-300">
+									<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
 										{ 
 						v.CreatedAt }
 									</td>
 								}
-								<td class="px-6 py-4 whitespace-nowrap text-md text-gray-500 dark:text-gray-300">
+								<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
 									{ 
 						v.Username }
 								</td>
-								<td class="px-6 py-4 whitespace-nowrap text-right text-md font-medium">
+								<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
 									<div class="relative inline-block text-left" id={ "dropdown-container-" + fmt.Sprint(i) }>
 										<button
 											type="button"
@@ -678,20 +678,20 @@ templ PublishedContent(nextLimit int, content []ListPublishedContentRes, url str
 											<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 												<!-- Content Details -->
 												<div class="space-y-3">
-													<h3 class="text-md font-medium text-gray-700 dark:text-gray-300">
+													<h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">
 														Detalji
 														sadržaja
 													</h3>
 													<div>
 														<p class="text-xs text-gray-500 dark:text-gray-400">Opis</p>
-														<p class="truncate text-md text-gray-800 dark:text-gray-200 mt-1">
+														<p class="truncate text-sm text-gray-800 dark:text-gray-200 mt-1">
 															{ 
 												v.ContentDescription }
 														</p>
 													</div>
 													<!-- Is Deleted -->
 													<div class="flex items-center justify-between">
-														<span class="text-md text-gray-700 dark:text-gray-300">Obrisano</span>
+														<span class="text-sm text-gray-700 dark:text-gray-300">Obrisano</span>
 														<div>
 															if v.IsDeleted {
 																<span
@@ -738,7 +738,7 @@ templ PublishedContent(nextLimit int, content []ListPublishedContentRes, url str
 													</div>
 													<div>
 														<p class="text-xs text-gray-500 dark:text-gray-400">ID Sadržaja</p>
-														<p class="text-md font-mono text-gray-600 dark:text-gray-400 mt-1">
+														<p class="text-sm font-mono text-gray-600 dark:text-gray-400 mt-1">
 															{ 
 												v.ContentID }
 														</p>
@@ -746,7 +746,7 @@ templ PublishedContent(nextLimit int, content []ListPublishedContentRes, url str
 												</div>
 												<!-- Statistics -->
 												<div class="space-y-3">
-													<h3 class="text-md font-medium text-gray-700 dark:text-gray-300">
+													<h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">
 														Statistika
 													</h3>
 													<div class="grid grid-cols-2 gap-3">
@@ -800,13 +800,13 @@ templ PublishedContent(nextLimit int, content []ListPublishedContentRes, url str
 												if v.Status == "published" && v.IsDeleted == false {
 													<!-- Settings and Toggles -->
 													<div class="space-y-3">
-														<h3 class="text-md font-medium text-gray-700 dark:text-gray-300">
+														<h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">
 															Postavke
 														</h3>
 														<div class="space-y-3">
 															<!-- Comments Toggle -->
 															<div class=" flex items-center justify-between">
-																<span class="text-md text-gray-700 dark:text-gray-300">
+																<span class="text-sm text-gray-700 dark:text-gray-300">
 																	Komentari
 																	omogućeni
 																</span>
@@ -840,7 +840,7 @@ templ PublishedContent(nextLimit int, content []ListPublishedContentRes, url str
 															</div>
 															<!-- View Count Toggle -->
 															<div class="flex items-center justify-between">
-																<span class="text-md text-gray-700 dark:text-gray-300">
+																<span class="text-sm text-gray-700 dark:text-gray-300">
 																	Prikaz
 																	brojača pregleda
 																</span>
@@ -874,7 +874,7 @@ templ PublishedContent(nextLimit int, content []ListPublishedContentRes, url str
 															</div>
 															<!-- Like Count Toggle -->
 															<div class="flex items-center justify-between">
-																<span class="text-md text-gray-700 dark:text-gray-300">
+																<span class="text-sm text-gray-700 dark:text-gray-300">
 																	Prikaz
 																	brojača lajkova
 																</span>
@@ -908,7 +908,7 @@ templ PublishedContent(nextLimit int, content []ListPublishedContentRes, url str
 															</div>
 															<!-- Dislike Count Toggle -->
 															<div class="flex items-center justify-between">
-																<span class="text-md text-gray-700 dark:text-gray-300">
+																<span class="text-sm text-gray-700 dark:text-gray-300">
 																	Prikaz
 																	brojača dislajkova
 																</span>
@@ -959,7 +959,7 @@ templ PublishedContent(nextLimit int, content []ListPublishedContentRes, url str
 						hx-get={ url + fmt.Sprintf("%d", nextLimit) }
 						hx-target="#admin-articles"
 						hx-swap="innerHTML"
-						class="cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-md font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
+						class="cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
 					>
 						Učitaj više
 						<svg
@@ -992,7 +992,7 @@ templ PublishedContent(nextLimit int, content []ListPublishedContentRes, url str
 				></path>
 			</svg>
 			<h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">Nema artikala</h3>
-			<p class="text-md text-gray-500 dark:text-gray-400">Trenutno nema artikala za prikaz.</p>
+			<p class="text-sm text-gray-500 dark:text-gray-400">Trenutno nema artikala za prikaz.</p>
 		</div>
 	}
 }
@@ -1047,7 +1047,7 @@ templ CreateArticle(categories []db.Category, tags []db.Tag) {
 			<main class="min-h-screen">
 				<div class="content-container">
 					<!-- Breadcrumbs -->
-					<nav class="text-md mb-6">
+					<nav class="text-sm mb-6">
 						<ol class="list-none p-0 flex">
 							<li class="flex items-center">
 								<a
@@ -1081,7 +1081,7 @@ templ CreateArticle(categories []db.Category, tags []db.Tag) {
 						<div class="mb-6">
 							<label
 								for="title"
-								class="block text-md font-medium text-gray-700 dark:text-gray-300 mb-2"
+								class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
 							>Naslov</label>
 							<div class="relative">
 								<input
@@ -1118,7 +1118,7 @@ templ CreateArticle(categories []db.Category, tags []db.Tag) {
 						<div class="mb-6">
 							<label
 								for="category"
-								class="block text-md font-medium text-gray-700 dark:text-gray-300 mb-2"
+								class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
 							>Kategorija</label>
 							<div class="relative">
 								<select
@@ -1155,7 +1155,7 @@ templ CreateArticle(categories []db.Category, tags []db.Tag) {
 						<div class="mb-6 mt-6">
 							<label
 								for="editor"
-								class="block text-md font-medium text-gray-700 dark:text-gray-300 mb-2"
+								class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
 							>Sadržaj</label>
 							<div
 								class="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden"
@@ -1198,7 +1198,7 @@ templ CreateArticle(categories []db.Category, tags []db.Tag) {
 					<!-- Media section -->
 					<div class="form-group mt-6">
 						<label
-							class="block text-md font-medium text-gray-700 dark:text-gray-300 mb-2"
+							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
 						>Medije</label>
 						<div
 							id="admin-media"
@@ -1282,7 +1282,7 @@ templ UpdateArticle(content db.GetContentDetailsRow, categories []db.Category, m
 			<main class="min-h-screen">
 				<div class="content-container">
 					<!-- Breadcrumbs -->
-					<nav class="text-md mb-6">
+					<nav class="text-sm mb-6">
 						<ol class="list-none p-0 flex">
 							<li class="flex items-center">
 								<a
@@ -1316,7 +1316,7 @@ templ UpdateArticle(content db.GetContentDetailsRow, categories []db.Category, m
 						<div class="mb-6">
 							<label
 								for="title"
-								class="block text-md font-medium text-gray-700 dark:text-gray-300 mb-2"
+								class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
 							>Naslov</label>
 							<div class="relative">
 								<input
@@ -1354,7 +1354,7 @@ templ UpdateArticle(content db.GetContentDetailsRow, categories []db.Category, m
 						<div class="mb-6">
 							<label
 								for="category"
-								class="block text-md font-medium text-gray-700 dark:text-gray-300 mb-2"
+								class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
 							>Kategorija</label>
 							<div class="relative">
 								<select
@@ -1396,7 +1396,7 @@ templ UpdateArticle(content db.GetContentDetailsRow, categories []db.Category, m
 						<div class="mb-6 mt-6">
 							<label
 								for="editor"
-								class="block text-md font-medium text-gray-700 dark:text-gray-300 mb-2"
+								class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
 							>Sadržaj</label>
 							<div
 								class="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden"
@@ -1431,7 +1431,7 @@ templ UpdateArticle(content db.GetContentDetailsRow, categories []db.Category, m
 					<!-- Media section -->
 					<div class="form-group mt-6">
 						<label
-							class="block text-md font-medium text-gray-700 dark:text-gray-300 mb-2"
+							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
 						>Medije</label>
 						<div
 							id="admin-media"
@@ -1482,7 +1482,7 @@ templ ArticleSuccess(message string) {
 				</svg>
 			</div>
 			<div class="ml-3 mr-7">
-				<p class="text-md text-center font-medium text-green-800">{ message }</p>
+				<p class="text-sm text-center font-medium text-green-800">{ message }</p>
 			</div>
 			<div class="sm:ml-auto sm:pl-3">
 				<div class="flex space-x-2">
@@ -1524,7 +1524,7 @@ templ ArticleError(message string) {
 				</svg>
 			</div>
 			<div class="ml-3 mr-7">
-				<p class="text-md text-center font-medium text-red-800">{ message }</p>
+				<p class="text-sm text-center font-medium text-red-800">{ message }</p>
 			</div>
 			<div class="sm:ml-auto sm:pl-3">
 				<div class="flex space-x-2">
@@ -1548,7 +1548,7 @@ templ ArticleError(message string) {
 
 templ AdminTags(tags []db.Tag, contentTags []db.Tag) {
 	<div class="mb-6">
-		<label class="block text-md font-medium text-gray-700 dark:text-gray-300 mb-2">Tagovi</label>
+		<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tagovi</label>
 		<div class="flex flex-col gap-2">
 			<div
 				class="flex flex-wrap gap-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 min-h-[30px]"
@@ -1557,7 +1557,7 @@ templ AdminTags(tags []db.Tag, contentTags []db.Tag) {
 				if len(contentTags) > 0 {
 					for _, v := range contentTags {
 						<span
-							class="inline-flex items-center px-3 py-1 rounded-full text-md font-medium bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-100"
+							class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-100"
 						>
 							<span>{ v.TagName }</span>
 							<button
@@ -1681,7 +1681,7 @@ templ AdminTags(tags []db.Tag, contentTags []db.Tag) {
 
 templ AdminTagsUpdate(tags []db.Tag, contentTags []db.Tag, contentID string) {
 	<div class="mb-6">
-		<label class="block text-md font-medium text-gray-700 dark:text-gray-300 mb-2">Tagovi</label>
+		<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tagovi</label>
 		<div class="flex flex-col gap-2">
 			<div
 				class="flex flex-wrap gap-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 min-h-[30px]"
@@ -1690,7 +1690,7 @@ templ AdminTagsUpdate(tags []db.Tag, contentTags []db.Tag, contentID string) {
 				if len(contentTags) > 0 {
 					for _, v := range contentTags {
 						<span
-							class="inline-flex items-center px-3 py-1 rounded-full text-md font-medium bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-100"
+							class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-100"
 						>
 							<span>{ v.TagName }</span>
 							<button
@@ -1824,7 +1824,7 @@ templ InsertMediaUpdate(medias []db.Medium, contentID string) {
 					stroke-linejoin="round"
 				></path>
 			</svg>
-			<div class="flex justify-center text-md text-gray-600 dark:text-gray-400">
+			<div class="flex justify-center text-sm text-gray-600 dark:text-gray-400">
 				<form
 					id="upload-form"
 					hx-post={ fmt.Sprintf("/api/admin/media/upload/%s", contentID) }
@@ -1960,7 +1960,7 @@ templ InsertMedia(medias []db.Medium, contentID string) {
 					stroke-linejoin="round"
 				></path>
 			</svg>
-			<div class="flex justify-center text-md text-gray-600 dark:text-gray-400">
+			<div class="flex justify-center text-sm text-gray-600 dark:text-gray-400">
 				<form
 					id="upload-form"
 					hx-post="/api/admin/media/upload/new"

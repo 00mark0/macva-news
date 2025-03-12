@@ -200,7 +200,7 @@ func AdminArticles(overview db.GetContentOverviewRow, nextLimit int, content []L
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"w-full min-h-screen dark:bg-black bg-gray-50 sm:p-8 p-4\"><div class=\"flex justify-between items-center\"><h1 class=\"text-3xl font-semibold text-black dark:text-white mb-10\">Artikli</h1><a href=\"/admin/content/create\" class=\"bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-md font-medium transition-colors duration-200 mb-10\">Novi Artikl</a></div><!-- Floating Nav Container --><div id=\"article-nav\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"w-full min-h-screen dark:bg-black bg-gray-50 sm:p-8 p-4\"><div class=\"flex justify-between items-center\"><h1 class=\"text-3xl font-semibold text-black dark:text-white mb-10\">Artikli</h1><a href=\"/admin/content/create\" class=\"bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 mb-10\">Novi Artikl</a></div><!-- Floating Nav Container --><div id=\"article-nav\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -233,7 +233,7 @@ func AdminArticles(overview db.GetContentOverviewRow, nextLimit int, content []L
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"><input type=\"search\" placeholder=\"Pretraži tagove...\" id=\"tag-search\" name=\"search_term\" class=\"bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl \n                        px-3 py-2 text-md focus:outline-none focus:ring-2 focus:ring-blue-500 \n                        dark:text-gray-200 w-64\"> <button type=\"submit\" class=\"cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md \n                        transition-colors duration-200 flex items-center justify-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-5 w-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z\"></path></svg></button></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"><input type=\"search\" placeholder=\"Pretraži tagove...\" id=\"tag-search\" name=\"search_term\" class=\"bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl \n                        px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 \n                        dark:text-gray-200 w-64\"> <button type=\"submit\" class=\"cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md \n                        transition-colors duration-200 flex items-center justify-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-5 w-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z\"></path></svg></button></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -347,7 +347,7 @@ func PublishedContentSort(nextLimit int, content []ListPublishedContentRes, url 
 			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div class=\"space-y-4\"><div class=\"flex flex-col gap-4 sm:gap-0 sm:flex-row items-center justify-between pb-4 border-b dark:border-gray-700\"><h2 class=\"text-xl font-medium text-gray-800 dark:text-gray-200\">Objavljeni Artikli</h2><div><form hx-get=\"/api/admin/content/published/search\" hx-target=\"#admin-articles\" class=\"relative flex gap-2 items-center\"><input type=\"search\" placeholder=\"Pretraži objavljene artikle...\" id=\"article-pub-search\" name=\"search_term\" class=\"bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl \n\t\t\t\t\t\t\t   px-3 py-2 text-md focus:outline-none focus:ring-2 focus:ring-blue-500 \n\t\t\t\t\t\t\t   dark:text-gray-200 w-64\"> <input type=\"hidden\" name=\"limit\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div class=\"space-y-4\"><div class=\"flex flex-col gap-4 sm:gap-0 sm:flex-row items-center justify-between pb-4 border-b dark:border-gray-700\"><h2 class=\"text-xl font-medium text-gray-800 dark:text-gray-200\">Objavljeni Artikli</h2><div><form hx-get=\"/api/admin/content/published/search\" hx-target=\"#admin-articles\" class=\"relative flex gap-2 items-center\"><input type=\"search\" placeholder=\"Pretraži objavljene artikle...\" id=\"article-pub-search\" name=\"search_term\" class=\"bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl \n\t\t\t\t\t\t\t   px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 \n\t\t\t\t\t\t\t   dark:text-gray-200 w-64\"> <input type=\"hidden\" name=\"limit\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -394,7 +394,7 @@ func PublishedContentSort(nextLimit int, content []ListPublishedContentRes, url 
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" class=\"bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2\n\t\t\t\ttext-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200\"><option data-url=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" class=\"bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2\n\t\t\t\ttext-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200\"><option data-url=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -472,7 +472,7 @@ func DraftContentSort(nextLimit int, content []ListPublishedContentRes, url stri
 			templ_7745c5c3_Var15 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div class=\"space-y-4\"><div class=\"flex flex-col gap-4 sm:gap-0 sm:flex-row items-center justify-between pb-4 border-b dark:border-gray-700\"><h2 class=\"text-xl font-medium text-gray-800 dark:text-gray-200\">Neobjavljeni Artikli</h2><div><form hx-get=\"/api/admin/content/draft/search\" hx-target=\"#admin-articles\" class=\"relative flex gap-2 items-center\"><input type=\"search\" placeholder=\"Pretraži neobjavljene artikle...\" id=\"article-draft-search\" name=\"search_term\" class=\"bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl \n\t\t\t\t\t\t\t   px-3 py-2 text-md focus:outline-none focus:ring-2 focus:ring-blue-500 \n\t\t\t\t\t\t\t   dark:text-gray-200 w-64\"> <input type=\"hidden\" name=\"limit\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div class=\"space-y-4\"><div class=\"flex flex-col gap-4 sm:gap-0 sm:flex-row items-center justify-between pb-4 border-b dark:border-gray-700\"><h2 class=\"text-xl font-medium text-gray-800 dark:text-gray-200\">Neobjavljeni Artikli</h2><div><form hx-get=\"/api/admin/content/draft/search\" hx-target=\"#admin-articles\" class=\"relative flex gap-2 items-center\"><input type=\"search\" placeholder=\"Pretraži neobjavljene artikle...\" id=\"article-draft-search\" name=\"search_term\" class=\"bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl \n\t\t\t\t\t\t\t   px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 \n\t\t\t\t\t\t\t   dark:text-gray-200 w-64\"> <input type=\"hidden\" name=\"limit\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -519,7 +519,7 @@ func DraftContentSort(nextLimit int, content []ListPublishedContentRes, url stri
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\" class=\"bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2\n\t\t\t\ttext-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200\"><option data-url=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\" class=\"bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2\n\t\t\t\ttext-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200\"><option data-url=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -595,7 +595,7 @@ func DeletedContentSort(nextLimit int, content []ListPublishedContentRes, url st
 			templ_7745c5c3_Var22 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<div class=\"space-y-4\"><div class=\"flex flex-col gap-4 sm:gap-0 sm:flex-row items-center justify-between pb-4 border-b dark:border-gray-700\"><h2 class=\"text-xl font-medium text-gray-800 dark:text-gray-200\">Arhivirani Artikli</h2><div><form hx-get=\"/api/admin/content/deleted/search\" hx-target=\"#admin-articles\" class=\"relative flex gap-2 items-center\"><input type=\"search\" placeholder=\"Pretraži arhivirane artikle...\" id=\"article-del-search\" name=\"search_term\" class=\"bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl \n\t\t\t\t\t\t\t   px-3 py-2 text-md focus:outline-none focus:ring-2 focus:ring-blue-500 \n\t\t\t\t\t\t\t   dark:text-gray-200 w-64\"> <input type=\"hidden\" name=\"limit\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<div class=\"space-y-4\"><div class=\"flex flex-col gap-4 sm:gap-0 sm:flex-row items-center justify-between pb-4 border-b dark:border-gray-700\"><h2 class=\"text-xl font-medium text-gray-800 dark:text-gray-200\">Arhivirani Artikli</h2><div><form hx-get=\"/api/admin/content/deleted/search\" hx-target=\"#admin-articles\" class=\"relative flex gap-2 items-center\"><input type=\"search\" placeholder=\"Pretraži arhivirane artikle...\" id=\"article-del-search\" name=\"search_term\" class=\"bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl \n\t\t\t\t\t\t\t   px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 \n\t\t\t\t\t\t\t   dark:text-gray-200 w-64\"> <input type=\"hidden\" name=\"limit\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -642,7 +642,7 @@ func DeletedContentSort(nextLimit int, content []ListPublishedContentRes, url st
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "\" class=\"bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2\n\t\t\t\ttext-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200\"><option data-url=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "\" class=\"bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2\n\t\t\t\ttext-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200\"><option data-url=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -741,7 +741,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 				return templ_7745c5c3_Err
 			}
 			for i, v := range content {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "<tr class=\"hover:bg-gray-50 dark:hover:bg-gray-700\"><td class=\"px-6 py-4 whitespace-nowrap text-md font-medium text-gray-900 dark:text-white\"><p class=\"w-64 truncate\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "<tr class=\"hover:bg-gray-50 dark:hover:bg-gray-700\"><td class=\"px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white\"><p class=\"w-64 truncate\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -759,7 +759,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 					return templ_7745c5c3_Err
 				}
 				if v.Status == "published" && v.IsDeleted == false {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "<td class=\"px-6 py-4 whitespace-nowrap text-md text-gray-500 dark:text-gray-300\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "<td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -777,18 +777,18 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 						return templ_7745c5c3_Err
 					}
 				} else if v.Status == "draft" && v.IsDeleted == false {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "<td class=\"px-6 py-4 whitespace-nowrap text-md text-gray-500 dark:text-gray-300\">Neobjavljeno</td>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "<td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300\">Neobjavljeno</td>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				} else {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "<td class=\"px-6 py-4 whitespace-nowrap text-md text-gray-500 dark:text-gray-300\">Arhivirano</td>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "<td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300\">Arhivirano</td>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
 				if content[0].Status == "published" && content[0].IsDeleted == false {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, "<td class=\"px-6 py-4 whitespace-nowrap text-md text-gray-500 dark:text-gray-300\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, "<td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -807,7 +807,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 						return templ_7745c5c3_Err
 					}
 				} else {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "<td class=\"px-6 py-4 whitespace-nowrap text-md text-gray-500 dark:text-gray-300\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "<td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -826,7 +826,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "<td class=\"px-6 py-4 whitespace-nowrap text-md text-gray-500 dark:text-gray-300\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "<td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -840,7 +840,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, "</td><td class=\"px-6 py-4 whitespace-nowrap text-right text-md font-medium\"><div class=\"relative inline-block text-left\" id=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, "</td><td class=\"px-6 py-4 whitespace-nowrap text-right text-sm font-medium\"><div class=\"relative inline-block text-left\" id=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -997,7 +997,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 73, "\" class=\"hidden w-full rounded-md bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm\"><div class=\"p-4\"><div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4\"><!-- Content Details --><div class=\"space-y-3\"><h3 class=\"text-md font-medium text-gray-700 dark:text-gray-300\">Detalji sadržaja</h3><div><p class=\"text-xs text-gray-500 dark:text-gray-400\">Opis</p><p class=\"truncate text-md text-gray-800 dark:text-gray-200 mt-1\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 73, "\" class=\"hidden w-full rounded-md bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm\"><div class=\"p-4\"><div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4\"><!-- Content Details --><div class=\"space-y-3\"><h3 class=\"text-sm font-medium text-gray-700 dark:text-gray-300\">Detalji sadržaja</h3><div><p class=\"text-xs text-gray-500 dark:text-gray-400\">Opis</p><p class=\"truncate text-sm text-gray-800 dark:text-gray-200 mt-1\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -1011,7 +1011,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 74, "</p></div><!-- Is Deleted --><div class=\"flex items-center justify-between\"><span class=\"text-md text-gray-700 dark:text-gray-300\">Obrisano</span><div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 74, "</p></div><!-- Is Deleted --><div class=\"flex items-center justify-between\"><span class=\"text-sm text-gray-700 dark:text-gray-300\">Obrisano</span><div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -1059,7 +1059,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 82, "\"></div></div><div><p class=\"text-xs text-gray-500 dark:text-gray-400\">ID Sadržaja</p><p class=\"text-md font-mono text-gray-600 dark:text-gray-400 mt-1\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 82, "\"></div></div><div><p class=\"text-xs text-gray-500 dark:text-gray-400\">ID Sadržaja</p><p class=\"text-sm font-mono text-gray-600 dark:text-gray-400 mt-1\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -1073,7 +1073,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, "</p></div></div><!-- Statistics --><div class=\"space-y-3\"><h3 class=\"text-md font-medium text-gray-700 dark:text-gray-300\">Statistika</h3><div class=\"grid grid-cols-2 gap-3\"><div class=\"bg-white dark:bg-gray-700 p-2 rounded-md shadow-sm\"><p class=\"text-xs text-gray-500 dark:text-gray-400\">Pregledi</p><p class=\"text-lg font-semibold text-gray-800 dark:text-white\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, "</p></div></div><!-- Statistics --><div class=\"space-y-3\"><h3 class=\"text-sm font-medium text-gray-700 dark:text-gray-300\">Statistika</h3><div class=\"grid grid-cols-2 gap-3\"><div class=\"bg-white dark:bg-gray-700 p-2 rounded-md shadow-sm\"><p class=\"text-xs text-gray-500 dark:text-gray-400\">Pregledi</p><p class=\"text-lg font-semibold text-gray-800 dark:text-white\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -1176,7 +1176,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 					return templ_7745c5c3_Err
 				}
 				if v.Status == "published" && v.IsDeleted == false {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 91, "<!-- Settings and Toggles --> <div class=\"space-y-3\"><h3 class=\"text-md font-medium text-gray-700 dark:text-gray-300\">Postavke</h3><div class=\"space-y-3\"><!-- Comments Toggle --><div class=\" flex items-center justify-between\"><span class=\"text-md text-gray-700 dark:text-gray-300\">Komentari omogućeni</span><form hx-put=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 91, "<!-- Settings and Toggles --> <div class=\"space-y-3\"><h3 class=\"text-sm font-medium text-gray-700 dark:text-gray-300\">Postavke</h3><div class=\"space-y-3\"><!-- Comments Toggle --><div class=\" flex items-center justify-between\"><span class=\"text-sm text-gray-700 dark:text-gray-300\">Komentari omogućeni</span><form hx-put=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -1199,7 +1199,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 							return templ_7745c5c3_Err
 						}
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 94, " value=\"true\"> <input id=\"comments-hidden\" type=\"hidden\" name=\"comments_enabled\" value=\"false\"><div class=\"relative w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[&#39;&#39;] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div></label></form></div><!-- View Count Toggle --><div class=\"flex items-center justify-between\"><span class=\"text-md text-gray-700 dark:text-gray-300\">Prikaz brojača pregleda</span><form hx-put=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 94, " value=\"true\"> <input id=\"comments-hidden\" type=\"hidden\" name=\"comments_enabled\" value=\"false\"><div class=\"relative w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[&#39;&#39;] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div></label></form></div><!-- View Count Toggle --><div class=\"flex items-center justify-between\"><span class=\"text-sm text-gray-700 dark:text-gray-300\">Prikaz brojača pregleda</span><form hx-put=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -1222,7 +1222,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 							return templ_7745c5c3_Err
 						}
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 97, " value=\"true\"> <input id=\"comments-hidden\" type=\"hidden\" name=\"view_count_enabled\" value=\"false\"><div class=\"relative w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[&#39;&#39;] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div></label></form></div><!-- Like Count Toggle --><div class=\"flex items-center justify-between\"><span class=\"text-md text-gray-700 dark:text-gray-300\">Prikaz brojača lajkova</span><form hx-put=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 97, " value=\"true\"> <input id=\"comments-hidden\" type=\"hidden\" name=\"view_count_enabled\" value=\"false\"><div class=\"relative w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[&#39;&#39;] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div></label></form></div><!-- Like Count Toggle --><div class=\"flex items-center justify-between\"><span class=\"text-sm text-gray-700 dark:text-gray-300\">Prikaz brojača lajkova</span><form hx-put=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -1245,7 +1245,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 							return templ_7745c5c3_Err
 						}
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 100, " value=\"true\"> <input id=\"comments-hidden\" type=\"hidden\" name=\"like_count_enabled\" value=\"false\"><div class=\"relative w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[&#39;&#39;] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div></label></form></div><!-- Dislike Count Toggle --><div class=\"flex items-center justify-between\"><span class=\"text-md text-gray-700 dark:text-gray-300\">Prikaz brojača dislajkova</span><form hx-put=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 100, " value=\"true\"> <input id=\"comments-hidden\" type=\"hidden\" name=\"like_count_enabled\" value=\"false\"><div class=\"relative w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[&#39;&#39;] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div></label></form></div><!-- Dislike Count Toggle --><div class=\"flex items-center justify-between\"><span class=\"text-sm text-gray-700 dark:text-gray-300\">Prikaz brojača dislajkova</span><form hx-put=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -1296,7 +1296,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 107, "\" hx-target=\"#admin-articles\" hx-swap=\"innerHTML\" class=\"cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-md font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out\">Učitaj više <svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-4 w-4 ml-2\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 9l-7 7-7-7\"></path></svg></button></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 107, "\" hx-target=\"#admin-articles\" hx-swap=\"innerHTML\" class=\"cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out\">Učitaj više <svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-4 w-4 ml-2\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 9l-7 7-7-7\"></path></svg></button></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -1306,7 +1306,7 @@ func PublishedContent(nextLimit int, content []ListPublishedContentRes, url stri
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 109, "<div class=\"flex flex-col items-center justify-center py-10 px-4 bg-white dark:bg-gray-800 rounded-lg shadow-md\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-16 w-16 text-gray-400 dark:text-gray-500 mb-4\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z\"></path></svg><h3 class=\"text-lg font-medium text-gray-700 dark:text-gray-300 mb-1\">Nema artikala</h3><p class=\"text-md text-gray-500 dark:text-gray-400\">Trenutno nema artikala za prikaz.</p></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 109, "<div class=\"flex flex-col items-center justify-center py-10 px-4 bg-white dark:bg-gray-800 rounded-lg shadow-md\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-16 w-16 text-gray-400 dark:text-gray-500 mb-4\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z\"></path></svg><h3 class=\"text-lg font-medium text-gray-700 dark:text-gray-300 mb-1\">Nema artikala</h3><p class=\"text-sm text-gray-500 dark:text-gray-400\">Trenutno nema artikala za prikaz.</p></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1336,7 +1336,7 @@ func CreateArticle(categories []db.Category, tags []db.Tag) templ.Component {
 			templ_7745c5c3_Var60 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 110, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Novi Artikl | Mačva News</title><meta name=\"description\" content=\"Mačva News Novi Artikl\"><link rel=\"preload\" href=\"/static/css/output.css\" as=\"style\"><link rel=\"preload\" href=\"/static/js/htmx.min.js\" as=\"script\"><link rel=\"preload\" href=\"/static/js/article.js\" as=\"script\"><link href=\"/static/css/output.css\" rel=\"stylesheet\"><!-- TinyMCE CDN --><script src=\"https://cdn.tiny.cloud/1/zg40kx0ha6mahvkb69fetcvauvyy8qkro8ig11uzb6jzf0cl/tinymce/7/tinymce.min.js\" referrerpolicy=\"origin\" defer></script><script src=\"/static/js/htmx.min.js\" defer></script><script src=\"/static/js/article.js\" defer></script></head><body class=\"bg-gray-50 text-gray-900 dark:bg-black dark:text-gray-100 min-h-screen p-4 sm:px-16 sm:py-12\"><!-- Theme Toggle Button --><div class=\"fixed top-4 right-4 z-10\"><button id=\"create-theme-toggle\" class=\"cursor-pointer p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200\"><svg id=\"sun-icon\" class=\"w-6 h-6 hidden dark:block\" fill=\"currentColor\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z\"></path></svg> <svg id=\"moon-icon\" class=\"w-6 h-6 block dark:hidden\" fill=\"currentColor\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z\"></path></svg></button></div><!-- Main Content --><main class=\"min-h-screen\"><div class=\"content-container\"><!-- Breadcrumbs --><nav class=\"text-md mb-6\"><ol class=\"list-none p-0 flex\"><li class=\"flex items-center\"><a href=\"/admin\" class=\"text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary\">Admin</a> <svg class=\"h-4 w-4 mx-2 text-gray-400\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 5l7 7-7 7\"></path></svg></li><li><span class=\"text-gray-700 dark:text-gray-300\">Novi Artikl</span></li></ol></nav><!-- Page Title --><h1 class=\"text-3xl font-semibold text-black dark:text-white mb-10\">Novi Artikl</h1><!-- Form --><form class=\"bg-white dark:bg-gray-800 shadow-md rounded-lg p-6\"><!-- Title Field --><div class=\"mb-6\"><label for=\"title\" class=\"block text-md font-medium text-gray-700 dark:text-gray-300 mb-2\">Naslov</label><div class=\"relative\"><input type=\"text\" id=\"title\" name=\"title\" class=\"w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors duration-200\" placeholder=\"Unesite naslov artikla\"><div class=\"absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400\"><svg class=\"h-5 w-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z\"></path></svg></div></div><p class=\"mt-1 text-xs text-gray-500 dark:text-gray-400\">Jasan i koncizan naslov koji privlači pažnju</p></div><!-- Category Field with enhanced dropdown --><div class=\"mb-6\"><label for=\"category\" class=\"block text-md font-medium text-gray-700 dark:text-gray-300 mb-2\">Kategorija</label><div class=\"relative\"><select id=\"category\" name=\"category_id\" class=\"w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none dark:bg-gray-700 dark:text-white transition-colors duration-200\"><option value=\"\">Izaberite kategoriju</option> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 110, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Novi Artikl | Mačva News</title><meta name=\"description\" content=\"Mačva News Novi Artikl\"><link rel=\"preload\" href=\"/static/css/output.css\" as=\"style\"><link rel=\"preload\" href=\"/static/js/htmx.min.js\" as=\"script\"><link rel=\"preload\" href=\"/static/js/article.js\" as=\"script\"><link href=\"/static/css/output.css\" rel=\"stylesheet\"><!-- TinyMCE CDN --><script src=\"https://cdn.tiny.cloud/1/zg40kx0ha6mahvkb69fetcvauvyy8qkro8ig11uzb6jzf0cl/tinymce/7/tinymce.min.js\" referrerpolicy=\"origin\" defer></script><script src=\"/static/js/htmx.min.js\" defer></script><script src=\"/static/js/article.js\" defer></script></head><body class=\"bg-gray-50 text-gray-900 dark:bg-black dark:text-gray-100 min-h-screen p-4 sm:px-16 sm:py-12\"><!-- Theme Toggle Button --><div class=\"fixed top-4 right-4 z-10\"><button id=\"create-theme-toggle\" class=\"cursor-pointer p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200\"><svg id=\"sun-icon\" class=\"w-6 h-6 hidden dark:block\" fill=\"currentColor\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z\"></path></svg> <svg id=\"moon-icon\" class=\"w-6 h-6 block dark:hidden\" fill=\"currentColor\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z\"></path></svg></button></div><!-- Main Content --><main class=\"min-h-screen\"><div class=\"content-container\"><!-- Breadcrumbs --><nav class=\"text-sm mb-6\"><ol class=\"list-none p-0 flex\"><li class=\"flex items-center\"><a href=\"/admin\" class=\"text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary\">Admin</a> <svg class=\"h-4 w-4 mx-2 text-gray-400\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 5l7 7-7 7\"></path></svg></li><li><span class=\"text-gray-700 dark:text-gray-300\">Novi Artikl</span></li></ol></nav><!-- Page Title --><h1 class=\"text-3xl font-semibold text-black dark:text-white mb-10\">Novi Artikl</h1><!-- Form --><form class=\"bg-white dark:bg-gray-800 shadow-md rounded-lg p-6\"><!-- Title Field --><div class=\"mb-6\"><label for=\"title\" class=\"block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2\">Naslov</label><div class=\"relative\"><input type=\"text\" id=\"title\" name=\"title\" class=\"w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors duration-200\" placeholder=\"Unesite naslov artikla\"><div class=\"absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400\"><svg class=\"h-5 w-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z\"></path></svg></div></div><p class=\"mt-1 text-xs text-gray-500 dark:text-gray-400\">Jasan i koncizan naslov koji privlači pažnju</p></div><!-- Category Field with enhanced dropdown --><div class=\"mb-6\"><label for=\"category\" class=\"block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2\">Kategorija</label><div class=\"relative\"><select id=\"category\" name=\"category_id\" class=\"w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none dark:bg-gray-700 dark:text-white transition-colors duration-200\"><option value=\"\">Izaberite kategoriju</option> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1372,7 +1372,7 @@ func CreateArticle(categories []db.Category, tags []db.Tag) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 114, "</select><div class=\"absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500 dark:text-gray-400\"><svg class=\"h-5 w-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 9l-7 7-7-7\"></path></svg></div></div></div><div class=\"mb-6 mt-6\"><label for=\"editor\" class=\"block text-md font-medium text-gray-700 dark:text-gray-300 mb-2\">Sadržaj</label><div class=\"border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden\"><!-- TinyMCE will replace this textarea --><textarea id=\"editor\" name=\"content_description\" class=\"w-full min-h-[400px]\"></textarea></div><p class=\"mt-1 text-xs text-gray-500 dark:text-gray-400\">Koristite alate za formatiranje za bolju čitljivost</p></div><div class=\"flex gap-4 pt-4\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 114, "</select><div class=\"absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500 dark:text-gray-400\"><svg class=\"h-5 w-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 9l-7 7-7-7\"></path></svg></div></div></div><div class=\"mb-6 mt-6\"><label for=\"editor\" class=\"block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2\">Sadržaj</label><div class=\"border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden\"><!-- TinyMCE will replace this textarea --><textarea id=\"editor\" name=\"content_description\" class=\"w-full min-h-[400px]\"></textarea></div><p class=\"mt-1 text-xs text-gray-500 dark:text-gray-400\">Koristite alate za formatiranje za bolju čitljivost</p></div><div class=\"flex gap-4 pt-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1406,7 +1406,7 @@ func CreateArticle(categories []db.Category, tags []db.Tag) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 118, "\" class=\"cursor-pointer py-2 px-4 rounded-lg bg-yellow-800 hover:bg-yellow-900 text-white\">Sačuvaj</button></div></form><!-- Media section --><div class=\"form-group mt-6\"><label class=\"block text-md font-medium text-gray-700 dark:text-gray-300 mb-2\">Medije</label><div id=\"admin-media\" hx-get=\"/api/admin/media\" hx-trigger=\"load\" hx-target=\"#admin-media\" class=\"mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-700 border-dashed rounded-md\"></div></div><!-- Tags section --><div id=\"admin-tags\" class=\"mt-6\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 118, "\" class=\"cursor-pointer py-2 px-4 rounded-lg bg-yellow-800 hover:bg-yellow-900 text-white\">Sačuvaj</button></div></form><!-- Media section --><div class=\"form-group mt-6\"><label class=\"block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2\">Medije</label><div id=\"admin-media\" hx-get=\"/api/admin/media\" hx-trigger=\"load\" hx-target=\"#admin-media\" class=\"mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-700 border-dashed rounded-md\"></div></div><!-- Tags section --><div id=\"admin-tags\" class=\"mt-6\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1444,7 +1444,7 @@ func UpdateArticle(content db.GetContentDetailsRow, categories []db.Category, me
 			templ_7745c5c3_Var65 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 120, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Uredi Artikl | Mačva News</title><meta name=\"description\" content=\"Mačva News Uredi Artikl\"><link rel=\"preload\" href=\"/static/css/output.css\" as=\"style\"><link rel=\"preload\" href=\"/static/js/htmx.min.js\" as=\"script\"><link rel=\"preload\" href=\"/static/js/article.js\" as=\"script\"><link href=\"/static/css/output.css\" rel=\"stylesheet\"><!-- TinyMCE CDN --><script src=\"https://cdn.tiny.cloud/1/zg40kx0ha6mahvkb69fetcvauvyy8qkro8ig11uzb6jzf0cl/tinymce/7/tinymce.min.js\" referrerpolicy=\"origin\" defer></script><script src=\"/static/js/htmx.min.js\" defer></script><script src=\"/static/js/article.js\" defer></script></head><body class=\"bg-gray-50 text-gray-900 dark:bg-black dark:text-gray-100 min-h-screen p-4 sm:px-16 sm:py-12\"><!-- Theme Toggle Button --><div class=\"fixed top-4 right-4 z-10\"><button id=\"create-theme-toggle\" class=\"cursor-pointer p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200\"><svg id=\"sun-icon\" class=\"w-6 h-6 hidden dark:block\" fill=\"currentColor\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z\"></path></svg> <svg id=\"moon-icon\" class=\"w-6 h-6 block dark:hidden\" fill=\"currentColor\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z\"></path></svg></button></div><!-- Main Content --><main class=\"min-h-screen\"><div class=\"content-container\"><!-- Breadcrumbs --><nav class=\"text-md mb-6\"><ol class=\"list-none p-0 flex\"><li class=\"flex items-center\"><a href=\"/admin\" class=\"text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary\">Admin</a> <svg class=\"h-4 w-4 mx-2 text-gray-400\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 5l7 7-7 7\"></path></svg></li><li><span class=\"text-gray-700 dark:text-gray-300\">Uredi Artikl</span></li></ol></nav><!-- Page Title --><h1 class=\"text-3xl font-semibold text-black dark:text-white mb-10\">Uredi Artikl</h1><!-- Form --><form class=\"bg-white dark:bg-gray-800 shadow-md rounded-lg p-6\"><!-- Title Field --><div class=\"mb-6\"><label for=\"title\" class=\"block text-md font-medium text-gray-700 dark:text-gray-300 mb-2\">Naslov</label><div class=\"relative\"><input type=\"text\" id=\"title\" name=\"title\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 120, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Uredi Artikl | Mačva News</title><meta name=\"description\" content=\"Mačva News Uredi Artikl\"><link rel=\"preload\" href=\"/static/css/output.css\" as=\"style\"><link rel=\"preload\" href=\"/static/js/htmx.min.js\" as=\"script\"><link rel=\"preload\" href=\"/static/js/article.js\" as=\"script\"><link href=\"/static/css/output.css\" rel=\"stylesheet\"><!-- TinyMCE CDN --><script src=\"https://cdn.tiny.cloud/1/zg40kx0ha6mahvkb69fetcvauvyy8qkro8ig11uzb6jzf0cl/tinymce/7/tinymce.min.js\" referrerpolicy=\"origin\" defer></script><script src=\"/static/js/htmx.min.js\" defer></script><script src=\"/static/js/article.js\" defer></script></head><body class=\"bg-gray-50 text-gray-900 dark:bg-black dark:text-gray-100 min-h-screen p-4 sm:px-16 sm:py-12\"><!-- Theme Toggle Button --><div class=\"fixed top-4 right-4 z-10\"><button id=\"create-theme-toggle\" class=\"cursor-pointer p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200\"><svg id=\"sun-icon\" class=\"w-6 h-6 hidden dark:block\" fill=\"currentColor\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z\"></path></svg> <svg id=\"moon-icon\" class=\"w-6 h-6 block dark:hidden\" fill=\"currentColor\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z\"></path></svg></button></div><!-- Main Content --><main class=\"min-h-screen\"><div class=\"content-container\"><!-- Breadcrumbs --><nav class=\"text-sm mb-6\"><ol class=\"list-none p-0 flex\"><li class=\"flex items-center\"><a href=\"/admin\" class=\"text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary\">Admin</a> <svg class=\"h-4 w-4 mx-2 text-gray-400\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 5l7 7-7 7\"></path></svg></li><li><span class=\"text-gray-700 dark:text-gray-300\">Uredi Artikl</span></li></ol></nav><!-- Page Title --><h1 class=\"text-3xl font-semibold text-black dark:text-white mb-10\">Uredi Artikl</h1><!-- Form --><form class=\"bg-white dark:bg-gray-800 shadow-md rounded-lg p-6\"><!-- Title Field --><div class=\"mb-6\"><label for=\"title\" class=\"block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2\">Naslov</label><div class=\"relative\"><input type=\"text\" id=\"title\" name=\"title\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1457,7 +1457,7 @@ func UpdateArticle(content db.GetContentDetailsRow, categories []db.Category, me
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 121, "\" class=\"w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors duration-200\" placeholder=\"Unesite naslov artikla\"><div class=\"absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400\"><svg class=\"h-5 w-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z\"></path></svg></div></div><p class=\"mt-1 text-xs text-gray-500 dark:text-gray-400\">Jasan i koncizan naslov koji privlači pažnju</p></div><!-- Category Field with enhanced dropdown --><div class=\"mb-6\"><label for=\"category\" class=\"block text-md font-medium text-gray-700 dark:text-gray-300 mb-2\">Kategorija</label><div class=\"relative\"><select id=\"category\" name=\"category_id\" class=\"w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none dark:bg-gray-700 dark:text-white transition-colors duration-200\"><option value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 121, "\" class=\"w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors duration-200\" placeholder=\"Unesite naslov artikla\"><div class=\"absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400\"><svg class=\"h-5 w-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z\"></path></svg></div></div><p class=\"mt-1 text-xs text-gray-500 dark:text-gray-400\">Jasan i koncizan naslov koji privlači pažnju</p></div><!-- Category Field with enhanced dropdown --><div class=\"mb-6\"><label for=\"category\" class=\"block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2\">Kategorija</label><div class=\"relative\"><select id=\"category\" name=\"category_id\" class=\"w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none dark:bg-gray-700 dark:text-white transition-colors duration-200\"><option value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1522,7 +1522,7 @@ func UpdateArticle(content db.GetContentDetailsRow, categories []db.Category, me
 				}
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 127, "</select><div class=\"absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500 dark:text-gray-400\"><svg class=\"h-5 w-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 9l-7 7-7-7\"></path></svg></div></div></div><div class=\"mb-6 mt-6\"><label for=\"editor\" class=\"block text-md font-medium text-gray-700 dark:text-gray-300 mb-2\">Sadržaj</label><div class=\"border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden\"><!-- TinyMCE will replace this textarea --><textarea id=\"editor\" name=\"content_description\" class=\"w-full min-h-[400px]\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 127, "</select><div class=\"absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500 dark:text-gray-400\"><svg class=\"h-5 w-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 9l-7 7-7-7\"></path></svg></div></div></div><div class=\"mb-6 mt-6\"><label for=\"editor\" class=\"block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2\">Sadržaj</label><div class=\"border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden\"><!-- TinyMCE will replace this textarea --><textarea id=\"editor\" name=\"content_description\" class=\"w-full min-h-[400px]\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1565,7 +1565,7 @@ func UpdateArticle(content db.GetContentDetailsRow, categories []db.Category, me
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 131, "\" type=\"submit\" class=\"cursor-pointer bg-sky-700 hover:bg-sky-800 text-white px-4 py-2 rounded-lg\">Uredi</button></div></form><!-- Media section --><div class=\"form-group mt-6\"><label class=\"block text-md font-medium text-gray-700 dark:text-gray-300 mb-2\">Medije</label><div id=\"admin-media\" class=\"mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-700 border-dashed rounded-md\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 131, "\" type=\"submit\" class=\"cursor-pointer bg-sky-700 hover:bg-sky-800 text-white px-4 py-2 rounded-lg\">Uredi</button></div></form><!-- Media section --><div class=\"form-group mt-6\"><label class=\"block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2\">Medije</label><div id=\"admin-media\" class=\"mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-700 border-dashed rounded-md\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1610,7 +1610,7 @@ func ArticleSuccess(message string) templ.Component {
 			templ_7745c5c3_Var74 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 134, "<div class=\"bg-green-100 border-l-4 border-green-500 rounded-md shadow-md transform transition-all duration-300 ease-out animate-fadeIn\"><div class=\"flex flex-col gap-2 sm:gap-0 sm:flex-row justify-center items-center p-3\"><div><svg class=\"h-5 w-5 text-green-500\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z\" clip-rule=\"evenodd\"></path></svg></div><div class=\"ml-3 mr-7\"><p class=\"text-md text-center font-medium text-green-800\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 134, "<div class=\"bg-green-100 border-l-4 border-green-500 rounded-md shadow-md transform transition-all duration-300 ease-out animate-fadeIn\"><div class=\"flex flex-col gap-2 sm:gap-0 sm:flex-row justify-center items-center p-3\"><div><svg class=\"h-5 w-5 text-green-500\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z\" clip-rule=\"evenodd\"></path></svg></div><div class=\"ml-3 mr-7\"><p class=\"text-sm text-center font-medium text-green-800\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1652,7 +1652,7 @@ func ArticleError(message string) templ.Component {
 			templ_7745c5c3_Var76 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 136, "<div class=\"bg-red-100 border-l-4 border-red-500 rounded-md shadow-md transform transition-all duration-300 ease-out animate-fadeIn\"><div class=\"flex flex-col gap-2 sm:gap-0 sm:flex-row justify-center items-center p-3\"><div><svg class=\"h-5 w-5 text-red-500\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z\" clip-rule=\"evenodd\"></path></svg></div><div class=\"ml-3 mr-7\"><p class=\"text-md text-center font-medium text-red-800\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 136, "<div class=\"bg-red-100 border-l-4 border-red-500 rounded-md shadow-md transform transition-all duration-300 ease-out animate-fadeIn\"><div class=\"flex flex-col gap-2 sm:gap-0 sm:flex-row justify-center items-center p-3\"><div><svg class=\"h-5 w-5 text-red-500\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z\" clip-rule=\"evenodd\"></path></svg></div><div class=\"ml-3 mr-7\"><p class=\"text-sm text-center font-medium text-red-800\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1694,13 +1694,13 @@ func AdminTags(tags []db.Tag, contentTags []db.Tag) templ.Component {
 			templ_7745c5c3_Var78 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 138, "<div class=\"mb-6\"><label class=\"block text-md font-medium text-gray-700 dark:text-gray-300 mb-2\">Tagovi</label><div class=\"flex flex-col gap-2\"><div class=\"flex flex-wrap gap-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 min-h-[30px]\"><!-- Example tags - you can make these dynamic -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 138, "<div class=\"mb-6\"><label class=\"block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2\">Tagovi</label><div class=\"flex flex-col gap-2\"><div class=\"flex flex-wrap gap-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 min-h-[30px]\"><!-- Example tags - you can make these dynamic -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if len(contentTags) > 0 {
 			for _, v := range contentTags {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 139, "<span class=\"inline-flex items-center px-3 py-1 rounded-full text-md font-medium bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-100\"><span>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 139, "<span class=\"inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-100\"><span>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -1832,13 +1832,13 @@ func AdminTagsUpdate(tags []db.Tag, contentTags []db.Tag, contentID string) temp
 			templ_7745c5c3_Var85 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 151, "<div class=\"mb-6\"><label class=\"block text-md font-medium text-gray-700 dark:text-gray-300 mb-2\">Tagovi</label><div class=\"flex flex-col gap-2\"><div class=\"flex flex-wrap gap-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 min-h-[30px]\"><!-- Example tags - you can make these dynamic -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 151, "<div class=\"mb-6\"><label class=\"block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2\">Tagovi</label><div class=\"flex flex-col gap-2\"><div class=\"flex flex-wrap gap-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 min-h-[30px]\"><!-- Example tags - you can make these dynamic -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if len(contentTags) > 0 {
 			for _, v := range contentTags {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 152, "<span class=\"inline-flex items-center px-3 py-1 rounded-full text-md font-medium bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-100\"><span>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 152, "<span class=\"inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-100\"><span>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -1984,7 +1984,7 @@ func InsertMediaUpdate(medias []db.Medium, contentID string) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		if len(medias) == 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 165, " <div class=\"space-y-1 text-center\"><svg class=\"mx-auto h-12 w-12 text-gray-400\" stroke=\"currentColor\" fill=\"none\" viewBox=\"0 0 48 48\"><path d=\"M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg><div class=\"flex justify-center text-md text-gray-600 dark:text-gray-400\"><form id=\"upload-form\" hx-post=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 165, " <div class=\"space-y-1 text-center\"><svg class=\"mx-auto h-12 w-12 text-gray-400\" stroke=\"currentColor\" fill=\"none\" viewBox=\"0 0 48 48\"><path d=\"M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg><div class=\"flex justify-center text-sm text-gray-600 dark:text-gray-400\"><form id=\"upload-form\" hx-post=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -2149,7 +2149,7 @@ func InsertMedia(medias []db.Medium, contentID string) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		if len(medias) == 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 180, " <div class=\"space-y-1 text-center\"><svg class=\"mx-auto h-12 w-12 text-gray-400\" stroke=\"currentColor\" fill=\"none\" viewBox=\"0 0 48 48\"><path d=\"M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg><div class=\"flex justify-center text-md text-gray-600 dark:text-gray-400\"><form id=\"upload-form\" hx-post=\"/api/admin/media/upload/new\" hx-encoding=\"multipart/form-data\" hx-target=\"#admin-media\" hx-swap=\"innerHTML\"><label for=\"file-upload\" class=\"relative cursor-pointer rounded-md font-medium text-primary hover:text-blue-700\"><span class=\"text-blue-500\">Dodaj fajl</span> <input id=\"file-upload\" name=\"file_upload\" type=\"file\" class=\"sr-only\" hx-trigger=\"change\" hx-on:change=\"document.getElementById(&#39;upload-form&#39;).requestSubmit()\"></label> <input type=\"hidden\" name=\"content_id\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 180, " <div class=\"space-y-1 text-center\"><svg class=\"mx-auto h-12 w-12 text-gray-400\" stroke=\"currentColor\" fill=\"none\" viewBox=\"0 0 48 48\"><path d=\"M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg><div class=\"flex justify-center text-sm text-gray-600 dark:text-gray-400\"><form id=\"upload-form\" hx-post=\"/api/admin/media/upload/new\" hx-encoding=\"multipart/form-data\" hx-target=\"#admin-media\" hx-swap=\"innerHTML\"><label for=\"file-upload\" class=\"relative cursor-pointer rounded-md font-medium text-primary hover:text-blue-700\"><span class=\"text-blue-500\">Dodaj fajl</span> <input id=\"file-upload\" name=\"file_upload\" type=\"file\" class=\"sr-only\" hx-trigger=\"change\" hx-on:change=\"document.getElementById(&#39;upload-form&#39;).requestSubmit()\"></label> <input type=\"hidden\" name=\"content_id\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

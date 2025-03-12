@@ -77,7 +77,7 @@ templ AdminCategoriesDisplay(nextLimit int, categories []db.Category) {
 				onClick={ openCreateCategoryModal() }
 				hx-get="/admin/create-cat-form"
 				hx-target="#create-category-modal"
-				class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-md font-medium transition duration-150 ease-in-out"
+				class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out"
 			>
 				Dodaj kategoriju
 			</button>
@@ -103,10 +103,10 @@ templ AdminCategoriesDisplay(nextLimit int, categories []db.Category) {
 				<tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
 					for _, category := range categories {
 						<tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-150 ease-in-out">
-							<td class="px-6 py-4 whitespace-nowrap text-md font-medium text-gray-900 dark:text-white">
+							<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
 								{ category.CategoryName }
 							</td>
-							<td class="px-6 py-4 whitespace-nowrap text-right text-md font-medium">
+							<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
 								<button
 									onClick={ openUpdateCategoryModal() }
 									hx-get={ "/admin/update-cat-form/" +
@@ -158,7 +158,7 @@ templ AdminCategoriesDisplay(nextLimit int, categories []db.Category) {
 					}
 					if len(categories) == 0 {
 						<tr>
-							<td colspan="2" class="px-6 py-4 text-md text-center text-gray-500 dark:text-gray-400">
+							<td colspan="2" class="px-6 py-4 text-sm text-center text-gray-500 dark:text-gray-400">
 								Trenutno nema kategorija. Kliknite "Dodaj kategoriju" za dodavanje nove.
 							</td>
 						</tr>
@@ -172,7 +172,7 @@ templ AdminCategoriesDisplay(nextLimit int, categories []db.Category) {
 					hx-get={ "/api/admin/categories?limit=" + strconv.Itoa(nextLimit) }
 					hx-target="#admin-categories-display"
 					hx-swap="innerHTML"
-					class="cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-md font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
+					class="cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
 				>
 					Učitaj više
 					<svg
@@ -211,7 +211,7 @@ templ CreateCategoryForm(err CreateCategoryErr) {
 		</div>
 		if string(err) != "" {
 			<div
-				class="bg-red-100 border border-red-400 mb-4 text-center text-md text-red-700 px-4 py-2 rounded relative"
+				class="bg-red-100 border border-red-400 mb-4 text-center text-sm text-red-700 px-4 py-2 rounded relative"
 				role="alert"
 			>
 				<span class="block sm:inline">
@@ -225,7 +225,7 @@ templ CreateCategoryForm(err CreateCategoryErr) {
 			hx-on::after-request={ closeCreateCategoryModalAfterSubmit() }
 		>
 			<div class="mb-6">
-				<label for="category_name" class="block text-md font-medium text-gray-700 dark:text-gray-300 mb-2">
+				<label for="category_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
 					Naziv
 					kategorije
 				</label>
@@ -241,14 +241,14 @@ templ CreateCategoryForm(err CreateCategoryErr) {
 			<div class="flex justify-center space-x-3">
 				<button
 					type="submit"
-					class="cursor-pointer px-4 py-2 border border-transparent rounded-md shadow-sm text-md font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
+					class="cursor-pointer px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
 				>
 					Dodaj
 				</button>
 				<button
 					type="button"
 					onClick={ closeCreateCategoryModal() }
-					class="cursor-pointer px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-md font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
+					class="cursor-pointer px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
 				>
 					Odustani
 				</button>
@@ -279,7 +279,7 @@ templ DeleteCategoryModal(category db.Category) {
 				</div>
 				<h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mt-2">Upozorenje!</h3>
 				<div class="mt-2 px-7 py-3">
-					<p class="text-md text-gray-500 dark:text-gray-400">
+					<p class="text-sm text-gray-500 dark:text-gray-400">
 						Brisanje kategorije
 						<span class="font-medium text-gray-700 dark:text-gray-300">
 							{ 
@@ -331,7 +331,7 @@ templ UpdateCategoryForm(category db.Category, err UpdateCategoryErr) {
 		</div>
 		if string(err) != "" {
 			<div
-				class="bg-red-100 border border-red-400 mb-4 text-center text-md text-red-700 px-4 py-2 rounded relative"
+				class="bg-red-100 border border-red-400 mb-4 text-center text-sm text-red-700 px-4 py-2 rounded relative"
 				role="alert"
 			>
 				<span class="block sm:inline">
@@ -345,7 +345,7 @@ templ UpdateCategoryForm(category db.Category, err UpdateCategoryErr) {
 			hx-on::after-request={ closeUpdateCategoryModalAfterSubmit() }
 		>
 			<div class="mb-6">
-				<label for="category_name" class="block text-md font-medium text-gray-700 dark:text-gray-300 mb-2">
+				<label for="category_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
 					Naziv
 					kategorije
 				</label>
@@ -362,14 +362,14 @@ templ UpdateCategoryForm(category db.Category, err UpdateCategoryErr) {
 			<div class="flex justify-center space-x-3">
 				<button
 					type="submit"
-					class="cursor-pointer px-4 py-2 border border-transparent rounded-md shadow-sm text-md font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
+					class="cursor-pointer px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
 				>
 					Ažuriraj
 				</button>
 				<button
 					type="button"
 					onClick={ closeUpdateCategoryModal() }
-					class="cursor-pointer px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-md font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
+					class="cursor-pointer px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
 				>
 					Odustani
 				</button>

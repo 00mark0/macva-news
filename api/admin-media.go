@@ -19,10 +19,9 @@ import (
 func (server *Server) addMediaToNewContent(ctx echo.Context) error {
 	contentIDCookie, err := ctx.Cookie("content_id")
 	if err != nil {
-		message := "Sadržaj nije pronađen. Da bi dodali medije pritisnite sačuvaj ili objavi."
+		var emptyMedia []db.Medium
 
-		ctx.Response().Header().Set("HX-Retarget", "#create-article-modal")
-		return Render(ctx, http.StatusOK, components.ArticleError(message))
+		return Render(ctx, http.StatusOK, components.InsertMedia(emptyMedia, ""))
 	}
 
 	contentIDStr := contentIDCookie.Value

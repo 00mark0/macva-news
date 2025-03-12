@@ -873,21 +873,24 @@ func (server *Server) updateContent(ctx echo.Context) error {
 		}(),
 	}
 
-	if *req.Title == "" {
+	if req.Title != nil && *req.Title == "" {
 		message := "Naslov je obavezan."
 
+		log.Println(message)
 		return Render(ctx, http.StatusOK, components.ArticleError(message))
 	}
 
-	if *req.CategoryID == "" {
+	if req.CategoryID != nil && *req.CategoryID == "" {
 		message := "Kategorija je obavezna."
 
+		log.Println(message)
 		return Render(ctx, http.StatusOK, components.ArticleError(message))
 	}
 
-	if *req.ContentDescription == "" {
+	if req.ContentDescription != nil && *req.ContentDescription == "" {
 		message := "Sadržaj je obavezan."
 
+		log.Println(message)
 		return Render(ctx, http.StatusOK, components.ArticleError(message))
 	}
 
