@@ -3,32 +3,21 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@font-face {
+    font-family: 'Merriweather';
+    src: url('/static/fonts/Merriweather-VariableFont_opsz\,wdth\,wght.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+}
+
+html {
+    font-size: 18px;
+}
+
 body {
     font-family: 'Merriweather', sans-serif;
-}
-
-/* Hide content until fonts are loaded or timeout occurs */
-.hide-until-fonts-loaded {
-    visibility: hidden;
-}
-
-.fonts-loaded .hide-until-fonts-loaded {
-    visibility: visible;
-}
-
-/* Reserve space for text elements with specific sizes */
-.font-reserved-space {
-    min-height: 1.25em;
-    /* Adjust based on your largest expected line height */
-}
-
-/* Set fallback fonts with similar metrics to Merriweather */
-body,
-button,
-input,
-select,
-textarea {
-    font-family: Merriweather, Georgia, serif;
+    font-weight: 600;
+    font-style: normal;
 }
 
 @keyframes fadeIn {

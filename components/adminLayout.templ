@@ -16,12 +16,6 @@ templ AdminLayout(payload *token.Payload, children ...templ.Component) {
 			<link rel="preload" href="/static/js/dark-mode.js" as="script"/>
 			<link rel="preload" href="/static/react/main.js" as="script"/>
 			<link rel="preload" href="/static/js/admin.js" as="script"/>
-			<link rel="preconnect" href="https://fonts.googleapis.com"/>
-			<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-			<link
-				href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap"
-				rel="stylesheet"
-			/>
 			<link href="/static/css/output.css" rel="stylesheet"/>
 			<script src="/static/js/htmx.min.js" defer></script>
 			<script src="/static/js/dark-mode.js" defer></script>
@@ -38,7 +32,7 @@ templ AdminLayout(payload *token.Payload, children ...templ.Component) {
 								data-drawer-toggle="logo-sidebar"
 								aria-controls="logo-sidebar"
 								type="button"
-								class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+								class="inline-flex items-center p-2 text-md text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
 							>
 								<span class="sr-only">Open sidebar</span>
 								<svg
@@ -71,7 +65,7 @@ templ AdminLayout(payload *token.Payload, children ...templ.Component) {
 								<div>
 									<button
 										type="button"
-										class="cursor-pointer flex text-sm rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+										class="cursor-pointer flex text-md rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
 										aria-expanded="false"
 										data-dropdown-toggle="dropdown-user"
 									>
@@ -88,10 +82,10 @@ templ AdminLayout(payload *token.Payload, children ...templ.Component) {
 									id="dropdown-user"
 								>
 									<div class="px-4 py-3" role="none">
-										<p class="text-sm text-gray-900 dark:text-white" role="none">
+										<p class="text-md text-gray-900 dark:text-white" role="none">
 											{ payload.Username }
 										</p>
-										<p class="text-sm font-medium text-gray-900 truncate dark:text-gray-300" role="none">
+										<p class="text-md font-medium text-gray-900 truncate dark:text-gray-300" role="none">
 											{ payload.Email }
 										</p>
 									</div>
@@ -103,7 +97,7 @@ templ AdminLayout(payload *token.Payload, children ...templ.Component) {
 												hx-get="/admin/hx-admin"
 												hx-target="#admin-content"
 												hx-swap="innerHTML"
-												class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+												class="block px-4 py-2 text-md text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
 												role="menuitem"
 											>Pregled</a>
 										</li>
@@ -111,7 +105,7 @@ templ AdminLayout(payload *token.Payload, children ...templ.Component) {
 											<a
 												href="#"
 												id="user-menu-item-settings"
-												class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+												class="block px-4 py-2 text-md text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
 												role="menuitem"
 											>Podešavanja</a>
 										</li>
@@ -119,7 +113,7 @@ templ AdminLayout(payload *token.Payload, children ...templ.Component) {
 											<a
 												href="#"
 												id="user-menu-item-earnings"
-												class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+												class="block px-4 py-2 text-md text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
 												role="menuitem"
 											>Earnings</a>
 										</li>
@@ -127,7 +121,7 @@ templ AdminLayout(payload *token.Payload, children ...templ.Component) {
 											<a
 												id="user-menu-item-logout"
 												hx-post="/api/logout"
-												class="cursor-pointer block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+												class="cursor-pointer block px-4 py-2 text-md text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
 												role="menuitem"
 											>Odjavi se</a>
 										</li>
