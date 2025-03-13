@@ -273,7 +273,6 @@ func TestSearchActiveUsers(t *testing.T) {
 
 	arg := SearchActiveUsersParams{
 		Limit:      50,
-		Offset:     0,
 		SearchTerm: searchTerm[:8],
 	}
 
@@ -300,7 +299,6 @@ func TestSearchDeletedUsers(t *testing.T) {
 	// First search: by username
 	arg := SearchDeletedUsersParams{
 		Limit:      50,
-		Offset:     0,
 		SearchTerm: searchTerm[:8],
 	}
 
@@ -319,7 +317,6 @@ func TestSearchDeletedUsers(t *testing.T) {
 	deletedEmailSearchTerm := fmt.Sprintf("deleted_%v@", user.UserID) // Construct search term for the email
 	arg = SearchDeletedUsersParams{
 		Limit:      50,
-		Offset:     0,
 		SearchTerm: deletedEmailSearchTerm,
 	}
 
@@ -347,7 +344,6 @@ func TestSearchBannedUsers(t *testing.T) {
 	// First search: by username
 	arg := SearchBannedUsersParams{
 		Limit:      50,
-		Offset:     0,
 		SearchTerm: searchTerm[:8],
 	}
 

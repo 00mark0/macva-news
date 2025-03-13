@@ -1,12 +1,24 @@
 package components
 
 import "fmt"
-import "github.com/00mark0/macva-news/db/services"
 
 type UsersOverview struct {
 	ActiveUsersCount  int
 	BannedUsersCount  int
 	DeletedUsersCount int
+}
+
+type UsersRes struct {
+	UserID        string
+	Username      string
+	Email         string
+	Password      string
+	Pfp           string
+	Role          string
+	EmailVerified bool
+	Banned        bool
+	IsDeleted     bool
+	CreatedAt     string
 }
 
 script handleActiveSort() {
@@ -57,7 +69,7 @@ const delUsersSelect = document.getElementById('del-users-select-div');
 delUsersSelect.classList.add('hidden');
 }
 
-templ AdminUsers(overview UsersOverview, nextLimit int, users []db.User, url string) {
+templ AdminUsers(overview UsersOverview, nextLimit int, users []UsersRes, url string) {
 	<div class="w-full min-h-screen dark:bg-black bg-gray-50 sm:p-8 p-4">
 		<div class="flex justify-between items-center">
 			<h1 class="text-3xl font-semibold text-black dark:text-white mb-10">Korisnici</h1>
@@ -146,7 +158,7 @@ templ UsersNav(overview UsersOverview) {
 	</nav>
 }
 
-templ ActiveUsersSort(nextLimit int, users []db.User, url string) {
+templ ActiveUsersSort(nextLimit int, users []UsersRes, url string) {
 	<div class="space-y-4">
 		<div
 			class="flex flex-col gap-4 sm:gap-0 sm:flex-row items-center justify-between pb-4 border-b dark:border-gray-700"
@@ -154,7 +166,7 @@ templ ActiveUsersSort(nextLimit int, users []db.User, url string) {
 			<h2 class="text-xl font-medium text-gray-800 dark:text-gray-200">Aktivni Korisnici</h2>
 			<div>
 				<form
-					hx-get=""
+					hx-get="/api/admin/users/active/search"
 					hx-target="#admin-users"
 					class="relative flex gap-2 items-center"
 				>
@@ -203,17 +215,17 @@ templ ActiveUsersSort(nextLimit int, users []db.User, url string) {
 					class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2
 				text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200"
 				>
-					<option data-url={ fmt.Sprintf("?limit=%d", nextLimit-20) }>
+					<option data-url={ fmt.Sprintf("/api/admin/users/active?limit=%d", nextLimit-20) }>
 						Najnoviji
 					</option>
 					<option
-						data-url={ fmt.Sprintf("?limit=%d",
+						data-url={ fmt.Sprintf("/api/admin/users/active/oldest?limit=%d",
 					nextLimit-20) }
 					>
 						Najstariji
 					</option>
 					<option
-						data-url={ fmt.Sprintf("?limit=%d",
+						data-url={ fmt.Sprintf("/api/admin/users/active/title?limit=%d",
 					nextLimit-20) }
 					>
 						Po
@@ -228,7 +240,7 @@ templ ActiveUsersSort(nextLimit int, users []db.User, url string) {
 	</div>
 }
 
-templ BannedUsersSort(nextLimit int, users []db.User, url string) {
+templ BannedUsersSort(nextLimit int, users []UsersRes, url string) {
 	<div class="space-y-4">
 		<div
 			class="flex flex-col gap-4 sm:gap-0 sm:flex-row items-center justify-between pb-4 border-b dark:border-gray-700"
@@ -236,7 +248,7 @@ templ BannedUsersSort(nextLimit int, users []db.User, url string) {
 			<h2 class="text-xl font-medium text-gray-800 dark:text-gray-200">Blokirani Korisnici</h2>
 			<div>
 				<form
-					hx-get=""
+					hx-get="/api/admin/users/banned/search"
 					hx-target="#admin-users"
 					class="relative flex gap-2 items-center"
 				>
@@ -285,17 +297,17 @@ templ BannedUsersSort(nextLimit int, users []db.User, url string) {
 					class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2
 				text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200"
 				>
-					<option data-url={ fmt.Sprintf("?limit=%d", nextLimit-20) }>
+					<option data-url={ fmt.Sprintf("/api/admin/users/banned?limit=%d", nextLimit-20) }>
 						Najnoviji
 					</option>
 					<option
-						data-url={ fmt.Sprintf("?limit=%d",
+						data-url={ fmt.Sprintf("/api/admin/users/banned/oldest?limit=%d",
 					nextLimit-20) }
 					>
 						Najstariji
 					</option>
 					<option
-						data-url={ fmt.Sprintf("?limit=%d",
+						data-url={ fmt.Sprintf("/api/admin/users/banned/title?limit=%d",
 					nextLimit-20) }
 					>
 						Po
@@ -310,7 +322,7 @@ templ BannedUsersSort(nextLimit int, users []db.User, url string) {
 	</div>
 }
 
-templ DelUsersSort(nextLimit int, users []db.User, url string) {
+templ DelUsersSort(nextLimit int, users []UsersRes, url string) {
 	<div class="space-y-4">
 		<div
 			class="flex flex-col gap-4 sm:gap-0 sm:flex-row items-center justify-between pb-4 border-b dark:border-gray-700"
@@ -318,7 +330,7 @@ templ DelUsersSort(nextLimit int, users []db.User, url string) {
 			<h2 class="text-xl font-medium text-gray-800 dark:text-gray-200">Arhivirani Korisnici</h2>
 			<div>
 				<form
-					hx-get=""
+					hx-get="/api/admin/users/deleted/search"
 					hx-target="#admin-users"
 					class="relative flex gap-2 items-center"
 				>
@@ -367,17 +379,17 @@ templ DelUsersSort(nextLimit int, users []db.User, url string) {
 					class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2
 				text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200"
 				>
-					<option data-url={ fmt.Sprintf("?limit=%d", nextLimit-20) }>
+					<option data-url={ fmt.Sprintf("/api/admin/users/deleted?limit=%d", nextLimit-20) }>
 						Najnoviji
 					</option>
 					<option
-						data-url={ fmt.Sprintf("?limit=%d",
+						data-url={ fmt.Sprintf("/api/admin/users/deleted/oldest?limit=%d",
 					nextLimit-20) }
 					>
 						Najstariji
 					</option>
 					<option
-						data-url={ fmt.Sprintf("?limit=%d",
+						data-url={ fmt.Sprintf("/api/admin/users/deleted/title?limit=%d",
 					nextLimit-20) }
 					>
 						Po
@@ -392,7 +404,7 @@ templ DelUsersSort(nextLimit int, users []db.User, url string) {
 	</div>
 }
 
-templ Users(nextLimit int, users []db.User, url string) {
+templ Users(nextLimit int, users []UsersRes, url string) {
 	if len(users) > 0 {
 		<div class="space-y-4">
 			<div class="overflow-x-auto">
@@ -441,9 +453,9 @@ templ Users(nextLimit int, users []db.User, url string) {
 									{ user.Email }
 								</td>
 								<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-									if user.IsDeleted.Bool {
+									if user.IsDeleted {
 										<span class="text-gray-500">Arhiviran</span>
-									} else if user.Banned.Bool {
+									} else if user.Banned {
 										<span class="text-red-500">Blokiran</span>
 									} else {
 										<span class="text-green-500">Aktivan</span>
@@ -459,10 +471,10 @@ templ Users(nextLimit int, users []db.User, url string) {
 									}
 								</td>
 								<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-									{ user.CreatedAt.Time.Format("02.01.2006 15:04") }
+									{ user.CreatedAt }
 								</td>
 								<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-									if user.Banned.Bool && !user.IsDeleted.Bool {
+									if user.Banned && !user.IsDeleted {
 										// Banned users
 										<button
 											hx-put={ fmt.Sprintf("/api/admin/users/unban/%v", user.UserID) }
@@ -478,7 +490,7 @@ templ Users(nextLimit int, users []db.User, url string) {
 											onclick="this.parentElement.parentElement.classList.add('hidden')"
 											class="cursor-pointer text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
 										>Arhiviraj</button>
-									} else if !user.Banned.Bool && !user.IsDeleted.Bool {
+									} else if !user.Banned && !user.IsDeleted {
 										// Active users
 										<button
 											hx-put={ fmt.Sprintf("/api/admin/users/ban/%v", user.UserID) }

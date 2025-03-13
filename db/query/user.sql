@@ -72,6 +72,22 @@ WHERE "is_deleted" = false
 ORDER BY created_at DESC
 LIMIT $1;
 
+-- name: GetActiveUsersOldest :many
+SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
+FROM "user"
+WHERE "is_deleted" = false
+  AND "banned" = false
+ORDER BY created_at ASC
+LIMIT $1;
+
+-- name: GetActiveUsersTitle :many
+SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
+FROM "user"
+WHERE "is_deleted" = false
+  AND "banned" = false
+ORDER BY username ASC
+LIMIT $1;
+
 -- name: GetBannedUsersCount :one
 SELECT COUNT(*) AS count
 FROM "user"
@@ -82,6 +98,20 @@ SELECT user_id, username, email, password, pfp, role, email_verified, banned, is
 FROM "user"
 WHERE "banned" = true
 ORDER BY created_at DESC
+LIMIT $1;
+
+-- name: GetBannedUsersOldest :many
+SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
+FROM "user"
+WHERE "banned" = true
+ORDER BY created_at ASC
+LIMIT $1;
+
+-- name: GetBannedUsersTitle :many
+SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
+FROM "user"
+WHERE "banned" = true
+ORDER BY username ASC
 LIMIT $1;
 
 -- name: GetDeletedUsersCount :one
@@ -96,6 +126,20 @@ WHERE "is_deleted" = true
 ORDER BY created_at DESC
 LIMIT $1;
 
+-- name: GetDeletedUsersOldest :many
+SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
+FROM "user"
+WHERE "is_deleted" = true
+ORDER BY created_at ASC
+LIMIT $1;
+
+-- name: GetDeletedUsersTitle :many
+SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
+FROM "user"
+WHERE "is_deleted" = true
+ORDER BY username ASC
+LIMIT $1;
+
 -- name: SearchActiveUsers :many
 SELECT
   u.*
@@ -107,7 +151,7 @@ WHERE u.is_deleted = false
     OR u.email ILIKE '%' || @search_term::text || '%'
   )
 ORDER BY u.created_at DESC
-LIMIT $1 OFFSET $2;
+LIMIT $1;
 
 -- name: SearchDeletedUsers :many
 SELECT
@@ -119,7 +163,7 @@ WHERE u.is_deleted = true
     OR u.email ILIKE '%' || @search_term::text || '%'
   )
 ORDER BY u.created_at DESC
-LIMIT $1 OFFSET $2;
+LIMIT $1;
 
 -- name: SearchBannedUsers :many
 SELECT
@@ -131,7 +175,7 @@ WHERE u.banned = true
     OR u.email ILIKE '%' || @search_term::text || '%'
   )
 ORDER BY u.created_at DESC
-LIMIT $1 OFFSET $2;
+LIMIT $1;
 
 -- name: SetEmailVerified :exec
 UPDATE "user" 

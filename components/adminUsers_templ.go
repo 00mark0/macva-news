@@ -9,12 +9,24 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import "fmt"
-import "github.com/00mark0/macva-news/db/services"
 
 type UsersOverview struct {
 	ActiveUsersCount  int
 	BannedUsersCount  int
 	DeletedUsersCount int
+}
+
+type UsersRes struct {
+	UserID        string
+	Username      string
+	Email         string
+	Password      string
+	Pfp           string
+	Role          string
+	EmailVerified bool
+	Banned        bool
+	IsDeleted     bool
+	CreatedAt     string
 }
 
 func handleActiveSort() templ.ComponentScript {
@@ -101,7 +113,7 @@ delUsersSelect.classList.add('hidden');
 	}
 }
 
-func AdminUsers(overview UsersOverview, nextLimit int, users []db.User, url string) templ.Component {
+func AdminUsers(overview UsersOverview, nextLimit int, users []UsersRes, url string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -174,7 +186,7 @@ func UsersNav(overview UsersOverview) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", overview.ActiveUsersCount))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 93, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 105, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -187,7 +199,7 @@ func UsersNav(overview UsersOverview) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", overview.BannedUsersCount))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 115, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 127, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -200,7 +212,7 @@ func UsersNav(overview UsersOverview) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", overview.DeletedUsersCount))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 137, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 149, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -214,7 +226,7 @@ func UsersNav(overview UsersOverview) templ.Component {
 	})
 }
 
-func ActiveUsersSort(nextLimit int, users []db.User, url string) templ.Component {
+func ActiveUsersSort(nextLimit int, users []UsersRes, url string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -235,14 +247,14 @@ func ActiveUsersSort(nextLimit int, users []db.User, url string) templ.Component
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"space-y-4\"><div class=\"flex flex-col gap-4 sm:gap-0 sm:flex-row items-center justify-between pb-4 border-b dark:border-gray-700\"><h2 class=\"text-xl font-medium text-gray-800 dark:text-gray-200\">Aktivni Korisnici</h2><div><form hx-get=\"\" hx-target=\"#admin-users\" class=\"relative flex gap-2 items-center\"><input type=\"search\" placeholder=\"Pretraži aktivne korisnike...\" id=\"users-active-search\" name=\"search_term\" class=\"bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl \n\t\t\t\t\t\t\t   px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 \n\t\t\t\t\t\t\t   dark:text-gray-200 w-64\"> <input type=\"hidden\" name=\"limit\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"space-y-4\"><div class=\"flex flex-col gap-4 sm:gap-0 sm:flex-row items-center justify-between pb-4 border-b dark:border-gray-700\"><h2 class=\"text-xl font-medium text-gray-800 dark:text-gray-200\">Aktivni Korisnici</h2><div><form hx-get=\"/api/admin/users/active/search\" hx-target=\"#admin-users\" class=\"relative flex gap-2 items-center\"><input type=\"search\" placeholder=\"Pretraži aktivne korisnike...\" id=\"users-active-search\" name=\"search_term\" class=\"bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl \n\t\t\t\t\t\t\t   px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 \n\t\t\t\t\t\t\t   dark:text-gray-200 w-64\"> <input type=\"hidden\" name=\"limit\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 173, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 185, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -287,9 +299,9 @@ func ActiveUsersSort(nextLimit int, users []db.User, url string) templ.Component
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("?limit=%d", nextLimit-20))
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/users/active?limit=%d", nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 206, Col: 62}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 218, Col: 85}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -300,10 +312,10 @@ func ActiveUsersSort(nextLimit int, users []db.User, url string) templ.Component
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var11 string
-		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("?limit=%d",
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/users/active/oldest?limit=%d",
 			nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 211, Col: 18}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 223, Col: 18}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -314,10 +326,10 @@ func ActiveUsersSort(nextLimit int, users []db.User, url string) templ.Component
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var12 string
-		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("?limit=%d",
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/users/active/title?limit=%d",
 			nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 217, Col: 18}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 229, Col: 18}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -339,7 +351,7 @@ func ActiveUsersSort(nextLimit int, users []db.User, url string) templ.Component
 	})
 }
 
-func BannedUsersSort(nextLimit int, users []db.User, url string) templ.Component {
+func BannedUsersSort(nextLimit int, users []UsersRes, url string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -360,14 +372,14 @@ func BannedUsersSort(nextLimit int, users []db.User, url string) templ.Component
 			templ_7745c5c3_Var13 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<div class=\"space-y-4\"><div class=\"flex flex-col gap-4 sm:gap-0 sm:flex-row items-center justify-between pb-4 border-b dark:border-gray-700\"><h2 class=\"text-xl font-medium text-gray-800 dark:text-gray-200\">Blokirani Korisnici</h2><div><form hx-get=\"\" hx-target=\"#admin-users\" class=\"relative flex gap-2 items-center\"><input type=\"search\" placeholder=\"Pretraži blokirane korisnike...\" id=\"users-banned-search\" name=\"search_term\" class=\"bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl \n\t\t\t\t\t\t\t   px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 \n\t\t\t\t\t\t\t   dark:text-gray-200 w-64\"> <input type=\"hidden\" name=\"limit\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<div class=\"space-y-4\"><div class=\"flex flex-col gap-4 sm:gap-0 sm:flex-row items-center justify-between pb-4 border-b dark:border-gray-700\"><h2 class=\"text-xl font-medium text-gray-800 dark:text-gray-200\">Blokirani Korisnici</h2><div><form hx-get=\"/api/admin/users/banned/search\" hx-target=\"#admin-users\" class=\"relative flex gap-2 items-center\"><input type=\"search\" placeholder=\"Pretraži blokirane korisnike...\" id=\"users-banned-search\" name=\"search_term\" class=\"bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl \n\t\t\t\t\t\t\t   px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 \n\t\t\t\t\t\t\t   dark:text-gray-200 w-64\"> <input type=\"hidden\" name=\"limit\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 255, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 267, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -412,9 +424,9 @@ func BannedUsersSort(nextLimit int, users []db.User, url string) templ.Component
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var17 string
-		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("?limit=%d", nextLimit-20))
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/users/banned?limit=%d", nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 288, Col: 62}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 300, Col: 85}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -425,10 +437,10 @@ func BannedUsersSort(nextLimit int, users []db.User, url string) templ.Component
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var18 string
-		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("?limit=%d",
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/users/banned/oldest?limit=%d",
 			nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 293, Col: 18}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 305, Col: 18}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -439,10 +451,10 @@ func BannedUsersSort(nextLimit int, users []db.User, url string) templ.Component
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var19 string
-		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("?limit=%d",
+		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/users/banned/title?limit=%d",
 			nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 299, Col: 18}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 311, Col: 18}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
@@ -464,7 +476,7 @@ func BannedUsersSort(nextLimit int, users []db.User, url string) templ.Component
 	})
 }
 
-func DelUsersSort(nextLimit int, users []db.User, url string) templ.Component {
+func DelUsersSort(nextLimit int, users []UsersRes, url string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -485,14 +497,14 @@ func DelUsersSort(nextLimit int, users []db.User, url string) templ.Component {
 			templ_7745c5c3_Var20 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "<div class=\"space-y-4\"><div class=\"flex flex-col gap-4 sm:gap-0 sm:flex-row items-center justify-between pb-4 border-b dark:border-gray-700\"><h2 class=\"text-xl font-medium text-gray-800 dark:text-gray-200\">Arhivirani Korisnici</h2><div><form hx-get=\"\" hx-target=\"#admin-users\" class=\"relative flex gap-2 items-center\"><input type=\"search\" placeholder=\"Pretraži arhivirane korisnike...\" id=\"users-del-search\" name=\"search_term\" class=\"bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl \n\t\t\t\t\t\t\t   px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 \n\t\t\t\t\t\t\t   dark:text-gray-200 w-64\"> <input type=\"hidden\" name=\"limit\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "<div class=\"space-y-4\"><div class=\"flex flex-col gap-4 sm:gap-0 sm:flex-row items-center justify-between pb-4 border-b dark:border-gray-700\"><h2 class=\"text-xl font-medium text-gray-800 dark:text-gray-200\">Arhivirani Korisnici</h2><div><form hx-get=\"/api/admin/users/deleted/search\" hx-target=\"#admin-users\" class=\"relative flex gap-2 items-center\"><input type=\"search\" placeholder=\"Pretraži arhivirane korisnike...\" id=\"users-del-search\" name=\"search_term\" class=\"bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl \n\t\t\t\t\t\t\t   px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 \n\t\t\t\t\t\t\t   dark:text-gray-200 w-64\"> <input type=\"hidden\" name=\"limit\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 337, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 349, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -537,9 +549,9 @@ func DelUsersSort(nextLimit int, users []db.User, url string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var24 string
-		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("?limit=%d", nextLimit-20))
+		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/users/deleted?limit=%d", nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 370, Col: 62}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 382, Col: 86}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
@@ -550,10 +562,10 @@ func DelUsersSort(nextLimit int, users []db.User, url string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var25 string
-		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("?limit=%d",
+		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/users/deleted/oldest?limit=%d",
 			nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 375, Col: 18}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 387, Col: 18}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 		if templ_7745c5c3_Err != nil {
@@ -564,10 +576,10 @@ func DelUsersSort(nextLimit int, users []db.User, url string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var26 string
-		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("?limit=%d",
+		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/users/deleted/title?limit=%d",
 			nextLimit-20))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 381, Col: 18}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 393, Col: 18}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 		if templ_7745c5c3_Err != nil {
@@ -589,7 +601,7 @@ func DelUsersSort(nextLimit int, users []db.User, url string) templ.Component {
 	})
 }
 
-func Users(nextLimit int, users []db.User, url string) templ.Component {
+func Users(nextLimit int, users []UsersRes, url string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -623,7 +635,7 @@ func Users(nextLimit int, users []db.User, url string) templ.Component {
 				var templ_7745c5c3_Var28 string
 				templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 438, Col: 49}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 450, Col: 49}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 				if templ_7745c5c3_Err != nil {
@@ -636,7 +648,7 @@ func Users(nextLimit int, users []db.User, url string) templ.Component {
 				var templ_7745c5c3_Var29 string
 				templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(user.Email)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 441, Col: 21}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 453, Col: 21}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 				if templ_7745c5c3_Err != nil {
@@ -646,12 +658,12 @@ func Users(nextLimit int, users []db.User, url string) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				if user.IsDeleted.Bool {
+				if user.IsDeleted {
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "<span class=\"text-gray-500\">Arhiviran</span>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-				} else if user.Banned.Bool {
+				} else if user.Banned {
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "<span class=\"text-red-500\">Blokiran</span>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -687,9 +699,9 @@ func Users(nextLimit int, users []db.User, url string) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var30 string
-				templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(user.CreatedAt.Time.Format("02.01.2006 15:04"))
+				templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(user.CreatedAt)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 462, Col: 57}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 474, Col: 25}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 				if templ_7745c5c3_Err != nil {
@@ -699,7 +711,7 @@ func Users(nextLimit int, users []db.User, url string) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				if user.Banned.Bool && !user.IsDeleted.Bool {
+				if user.Banned && !user.IsDeleted {
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, " <button hx-put=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -707,7 +719,7 @@ func Users(nextLimit int, users []db.User, url string) templ.Component {
 					var templ_7745c5c3_Var31 string
 					templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/users/unban/%v", user.UserID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 468, Col: 73}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 480, Col: 73}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 					if templ_7745c5c3_Err != nil {
@@ -720,7 +732,7 @@ func Users(nextLimit int, users []db.User, url string) templ.Component {
 					var templ_7745c5c3_Var32 string
 					templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/users/archive/%v", user.UserID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 475, Col: 75}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 487, Col: 75}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 					if templ_7745c5c3_Err != nil {
@@ -730,7 +742,7 @@ func Users(nextLimit int, users []db.User, url string) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-				} else if !user.Banned.Bool && !user.IsDeleted.Bool {
+				} else if !user.Banned && !user.IsDeleted {
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, " <button hx-put=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -738,7 +750,7 @@ func Users(nextLimit int, users []db.User, url string) templ.Component {
 					var templ_7745c5c3_Var33 string
 					templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/users/ban/%v", user.UserID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 484, Col: 71}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 496, Col: 71}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 					if templ_7745c5c3_Err != nil {
@@ -751,7 +763,7 @@ func Users(nextLimit int, users []db.User, url string) templ.Component {
 					var templ_7745c5c3_Var34 string
 					templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/admin/users/archive/%v", user.UserID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 491, Col: 75}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 503, Col: 75}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 					if templ_7745c5c3_Err != nil {
@@ -779,7 +791,7 @@ func Users(nextLimit int, users []db.User, url string) templ.Component {
 				var templ_7745c5c3_Var35 string
 				templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(url + fmt.Sprintf("%d", nextLimit))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 508, Col: 49}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminUsers.templ`, Line: 520, Col: 49}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 				if templ_7745c5c3_Err != nil {

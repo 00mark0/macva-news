@@ -169,6 +169,86 @@ func (q *Queries) GetActiveUsersCount(ctx context.Context) (int64, error) {
 	return count, err
 }
 
+const getActiveUsersOldest = `-- name: GetActiveUsersOldest :many
+SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
+FROM "user"
+WHERE "is_deleted" = false
+  AND "banned" = false
+ORDER BY created_at ASC
+LIMIT $1
+`
+
+func (q *Queries) GetActiveUsersOldest(ctx context.Context, limit int32) ([]User, error) {
+	rows, err := q.db.Query(ctx, getActiveUsersOldest, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.UserID,
+			&i.Username,
+			&i.Email,
+			&i.Password,
+			&i.Pfp,
+			&i.Role,
+			&i.EmailVerified,
+			&i.Banned,
+			&i.IsDeleted,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getActiveUsersTitle = `-- name: GetActiveUsersTitle :many
+SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
+FROM "user"
+WHERE "is_deleted" = false
+  AND "banned" = false
+ORDER BY username ASC
+LIMIT $1
+`
+
+func (q *Queries) GetActiveUsersTitle(ctx context.Context, limit int32) ([]User, error) {
+	rows, err := q.db.Query(ctx, getActiveUsersTitle, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.UserID,
+			&i.Username,
+			&i.Email,
+			&i.Password,
+			&i.Pfp,
+			&i.Role,
+			&i.EmailVerified,
+			&i.Banned,
+			&i.IsDeleted,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getAdminUsers = `-- name: GetAdminUsers :many
 SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
 FROM "user"
@@ -259,6 +339,84 @@ func (q *Queries) GetBannedUsersCount(ctx context.Context) (int64, error) {
 	return count, err
 }
 
+const getBannedUsersOldest = `-- name: GetBannedUsersOldest :many
+SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
+FROM "user"
+WHERE "banned" = true
+ORDER BY created_at ASC
+LIMIT $1
+`
+
+func (q *Queries) GetBannedUsersOldest(ctx context.Context, limit int32) ([]User, error) {
+	rows, err := q.db.Query(ctx, getBannedUsersOldest, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.UserID,
+			&i.Username,
+			&i.Email,
+			&i.Password,
+			&i.Pfp,
+			&i.Role,
+			&i.EmailVerified,
+			&i.Banned,
+			&i.IsDeleted,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getBannedUsersTitle = `-- name: GetBannedUsersTitle :many
+SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
+FROM "user"
+WHERE "banned" = true
+ORDER BY username ASC
+LIMIT $1
+`
+
+func (q *Queries) GetBannedUsersTitle(ctx context.Context, limit int32) ([]User, error) {
+	rows, err := q.db.Query(ctx, getBannedUsersTitle, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.UserID,
+			&i.Username,
+			&i.Email,
+			&i.Password,
+			&i.Pfp,
+			&i.Role,
+			&i.EmailVerified,
+			&i.Banned,
+			&i.IsDeleted,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getDeletedUsers = `-- name: GetDeletedUsers :many
 SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
 FROM "user"
@@ -309,6 +467,84 @@ func (q *Queries) GetDeletedUsersCount(ctx context.Context) (int64, error) {
 	var count int64
 	err := row.Scan(&count)
 	return count, err
+}
+
+const getDeletedUsersOldest = `-- name: GetDeletedUsersOldest :many
+SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
+FROM "user"
+WHERE "is_deleted" = true
+ORDER BY created_at ASC
+LIMIT $1
+`
+
+func (q *Queries) GetDeletedUsersOldest(ctx context.Context, limit int32) ([]User, error) {
+	rows, err := q.db.Query(ctx, getDeletedUsersOldest, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.UserID,
+			&i.Username,
+			&i.Email,
+			&i.Password,
+			&i.Pfp,
+			&i.Role,
+			&i.EmailVerified,
+			&i.Banned,
+			&i.IsDeleted,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getDeletedUsersTitle = `-- name: GetDeletedUsersTitle :many
+SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
+FROM "user"
+WHERE "is_deleted" = true
+ORDER BY username ASC
+LIMIT $1
+`
+
+func (q *Queries) GetDeletedUsersTitle(ctx context.Context, limit int32) ([]User, error) {
+	rows, err := q.db.Query(ctx, getDeletedUsersTitle, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.UserID,
+			&i.Username,
+			&i.Email,
+			&i.Password,
+			&i.Pfp,
+			&i.Role,
+			&i.EmailVerified,
+			&i.Banned,
+			&i.IsDeleted,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
@@ -384,21 +620,20 @@ FROM "user" u
 WHERE u.is_deleted = false 
   AND u.banned = false
   AND (
-    u.username ILIKE '%' || $3::text || '%'
-    OR u.email ILIKE '%' || $3::text || '%'
+    u.username ILIKE '%' || $2::text || '%'
+    OR u.email ILIKE '%' || $2::text || '%'
   )
 ORDER BY u.created_at DESC
-LIMIT $1 OFFSET $2
+LIMIT $1
 `
 
 type SearchActiveUsersParams struct {
 	Limit      int32
-	Offset     int32
 	SearchTerm string
 }
 
 func (q *Queries) SearchActiveUsers(ctx context.Context, arg SearchActiveUsersParams) ([]User, error) {
-	rows, err := q.db.Query(ctx, searchActiveUsers, arg.Limit, arg.Offset, arg.SearchTerm)
+	rows, err := q.db.Query(ctx, searchActiveUsers, arg.Limit, arg.SearchTerm)
 	if err != nil {
 		return nil, err
 	}
@@ -434,21 +669,20 @@ SELECT
 FROM "user" u
 WHERE u.banned = true
   AND (
-    u.username ILIKE '%' || $3::text || '%'
-    OR u.email ILIKE '%' || $3::text || '%'
+    u.username ILIKE '%' || $2::text || '%'
+    OR u.email ILIKE '%' || $2::text || '%'
   )
 ORDER BY u.created_at DESC
-LIMIT $1 OFFSET $2
+LIMIT $1
 `
 
 type SearchBannedUsersParams struct {
 	Limit      int32
-	Offset     int32
 	SearchTerm string
 }
 
 func (q *Queries) SearchBannedUsers(ctx context.Context, arg SearchBannedUsersParams) ([]User, error) {
-	rows, err := q.db.Query(ctx, searchBannedUsers, arg.Limit, arg.Offset, arg.SearchTerm)
+	rows, err := q.db.Query(ctx, searchBannedUsers, arg.Limit, arg.SearchTerm)
 	if err != nil {
 		return nil, err
 	}
@@ -484,21 +718,20 @@ SELECT
 FROM "user" u
 WHERE u.is_deleted = true
   AND (
-    u.username ILIKE '%' || $3::text || '%'
-    OR u.email ILIKE '%' || $3::text || '%'
+    u.username ILIKE '%' || $2::text || '%'
+    OR u.email ILIKE '%' || $2::text || '%'
   )
 ORDER BY u.created_at DESC
-LIMIT $1 OFFSET $2
+LIMIT $1
 `
 
 type SearchDeletedUsersParams struct {
 	Limit      int32
-	Offset     int32
 	SearchTerm string
 }
 
 func (q *Queries) SearchDeletedUsers(ctx context.Context, arg SearchDeletedUsersParams) ([]User, error) {
-	rows, err := q.db.Query(ctx, searchDeletedUsers, arg.Limit, arg.Offset, arg.SearchTerm)
+	rows, err := q.db.Query(ctx, searchDeletedUsers, arg.Limit, arg.SearchTerm)
 	if err != nil {
 		return nil, err
 	}

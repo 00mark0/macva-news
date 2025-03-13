@@ -330,10 +330,26 @@ func (server *Server) adminUsers(ctx echo.Context) error {
 		DeletedUsersCount: int(delCount),
 	}
 
-	users, err := server.store.GetActiveUsers(ctx.Request().Context(), nextLimit)
+	var users []components.UsersRes
+
+	data, err := server.store.GetActiveUsers(ctx.Request().Context(), nextLimit)
 	if err != nil {
 		log.Println("Error getting active users in adminUsers:", err)
 		return err
+	}
+
+	for _, v := range data {
+		users = append(users, components.UsersRes{
+			UserID:        v.UserID.String(),
+			Username:      v.Username,
+			Email:         v.Email,
+			Pfp:           v.Pfp,
+			Role:          v.Role,
+			EmailVerified: v.EmailVerified.Bool,
+			Banned:        v.Banned.Bool,
+			IsDeleted:     v.IsDeleted.Bool,
+			CreatedAt:     v.CreatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+		})
 	}
 
 	url := "/api/admin/users/active?limit="
@@ -346,10 +362,26 @@ func (server *Server) activeUsersList(ctx echo.Context) error {
 
 	nextLimit := req.Limit + 20
 
-	users, err := server.store.GetActiveUsers(ctx.Request().Context(), nextLimit)
+	var users []components.UsersRes
+
+	data, err := server.store.GetActiveUsers(ctx.Request().Context(), nextLimit)
 	if err != nil {
 		log.Println("Error getting active users in activeUsersList:", err)
 		return err
+	}
+
+	for _, v := range data {
+		users = append(users, components.UsersRes{
+			UserID:        v.UserID.String(),
+			Username:      v.Username,
+			Email:         v.Email,
+			Pfp:           v.Pfp,
+			Role:          v.Role,
+			EmailVerified: v.EmailVerified.Bool,
+			Banned:        v.Banned.Bool,
+			IsDeleted:     v.IsDeleted.Bool,
+			CreatedAt:     v.CreatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+		})
 	}
 
 	url := "/api/admin/users/active?limit="
@@ -362,10 +394,26 @@ func (server *Server) bannedUsersList(ctx echo.Context) error {
 
 	nextLimit := req.Limit + 20
 
-	users, err := server.store.GetBannedUsers(ctx.Request().Context(), nextLimit)
+	var users []components.UsersRes
+
+	data, err := server.store.GetBannedUsers(ctx.Request().Context(), nextLimit)
 	if err != nil {
-		log.Println("Error getting banned users in bannedUsersList:", err)
+		log.Println("Error getting active users in bannedUsersList:", err)
 		return err
+	}
+
+	for _, v := range data {
+		users = append(users, components.UsersRes{
+			UserID:        v.UserID.String(),
+			Username:      v.Username,
+			Email:         v.Email,
+			Pfp:           v.Pfp,
+			Role:          v.Role,
+			EmailVerified: v.EmailVerified.Bool,
+			Banned:        v.Banned.Bool,
+			IsDeleted:     v.IsDeleted.Bool,
+			CreatedAt:     v.CreatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+		})
 	}
 
 	url := "/api/admin/users/banned?limit="
@@ -378,10 +426,26 @@ func (server *Server) deletedUsersList(ctx echo.Context) error {
 
 	nextLimit := req.Limit + 20
 
-	users, err := server.store.GetDeletedUsers(ctx.Request().Context(), nextLimit)
+	var users []components.UsersRes
+
+	data, err := server.store.GetDeletedUsers(ctx.Request().Context(), nextLimit)
 	if err != nil {
-		log.Println("Error getting deleted users in deletedUsersList:", err)
+		log.Println("Error getting active users in deletedUsersList:", err)
 		return err
+	}
+
+	for _, v := range data {
+		users = append(users, components.UsersRes{
+			UserID:        v.UserID.String(),
+			Username:      v.Username,
+			Email:         v.Email,
+			Pfp:           v.Pfp,
+			Role:          v.Role,
+			EmailVerified: v.EmailVerified.Bool,
+			Banned:        v.Banned.Bool,
+			IsDeleted:     v.IsDeleted.Bool,
+			CreatedAt:     v.CreatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+		})
 	}
 
 	url := "/api/admin/users/deleted?limit="

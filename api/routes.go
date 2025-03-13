@@ -105,6 +105,20 @@ func (server *Server) setupRouter() {
 	adminRoutes.DELETE("/api/admin/tags/content/remove/:content_id/:tag_id", server.removeTagFromContentUpdate)
 	adminRoutes.DELETE("/api/admin/tags/remove/:id", server.deleteTag)
 
+	// Admin Users
+	adminRoutes.GET("/api/admin/users/active", server.listActiveUsers)
+	adminRoutes.GET("/api/admin/users/active/oldest", server.listActiveUsersOldest)
+	adminRoutes.GET("/api/admin/users/active/title", server.listActiveUsersTitle)
+	adminRoutes.GET("/api/admin/users/banned", server.listBannedUsers)
+	adminRoutes.GET("/api/admin/users/banned/oldest", server.listBannedUsersOldest)
+	adminRoutes.GET("/api/admin/users/banned/title", server.listBannedUsersTitle)
+	adminRoutes.GET("/api/admin/users/deleted", server.listDeletedUsers)
+	adminRoutes.GET("/api/admin/users/deleted/oldest", server.listDeletedUsersOldest)
+	adminRoutes.GET("/api/admin/users/deleted/title", server.listDeletedUsersTitle)
+	adminRoutes.GET("/api/admin/users/active/search", server.searchActiveUsers)
+	adminRoutes.GET("/api/admin/users/banned/search", server.searchBannedUsers)
+	adminRoutes.GET("/api/admin/users/deleted/search", server.searchArchivedUsers)
+
 	// Cookie
 	adminRoutes.DELETE("/api/cookie", server.deleteCookie)
 
