@@ -50,6 +50,9 @@ func (server *Server) setupRouter() {
 	adminRoutes.GET("/admin/del-content", server.deletedContentList)
 	// Admin users
 	adminRoutes.GET("/admin/users", server.adminUsers)
+	adminRoutes.GET("/admin/active-users", server.activeUsersList)
+	adminRoutes.GET("/admin/banned-users", server.bannedUsersList)
+	adminRoutes.GET("/admin/deleted-users", server.deletedUsersList)
 	// Admin ads
 	adminRoutes.GET("/admin/ads", server.adminAds)
 

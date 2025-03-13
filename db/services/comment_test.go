@@ -30,7 +30,7 @@ func createRandomComment(t *testing.T) Comment {
 	require.NoError(t, err)
 	require.NotEmpty(t, content)
 
-	users, err := testQueries.GetActiveUsers(context.Background(), GetActiveUsersParams{Limit: 10, Offset: 0})
+	users, err := testQueries.GetActiveUsers(context.Background(), 10)
 	require.NoError(t, err)
 	require.NotEmpty(t, users)
 
@@ -70,7 +70,7 @@ func createRandomComments(t *testing.T) []Comment {
 	require.NoError(t, err)
 	require.NotEmpty(t, content)
 
-	users, err := testQueries.GetActiveUsers(context.Background(), GetActiveUsersParams{Limit: 10, Offset: 0})
+	users, err := testQueries.GetActiveUsers(context.Background(), 10)
 	require.NoError(t, err)
 	require.NotEmpty(t, users)
 
@@ -224,7 +224,7 @@ func TestListContentCommentsByScore(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, contentPub.Status, "published")
 
-	users, err := testQueries.GetActiveUsers(context.Background(), GetActiveUsersParams{Limit: 10, Offset: 0})
+	users, err := testQueries.GetActiveUsers(context.Background(), 10)
 	require.NoError(t, err)
 	require.NotEmpty(t, users)
 

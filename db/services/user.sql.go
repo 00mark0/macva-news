@@ -121,16 +121,11 @@ FROM "user"
 WHERE "is_deleted" = false
   AND "banned" = false
 ORDER BY created_at DESC
-LIMIT $1 OFFSET $2
+LIMIT $1
 `
 
-type GetActiveUsersParams struct {
-	Limit  int32
-	Offset int32
-}
-
-func (q *Queries) GetActiveUsers(ctx context.Context, arg GetActiveUsersParams) ([]User, error) {
-	rows, err := q.db.Query(ctx, getActiveUsers, arg.Limit, arg.Offset)
+func (q *Queries) GetActiveUsers(ctx context.Context, limit int32) ([]User, error) {
+	rows, err := q.db.Query(ctx, getActiveUsers, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -217,16 +212,11 @@ SELECT user_id, username, email, password, pfp, role, email_verified, banned, is
 FROM "user"
 WHERE "banned" = true
 ORDER BY created_at DESC
-LIMIT $1 OFFSET $2
+LIMIT $1
 `
 
-type GetBannedUsersParams struct {
-	Limit  int32
-	Offset int32
-}
-
-func (q *Queries) GetBannedUsers(ctx context.Context, arg GetBannedUsersParams) ([]User, error) {
-	rows, err := q.db.Query(ctx, getBannedUsers, arg.Limit, arg.Offset)
+func (q *Queries) GetBannedUsers(ctx context.Context, limit int32) ([]User, error) {
+	rows, err := q.db.Query(ctx, getBannedUsers, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -274,16 +264,11 @@ SELECT user_id, username, email, password, pfp, role, email_verified, banned, is
 FROM "user"
 WHERE "is_deleted" = true
 ORDER BY created_at DESC
-LIMIT $1 OFFSET $2
+LIMIT $1
 `
 
-type GetDeletedUsersParams struct {
-	Limit  int32
-	Offset int32
-}
-
-func (q *Queries) GetDeletedUsers(ctx context.Context, arg GetDeletedUsersParams) ([]User, error) {
-	rows, err := q.db.Query(ctx, getDeletedUsers, arg.Limit, arg.Offset)
+func (q *Queries) GetDeletedUsers(ctx context.Context, limit int32) ([]User, error) {
+	rows, err := q.db.Query(ctx, getDeletedUsers, limit)
 	if err != nil {
 		return nil, err
 	}

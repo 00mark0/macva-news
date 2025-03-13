@@ -184,12 +184,7 @@ func TestGetActiveUsersCount(t *testing.T) {
 }
 
 func TestGetActiveUsers(t *testing.T) {
-	arg := GetActiveUsersParams{
-		Limit:  5,
-		Offset: 0,
-	}
-
-	users, err := testQueries.GetActiveUsers(context.Background(), arg)
+	users, err := testQueries.GetActiveUsers(context.Background(), 5)
 	require.NoError(t, err)
 	require.NotEmpty(t, users)
 
@@ -217,12 +212,7 @@ func TestGetBannedUsersCount(t *testing.T) {
 }
 
 func TestGetBannedUsers(t *testing.T) {
-	arg := GetBannedUsersParams{
-		Limit:  5,
-		Offset: 0,
-	}
-
-	users, err := testQueries.GetBannedUsers(context.Background(), arg)
+	users, err := testQueries.GetBannedUsers(context.Background(), 5)
 	require.NoError(t, err)
 	require.NotEmpty(t, users)
 
@@ -249,12 +239,7 @@ func TestGetDeletedUsersCount(t *testing.T) {
 }
 
 func TestGetDeletedUsers(t *testing.T) {
-	arg := GetDeletedUsersParams{
-		Limit:  5,
-		Offset: 0,
-	}
-
-	users, err := testQueries.GetDeletedUsers(context.Background(), arg)
+	users, err := testQueries.GetDeletedUsers(context.Background(), 5)
 	require.NoError(t, err)
 	require.NotEmpty(t, users)
 

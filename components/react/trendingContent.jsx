@@ -248,9 +248,9 @@ export default function TrendingContent() {
 							<h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
 								Nema trending sadržaja {filterLabel}
 							</h3>
-							{/*<p className="text-gray-600 dark:text-gray-400 mb-4">
+							<p className="text-gray-600 dark:text-gray-400 mb-4">
 								Pokušajte drugi vremenski period ili se vratite kasnije.
-							</p>*/}
+							</p>
 							<div className="flex justify-center space-x-3">
 								{dateFilter !== 'week' && (
 									<button

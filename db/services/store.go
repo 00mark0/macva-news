@@ -1,10 +1,6 @@
 package db
 
 import (
-	"fmt"
-
-	"context"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -22,7 +18,7 @@ func NewStore(db *pgxpool.Pool) *Store {
 }
 
 // execTx executes a function within a database transaction
-func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
+/*func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
 	txOptions := pgx.TxOptions{}
 	tx, err := store.db.BeginTx(ctx, txOptions)
 	if err != nil {
@@ -39,4 +35,4 @@ func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
 	}
 
 	return tx.Commit(ctx)
-}
+}*/

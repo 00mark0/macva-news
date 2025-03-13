@@ -70,7 +70,7 @@ FROM "user"
 WHERE "is_deleted" = false
   AND "banned" = false
 ORDER BY created_at DESC
-LIMIT $1 OFFSET $2;
+LIMIT $1;
 
 -- name: GetBannedUsersCount :one
 SELECT COUNT(*) AS count
@@ -82,7 +82,7 @@ SELECT user_id, username, email, password, pfp, role, email_verified, banned, is
 FROM "user"
 WHERE "banned" = true
 ORDER BY created_at DESC
-LIMIT $1 OFFSET $2;
+LIMIT $1;
 
 -- name: GetDeletedUsersCount :one
 SELECT COUNT(*) AS count
@@ -94,7 +94,7 @@ SELECT user_id, username, email, password, pfp, role, email_verified, banned, is
 FROM "user"
 WHERE "is_deleted" = true
 ORDER BY created_at DESC
-LIMIT $1 OFFSET $2;
+LIMIT $1;
 
 -- name: SearchActiveUsers :many
 SELECT

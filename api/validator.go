@@ -25,7 +25,7 @@ func NewCustomValidator() *CustomValidator {
 }
 
 // Validate implements the echo.Validator interface.
-func (cv *CustomValidator) Validate(i interface{}) error {
+func (cv *CustomValidator) Validate(i any) error {
 	if err := cv.validator.Struct(i); err != nil {
 		// Return a 400 Bad Request error if validation fails.
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())

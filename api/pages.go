@@ -297,8 +297,96 @@ func (server *Server) deletedContentList(ctx echo.Context) error {
 	return Render(ctx, http.StatusOK, components.DeletedContentSort(int(nextLimit), content, url))
 }
 
+type ListUsersLimitReq struct {
+	Limit int32 `query:"limit"`
+}
+
 func (server *Server) adminUsers(ctx echo.Context) error {
-	return Render(ctx, http.StatusOK, components.AdminUsers())
+	var req ListUsersLimitReq
+
+	nextLimit := req.Limit + 20
+
+	activeCount, err := server.store.GetActiveUsersCount(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error getting active users count in adminUsers:", err)
+		return err
+	}
+
+	bannedCount, err := server.store.GetBannedUsersCount(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error getting banned users count in adminUsers:", err)
+		return err
+	}
+
+	delCount, err := server.store.GetDeletedUsersCount(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error getting deleted users count in adminUsers:", err)
+		return err
+	}
+
+	overview := components.UsersOverview{
+		ActiveUsersCount:  int(activeCount),
+		BannedUsersCount:  int(bannedCount),
+		DeletedUsersCount: int(delCount),
+	}
+
+	users, err := server.store.GetActiveUsers(ctx.Request().Context(), nextLimit)
+	if err != nil {
+		log.Println("Error getting active users in adminUsers:", err)
+		return err
+	}
+
+	url := "/api/admin/users/active?limit="
+
+	return Render(ctx, http.StatusOK, components.AdminUsers(overview, int(nextLimit), users, url))
+}
+
+func (server *Server) activeUsersList(ctx echo.Context) error {
+	var req ListUsersLimitReq
+
+	nextLimit := req.Limit + 20
+
+	users, err := server.store.GetActiveUsers(ctx.Request().Context(), nextLimit)
+	if err != nil {
+		log.Println("Error getting active users in activeUsersList:", err)
+		return err
+	}
+
+	url := "/api/admin/users/active?limit="
+
+	return Render(ctx, http.StatusOK, components.ActiveUsersSort(int(nextLimit), users, url))
+}
+
+func (server *Server) bannedUsersList(ctx echo.Context) error {
+	var req ListUsersLimitReq
+
+	nextLimit := req.Limit + 20
+
+	users, err := server.store.GetBannedUsers(ctx.Request().Context(), nextLimit)
+	if err != nil {
+		log.Println("Error getting banned users in bannedUsersList:", err)
+		return err
+	}
+
+	url := "/api/admin/users/banned?limit="
+
+	return Render(ctx, http.StatusOK, components.BannedUsersSort(int(nextLimit), users, url))
+}
+
+func (server *Server) deletedUsersList(ctx echo.Context) error {
+	var req ListUsersLimitReq
+
+	nextLimit := req.Limit + 20
+
+	users, err := server.store.GetDeletedUsers(ctx.Request().Context(), nextLimit)
+	if err != nil {
+		log.Println("Error getting deleted users in deletedUsersList:", err)
+		return err
+	}
+
+	url := "/api/admin/users/deleted?limit="
+
+	return Render(ctx, http.StatusOK, components.DelUsersSort(int(nextLimit), users, url))
 }
 
 func (server *Server) adminAds(ctx echo.Context) error {

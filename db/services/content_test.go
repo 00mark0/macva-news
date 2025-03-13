@@ -376,7 +376,7 @@ func TestIncrementViewCount(t *testing.T) {
 // this one test both TestInsertOrUpdateContentReaction and FetchContentReactions
 func TestInsertOrUpdateContentReaction(t *testing.T) {
 	content := createRandomContent(t)
-	users, err := testQueries.GetActiveUsers(context.Background(), GetActiveUsersParams{Limit: 10, Offset: 0})
+	users, err := testQueries.GetActiveUsers(context.Background(), 10)
 	require.NoError(t, err)
 
 	contentID, err := testQueries.InsertOrUpdateContentReaction(context.Background(), InsertOrUpdateContentReactionParams{
@@ -420,7 +420,7 @@ func TestInsertOrUpdateContentReaction(t *testing.T) {
 
 func TestDeleteContentReaction(t *testing.T) {
 	content := createRandomContent(t)
-	users, err := testQueries.GetActiveUsers(context.Background(), GetActiveUsersParams{Limit: 10, Offset: 0})
+	users, err := testQueries.GetActiveUsers(context.Background(), 10)
 	require.NoError(t, err)
 
 	contentID, err := testQueries.InsertOrUpdateContentReaction(context.Background(), InsertOrUpdateContentReactionParams{
@@ -445,7 +445,7 @@ func TestDeleteContentReaction(t *testing.T) {
 
 func TestUpdateContentLikeDislikeCount(t *testing.T) {
 	content := createRandomContent(t)
-	users, err := testQueries.GetActiveUsers(context.Background(), GetActiveUsersParams{Limit: 10, Offset: 0})
+	users, err := testQueries.GetActiveUsers(context.Background(), 10)
 
 	contentID, err := testQueries.InsertOrUpdateContentReaction(context.Background(), InsertOrUpdateContentReactionParams{
 		ContentID: content.ContentID,
