@@ -72,7 +72,7 @@ templ AdminLayout(payload *token.Payload, children ...templ.Component) {
 										<span class="sr-only">Open user menu</span>
 										<img
 											class="w-10 h-10 rounded-full object-fit"
-											src="/static/assets/default-avatar-64x64.png"
+											src={ payload.Pfp }
 											alt="user photo"
 										/>
 									</button>
@@ -101,9 +101,12 @@ templ AdminLayout(payload *token.Payload, children ...templ.Component) {
 												role="menuitem"
 											>Pregled</a>
 										</li>
-										<li>
+										<li class="cursor-pointer">
 											<a
-												href="#"
+												hx-get="/admin/settings"
+												hx-trigger="click"
+												hx-target="#admin-content"
+												hx-swap="innerHTML"
 												id="user-menu-item-settings"
 												class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
 												role="menuitem"

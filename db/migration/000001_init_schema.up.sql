@@ -5,7 +5,7 @@ CREATE TABLE "user" (
   "username" VARCHAR(50) NOT NULL,
   "email" VARCHAR(100) UNIQUE NOT NULL,
   "password" TEXT NOT NULL,
-  "pfp" TEXT NOT NULL DEFAULT 'https://res.cloudinary.com/dxq2xh2oq/image/upload/v1656979667/avatar/avatar-1_1_1_1_u2v3i2.png',
+  "pfp" TEXT NOT NULL DEFAULT 'static/assets/default-avatar-64x64.png',
   "role" VARCHAR(20) NOT NULL DEFAULT 'user',
   "email_verified" BOOL DEFAULT false,
   "banned" BOOL DEFAULT false,

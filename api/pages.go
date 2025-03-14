@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/00mark0/macva-news/components"
+	db "github.com/00mark0/macva-news/db/services"
 	"github.com/00mark0/macva-news/token"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -533,4 +534,39 @@ func (server *Server) updateArticlePage(ctx echo.Context) error {
 	})
 
 	return Render(ctx, http.StatusOK, components.UpdateArticle(content, categories, media, tags, contentTags))
+}
+
+func (server *Server) adminSettings(ctx echo.Context) error {
+	// Get user data from auth payload
+	payload := ctx.Get(authorizationPayloadKey).(*token.Payload)
+
+	// Get global settings or create if they don't exist
+	globalSettings, err := server.store.GetGlobalSettings(ctx.Request().Context())
+	if err != nil || len(globalSettings) == 0 {
+		// If there's an error or no settings exist, create new settings
+		newSettings, err := server.store.CreateGlobalSettings(ctx.Request().Context())
+		if err != nil {
+			log.Println("Error creating global settings in adminSettings:", err)
+			return err
+		}
+		globalSettings = []db.GlobalSetting{newSettings}
+	}
+
+	// Create props for the AdminSettings component
+	props := components.AdminSettingsProps{
+		// User settings from auth payload
+		UserID:   payload.UserID,
+		Username: payload.Username,
+		Pfp:      payload.Pfp,
+
+		// Global settings from the first record
+		DisableComments: globalSettings[0].DisableComments,
+		DisableLikes:    globalSettings[0].DisableLikes,
+		DisableDislikes: globalSettings[0].DisableDislikes,
+		DisableViews:    globalSettings[0].DisableViews,
+		DisableAds:      globalSettings[0].DisableAds,
+	}
+
+	// Render the AdminSettings component with the props
+	return Render(ctx, http.StatusOK, components.AdminSettings(props))
 }

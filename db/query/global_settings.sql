@@ -3,8 +3,8 @@ INSERT INTO "global_settings" ("disable_comments", "disable_likes", "disable_dis
 VALUES (false, false, true, false, false)
 RETURNING *;
 
--- name: GetGlobalSettings :one
-SELECT * FROM "global_settings" LIMIT 1;
+-- name: GetGlobalSettings :many
+SELECT * FROM "global_settings";
 
 -- name: UpdateGlobalSettings :exec
 UPDATE "global_settings"

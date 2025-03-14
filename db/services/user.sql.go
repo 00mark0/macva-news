@@ -105,7 +105,7 @@ const deleteUser = `-- name: DeleteUser :exec
 UPDATE "user" 
 SET email = CONCAT('deleted_', user_id, '@example.com'), 
     password = '', 
-    pfp = 'https://res.cloudinary.com/dxq2xh2oq/image/upload/v1656979667/avatar/avatar-1_1_1_1_u2v3i2.png', 
+    pfp = '/static/assets/default-avatar-64x64.png', 
     is_deleted = true 
 WHERE user_id = $1
 `

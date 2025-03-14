@@ -29,22 +29,35 @@ func (q *Queries) CreateGlobalSettings(ctx context.Context) (GlobalSetting, erro
 	return i, err
 }
 
-const getGlobalSettings = `-- name: GetGlobalSettings :one
-SELECT global_settings_id, disable_comments, disable_likes, disable_dislikes, disable_views, disable_ads FROM "global_settings" LIMIT 1
+const getGlobalSettings = `-- name: GetGlobalSettings :many
+SELECT global_settings_id, disable_comments, disable_likes, disable_dislikes, disable_views, disable_ads FROM "global_settings"
 `
 
-func (q *Queries) GetGlobalSettings(ctx context.Context) (GlobalSetting, error) {
-	row := q.db.QueryRow(ctx, getGlobalSettings)
-	var i GlobalSetting
-	err := row.Scan(
-		&i.GlobalSettingsID,
-		&i.DisableComments,
-		&i.DisableLikes,
-		&i.DisableDislikes,
-		&i.DisableViews,
-		&i.DisableAds,
-	)
-	return i, err
+func (q *Queries) GetGlobalSettings(ctx context.Context) ([]GlobalSetting, error) {
+	rows, err := q.db.Query(ctx, getGlobalSettings)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GlobalSetting
+	for rows.Next() {
+		var i GlobalSetting
+		if err := rows.Scan(
+			&i.GlobalSettingsID,
+			&i.DisableComments,
+			&i.DisableLikes,
+			&i.DisableDislikes,
+			&i.DisableViews,
+			&i.DisableAds,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const resetGlobalSettings = `-- name: ResetGlobalSettings :exec

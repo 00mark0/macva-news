@@ -55,6 +55,8 @@ func (server *Server) setupRouter() {
 	adminRoutes.GET("/admin/deleted-users", server.deletedUsersList)
 	// Admin ads
 	adminRoutes.GET("/admin/ads", server.adminAds)
+	// Admin settings
+	adminRoutes.GET("/admin/settings", server.adminSettings)
 
 	// Admin API Routes
 	// Admin overview
