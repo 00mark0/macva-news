@@ -7,8 +7,10 @@ import (
 
 	"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/db/services"
-	"github.com/00mark0/macva-news/token"
+	//"github.com/00mark0/macva-news/token"
 	"github.com/00mark0/macva-news/utils"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 
 	"os"
 
@@ -23,7 +25,7 @@ type userResponse struct {
 	Role     string `json:"role"`
 }
 
-func newUserResponse(payload *token.Payload) userResponse {
+/*func newUserResponse(payload *token.Payload) userResponse {
 	return userResponse{
 		UserID:   payload.UserID,
 		Username: payload.Username,
@@ -31,7 +33,7 @@ func newUserResponse(payload *token.Payload) userResponse {
 		Pfp:      payload.Pfp,
 		Role:     payload.Role,
 	}
-}
+}*/
 
 type loginUserReq struct {
 	Email    string `json:"email" form:"email" validate:"required,email"`
@@ -39,8 +41,12 @@ type loginUserReq struct {
 }
 
 type loginUserRes struct {
-	AccessToken string       `json:"access_token"`
-	User        userResponse `json:"user"`
+	SessionID             uuid.UUID    `json:"session_id"`
+	AccessToken           string       `json:"access_token"`
+	AccessTokenExpiresAt  time.Time    `json:"access_token_expires_at"`
+	RefreshToken          string       `json:"refresh_token"`
+	RefreshTokenExpiresAt time.Time    `json:"refresh_token_expires_at"`
+	User                  userResponse `json:"user"`
 }
 
 func (server *Server) login(ctx echo.Context) error {
@@ -90,12 +96,15 @@ func (server *Server) login(ctx echo.Context) error {
 		return err
 	}
 
-	accessToken, payload, err := server.tokenMaker.CreateToken(
+	accessToken, _, err := server.tokenMaker.CreateToken(
 		user.UserID.String(),
 		user.Username,
 		user.Email,
 		user.Pfp,
 		user.Role,
+		user.EmailVerified.Bool,
+		user.Banned.Bool,
+		user.IsDeleted.Bool,
 		duration,
 	)
 	if err != nil {
@@ -103,13 +112,42 @@ func (server *Server) login(ctx echo.Context) error {
 		return err
 	}
 
-	res := loginUserRes{
-		AccessToken: accessToken,
-		User:        newUserResponse(payload),
+	refreshTokenDurationStr := os.Getenv("REFRESH_TOKEN_DURATION")
+	refreshTokenDuration, err := time.ParseDuration(refreshTokenDurationStr)
+	if err != nil {
+		log.Println("Error parsing duration in login:", err)
+		return err
 	}
 
-	if acceptHeader := ctx.Request().Header.Get("Accept"); acceptHeader == "application/json" {
-		return ctx.JSON(http.StatusOK, res)
+	refreshToken, refreshTokenPayload, err := server.tokenMaker.CreateToken(
+		user.UserID.String(),
+		user.Username,
+		user.Email,
+		user.Pfp,
+		user.Role,
+		user.EmailVerified.Bool,
+		user.Banned.Bool,
+		user.IsDeleted.Bool,
+		refreshTokenDuration,
+	)
+	if err != nil {
+		log.Println("Error creating token in login:", err)
+		return err
+	}
+
+	session, err := server.store.CreateSession(ctx.Request().Context(), db.CreateSessionParams{
+		ID:           pgtype.UUID{Bytes: refreshTokenPayload.ID, Valid: true},
+		UserID:       user.UserID,
+		Username:     user.Username,
+		RefreshToken: refreshToken,
+		UserAgent:    ctx.Request().UserAgent(),
+		ClientIp:     ctx.RealIP(),
+		IsBlocked:    false,
+		ExpiresAt:    pgtype.Timestamptz{Time: refreshTokenPayload.ExpiredAt, Valid: true},
+	})
+	if err != nil {
+		log.Println("Error creating session in login:", err)
+		return err
 	}
 
 	// Set token as a secure, HTTP-only cookie
@@ -121,18 +159,57 @@ func (server *Server) login(ctx echo.Context) error {
 		HttpOnly: true,
 	})
 
+	ctx.SetCookie(&http.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		Expires:  time.Now().Add(refreshTokenDuration),
+		Path:     "/",
+		HttpOnly: true,
+	})
+
+	ctx.SetCookie(&http.Cookie{
+		Name:     "session_id",
+		Value:    session.ID.String(),
+		Expires:  time.Now().Add(refreshTokenDuration),
+		Path:     "/",
+		HttpOnly: true,
+	})
+
 	ctx.Response().Header().Set("HX-Redirect", "/")
 	return ctx.NoContent(http.StatusOK)
 }
 
 func (server *Server) logOut(ctx echo.Context) error {
-	ctx.SetCookie(&http.Cookie{
-		Name:    "access_token",
-		Value:   "",
-		MaxAge:  -1,
-		Path:    "/",
-		Expires: time.Now(),
-	})
+	sessionCookie, err := ctx.Cookie("session_id")
+	if err != nil {
+		log.Println("Error getting session cookie in logOut:", err)
+		return err
+	}
+
+	sessionID, err := uuid.Parse(sessionCookie.Value)
+	if err != nil {
+		log.Println("Error parsing session ID in logOut:", err)
+		return err
+	}
+
+	err = server.store.DeleteSession(ctx.Request().Context(), pgtype.UUID{Bytes: sessionID, Valid: true})
+	if err != nil {
+		log.Println("Error deleting session in logOut:", err)
+		return err
+	}
+
+	// Clear all cookies
+	clearCookie := func(name string) {
+		ctx.SetCookie(&http.Cookie{
+			Name:   name,
+			Value:  "",
+			Path:   "/",
+			MaxAge: -1, // Expire immediately
+		})
+	}
+	clearCookie("access_token")
+	clearCookie("refresh_token")
+	clearCookie("session_id")
 
 	ctx.Response().Header().Set("HX-Redirect", "/")
 	return ctx.NoContent(http.StatusOK)
@@ -619,4 +696,145 @@ func (server *Server) searchArchivedUsers(ctx echo.Context) error {
 	url := "/api/admin/users/deleted/search?search_term=" + req.SearchTerm + "&limit="
 
 	return Render(ctx, http.StatusOK, components.Users(int(nextLimit), users, url))
+}
+
+func (server *Server) banUser(ctx echo.Context) error {
+	userIDStr := ctx.Param("id")
+
+	userIDBytes, err := uuid.Parse(userIDStr)
+	if err != nil {
+		log.Println("Error parsing user_id in banUser:", err)
+		return err
+	}
+
+	userID := pgtype.UUID{
+		Bytes: userIDBytes,
+		Valid: true,
+	}
+
+	err = server.store.BanUser(ctx.Request().Context(), userID)
+	if err != nil {
+		log.Println("Error banning user in banUser:", err)
+		return err
+	}
+
+	activeCount, err := server.store.GetActiveUsersCount(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error getting active users count in adminUsers:", err)
+		return err
+	}
+
+	bannedCount, err := server.store.GetBannedUsersCount(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error getting banned users count in adminUsers:", err)
+		return err
+	}
+
+	delCount, err := server.store.GetDeletedUsersCount(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error getting deleted users count in adminUsers:", err)
+		return err
+	}
+
+	overview := components.UsersOverview{
+		ActiveUsersCount:  int(activeCount),
+		BannedUsersCount:  int(bannedCount),
+		DeletedUsersCount: int(delCount),
+	}
+
+	return Render(ctx, http.StatusOK, components.UsersNav(overview))
+}
+
+func (server *Server) unbanUser(ctx echo.Context) error {
+	userIDStr := ctx.Param("id")
+
+	userIDBytes, err := uuid.Parse(userIDStr)
+	if err != nil {
+		log.Println("Error parsing user_id in unbanUser:", err)
+		return err
+	}
+
+	userID := pgtype.UUID{
+		Bytes: userIDBytes,
+		Valid: true,
+	}
+
+	err = server.store.UnbanUser(ctx.Request().Context(), userID)
+	if err != nil {
+		log.Println("Error unbanning user in unbanUser:", err)
+		return err
+	}
+
+	activeCount, err := server.store.GetActiveUsersCount(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error getting active users count in adminUsers:", err)
+		return err
+	}
+
+	bannedCount, err := server.store.GetBannedUsersCount(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error getting banned users count in adminUsers:", err)
+		return err
+	}
+
+	delCount, err := server.store.GetDeletedUsersCount(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error getting deleted users count in adminUsers:", err)
+		return err
+	}
+
+	overview := components.UsersOverview{
+		ActiveUsersCount:  int(activeCount),
+		BannedUsersCount:  int(bannedCount),
+		DeletedUsersCount: int(delCount),
+	}
+
+	return Render(ctx, http.StatusOK, components.UsersNav(overview))
+}
+
+func (server *Server) deleteUser(ctx echo.Context) error {
+	userIDStr := ctx.Param("id")
+
+	userIDBytes, err := uuid.Parse(userIDStr)
+	if err != nil {
+		log.Println("Error parsing user_id in deleteUser:", err)
+		return err
+	}
+
+	userID := pgtype.UUID{
+		Bytes: userIDBytes,
+		Valid: true,
+	}
+
+	err = server.store.DeleteUser(ctx.Request().Context(), userID)
+	if err != nil {
+		log.Println("Error deleting user in deleteUser:", err)
+		return err
+	}
+
+	activeCount, err := server.store.GetActiveUsersCount(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error getting active users count in adminUsers:", err)
+		return err
+	}
+
+	bannedCount, err := server.store.GetBannedUsersCount(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error getting banned users count in adminUsers:", err)
+		return err
+	}
+
+	delCount, err := server.store.GetDeletedUsersCount(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error getting deleted users count in adminUsers:", err)
+		return err
+	}
+
+	overview := components.UsersOverview{
+		ActiveUsersCount:  int(activeCount),
+		BannedUsersCount:  int(bannedCount),
+		DeletedUsersCount: int(delCount),
+	}
+
+	return Render(ctx, http.StatusOK, components.UsersNav(overview))
 }

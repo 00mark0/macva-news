@@ -30,7 +30,7 @@ func (server *Server) setupRouter() {
 	//authRoutes.Use(authMiddleware(server.tokenMaker))
 
 	adminRoutes := router.Group("")
-	adminRoutes.Use(adminMiddleware(server.tokenMaker))
+	adminRoutes.Use(server.adminMiddleware(server.tokenMaker))
 
 	// Admin Page Routes
 	// Admin overview
@@ -118,6 +118,9 @@ func (server *Server) setupRouter() {
 	adminRoutes.GET("/api/admin/users/active/search", server.searchActiveUsers)
 	adminRoutes.GET("/api/admin/users/banned/search", server.searchBannedUsers)
 	adminRoutes.GET("/api/admin/users/deleted/search", server.searchArchivedUsers)
+	adminRoutes.PUT("/api/admin/users/ban/:id", server.banUser)
+	adminRoutes.PUT("/api/admin/users/unban/:id", server.unbanUser)
+	adminRoutes.PUT("/api/admin/users/archive/:id", server.deleteUser)
 
 	// Cookie
 	adminRoutes.DELETE("/api/cookie", server.deleteCookie)

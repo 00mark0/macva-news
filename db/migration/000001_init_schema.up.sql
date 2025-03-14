@@ -13,6 +13,18 @@ CREATE TABLE "user" (
   "created_at" TIMESTAMPTZ DEFAULT (now())
 );
 
+CREATE TABLE "session" (
+  "id" UUID PRIMARY KEY,
+  "user_id" UUID NOT NULL,
+  "username" VARCHAR NOT NULL,
+  "refresh_token" VARCHAR NOT NULL,
+  "user_agent" VARCHAR NOT NULL,
+  "client_ip" VARCHAR NOT NULL,
+  "is_blocked" BOOLEAN NOT NULL,
+  "expires_at" TIMESTAMPTZ NOT NULL,
+  "created_at" TIMESTAMPTZ NOT NULL DEFAULT (now())
+);
+
 CREATE TABLE "content" (
   "content_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "user_id" UUID NOT NULL,
@@ -150,6 +162,7 @@ CREATE INDEX "idx_analytics_daily_date_updated_at" ON "analytics_daily"("analyti
 CREATE INDEX "idx_recent_analytics" ON "analytics_daily"("analytics_date");
 
 -- Create foreign key constraints
+ALTER TABLE "session" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("user_id") ON DELETE CASCADE;
 ALTER TABLE "content" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("user_id") ON DELETE CASCADE;
 ALTER TABLE "content" ADD FOREIGN KEY ("category_id") REFERENCES "category" ("category_id") ON DELETE CASCADE;
 ALTER TABLE "content_tag" ADD FOREIGN KEY ("content_id") REFERENCES "content" ("content_id") ON DELETE CASCADE;

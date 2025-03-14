@@ -106,6 +106,18 @@ type Medium struct {
 	MediaOrder   int32
 }
 
+type Session struct {
+	ID           pgtype.UUID
+	UserID       pgtype.UUID
+	Username     string
+	RefreshToken string
+	UserAgent    string
+	ClientIp     string
+	IsBlocked    bool
+	ExpiresAt    pgtype.Timestamptz
+	CreatedAt    pgtype.Timestamptz
+}
+
 type Tag struct {
 	TagID   pgtype.UUID
 	TagName string

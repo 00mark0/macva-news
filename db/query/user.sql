@@ -9,12 +9,12 @@ VALUES ($1, $2, $3, $4)
 RETURNING *;
 
 -- name: GetUserByID :one
-SELECT user_id, username, password, email, role, pfp, email_verified, banned 
+SELECT user_id, username, password, email, role, pfp, email_verified, banned, is_deleted 
 FROM "user" 
 WHERE user_id = $1 AND banned = false;
 
 -- name: GetUserByEmail :one
-SELECT user_id, username, password, email, role, pfp, email_verified, banned 
+SELECT user_id, username, password, email, role, pfp, email_verified, banned, is_deleted 
 FROM "user" 
 WHERE email = $1 AND banned = false;
 
@@ -91,12 +91,13 @@ LIMIT $1;
 -- name: GetBannedUsersCount :one
 SELECT COUNT(*) AS count
 FROM "user"
-WHERE "banned" = true;
+WHERE "banned" = true AND "is_deleted" = false;
 
 -- name: GetBannedUsers :many
 SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
 FROM "user"
 WHERE "banned" = true
+  AND "is_deleted" = false
 ORDER BY created_at DESC
 LIMIT $1;
 
@@ -104,6 +105,7 @@ LIMIT $1;
 SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
 FROM "user"
 WHERE "banned" = true
+  AND "is_deleted" = false
 ORDER BY created_at ASC
 LIMIT $1;
 
@@ -111,6 +113,7 @@ LIMIT $1;
 SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
 FROM "user"
 WHERE "banned" = true
+  AND "is_deleted" = false
 ORDER BY username ASC
 LIMIT $1;
 

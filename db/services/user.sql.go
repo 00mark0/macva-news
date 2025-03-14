@@ -291,6 +291,7 @@ const getBannedUsers = `-- name: GetBannedUsers :many
 SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
 FROM "user"
 WHERE "banned" = true
+  AND "is_deleted" = false
 ORDER BY created_at DESC
 LIMIT $1
 `
@@ -329,7 +330,7 @@ func (q *Queries) GetBannedUsers(ctx context.Context, limit int32) ([]User, erro
 const getBannedUsersCount = `-- name: GetBannedUsersCount :one
 SELECT COUNT(*) AS count
 FROM "user"
-WHERE "banned" = true
+WHERE "banned" = true AND "is_deleted" = false
 `
 
 func (q *Queries) GetBannedUsersCount(ctx context.Context) (int64, error) {
@@ -343,6 +344,7 @@ const getBannedUsersOldest = `-- name: GetBannedUsersOldest :many
 SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
 FROM "user"
 WHERE "banned" = true
+  AND "is_deleted" = false
 ORDER BY created_at ASC
 LIMIT $1
 `
@@ -382,6 +384,7 @@ const getBannedUsersTitle = `-- name: GetBannedUsersTitle :many
 SELECT user_id, username, email, password, pfp, role, email_verified, banned, is_deleted, created_at
 FROM "user"
 WHERE "banned" = true
+  AND "is_deleted" = false
 ORDER BY username ASC
 LIMIT $1
 `
@@ -548,7 +551,7 @@ func (q *Queries) GetDeletedUsersTitle(ctx context.Context, limit int32) ([]User
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT user_id, username, password, email, role, pfp, email_verified, banned 
+SELECT user_id, username, password, email, role, pfp, email_verified, banned, is_deleted 
 FROM "user" 
 WHERE email = $1 AND banned = false
 `
@@ -562,6 +565,7 @@ type GetUserByEmailRow struct {
 	Pfp           string
 	EmailVerified pgtype.Bool
 	Banned        pgtype.Bool
+	IsDeleted     pgtype.Bool
 }
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
@@ -576,12 +580,13 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEm
 		&i.Pfp,
 		&i.EmailVerified,
 		&i.Banned,
+		&i.IsDeleted,
 	)
 	return i, err
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT user_id, username, password, email, role, pfp, email_verified, banned 
+SELECT user_id, username, password, email, role, pfp, email_verified, banned, is_deleted 
 FROM "user" 
 WHERE user_id = $1 AND banned = false
 `
@@ -595,6 +600,7 @@ type GetUserByIDRow struct {
 	Pfp           string
 	EmailVerified pgtype.Bool
 	Banned        pgtype.Bool
+	IsDeleted     pgtype.Bool
 }
 
 func (q *Queries) GetUserByID(ctx context.Context, userID pgtype.UUID) (GetUserByIDRow, error) {
@@ -609,6 +615,7 @@ func (q *Queries) GetUserByID(ctx context.Context, userID pgtype.UUID) (GetUserB
 		&i.Pfp,
 		&i.EmailVerified,
 		&i.Banned,
+		&i.IsDeleted,
 	)
 	return i, err
 }
