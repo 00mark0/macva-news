@@ -1,10 +1,9 @@
 package api
 
 import (
-	"net/http"
+	"regexp"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/labstack/echo/v4"
 )
 
 // CustomValidator wraps the validator package and is used by Echo for request validation.
@@ -20,15 +19,17 @@ func NewCustomValidator() *CustomValidator {
 	// Example of registering a custom validation:
 	// v.RegisterValidation("currency", validCurrency)
 	// You can add more custom validations here as needed.
+	// Register custom validations
+	v.RegisterValidation("regex", validCategoryName)
 
 	return &CustomValidator{validator: v}
 }
 
 // Validate implements the echo.Validator interface.
-func (cv *CustomValidator) Validate(i any) error {
+func (cv *CustomValidator) Validate(i interface{}) error {
 	if err := cv.validator.Struct(i); err != nil {
-		// Return a 400 Bad Request error if validation fails.
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		// Optionally, you could return the error to give each route more control over the status code
+		return err
 	}
 	return nil
 }
@@ -41,3 +42,10 @@ func (cv *CustomValidator) Validate(i any) error {
 //     // return utils.IsSupportedCurrency(fl.Field().String())
 //     return true // Simplified example
 // }
+
+// validCategoryName is a custom validation function for the "regex" tag
+var validCategoryName validator.Func = func(fl validator.FieldLevel) bool {
+	// Regex pattern: only letters and spaces
+	re := regexp.MustCompile(`^[A-Za-z ]+$`)
+	return re.MatchString(fl.Field().String())
+}

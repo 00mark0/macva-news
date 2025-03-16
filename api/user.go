@@ -1,12 +1,17 @@
 package api
 
 import (
+	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/db/services"
+	"github.com/go-playground/validator/v10"
+
 	//"github.com/00mark0/macva-news/token"
 	"github.com/00mark0/macva-news/utils"
 	"github.com/google/uuid"
@@ -57,15 +62,23 @@ func (server *Server) login(ctx echo.Context) error {
 		return err
 	}
 
-	if req.Email == "" {
-		loginErr = "Email obavezan"
+	// Run validation
+	if err := ctx.Validate(req); err != nil {
+		var loginErr components.LoginErr
 
-		return Render(ctx, http.StatusOK, components.LoginForm(loginErr))
-	}
+		// Loop through validation errors and handle each field separately
+		for _, fieldErr := range err.(validator.ValidationErrors) {
+			switch fieldErr.Field() {
+			case "Email":
+				// Custom error message for email validation
+				loginErr = "Email je obavezan i mora biti validan."
+			case "Password":
+				// Custom error message for password validation
+				loginErr = "Lozinka je obavezna i mora imati najmanje 6 karaktera."
+			}
+		}
 
-	if req.Password == "" {
-		loginErr = "Lozinka obavezna"
-
+		// Render the login form with the custom error message
 		return Render(ctx, http.StatusOK, components.LoginForm(loginErr))
 	}
 
@@ -837,4 +850,154 @@ func (server *Server) deleteUser(ctx echo.Context) error {
 	}
 
 	return Render(ctx, http.StatusOK, components.UsersNav(overview))
+}
+
+type UserInfoReq struct {
+	Username string `form:"username" validate:"required,min=3,max=20"`
+	Pfp      string `form:"pfp"`
+}
+
+func (server *Server) updateUsername(ctx echo.Context) error {
+	var req UserInfoReq
+
+	if err := ctx.Bind(&req); err != nil {
+		log.Println("Error binding request in updateUsername:", err)
+		return err
+	}
+
+	if err := ctx.Validate(req); err != nil {
+		message := "Korisničko ime mora biti između 3 i 20 karaktera."
+
+		return Render(ctx, http.StatusOK, components.UpdateError(message))
+	}
+
+	userIDStr := ctx.Param("id")
+
+	userIDBytes, err := uuid.Parse(userIDStr)
+	if err != nil {
+		log.Println("Error parsing user_id in updateUsername:", err)
+		return err
+	}
+
+	userID := pgtype.UUID{
+		Bytes: userIDBytes,
+		Valid: true,
+	}
+
+	user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
+	if err != nil {
+		log.Println("Error getting user in updateUsername:", err)
+		return err
+	}
+
+	arg := db.UpdateUserParams{
+		UserID:   userID,
+		Username: req.Username,
+		Pfp:      user.Pfp,
+	}
+
+	err = server.store.UpdateUser(ctx.Request().Context(), arg)
+	if err != nil {
+		log.Println("Error updating user in updateUsername:", err)
+		return err
+	}
+
+	message := "Korisničko ime je uspešno promenjeno."
+	return Render(ctx, http.StatusOK, components.UpdateSuccess(message))
+}
+
+type UpdatePfpReq struct {
+	Pfp string `form:"pfp"`
+}
+
+func (server *Server) updatePfp(ctx echo.Context) error {
+	var req UpdatePfpReq
+	if err := ctx.Bind(&req); err != nil {
+		log.Println("Error binding request in updatePfp:", err)
+		return err
+	}
+
+	userIDStr := ctx.Param("id")
+	userIDBytes, err := uuid.Parse(userIDStr)
+	if err != nil {
+		log.Println("Error parsing user_id in updatePfp:", err)
+		return err
+	}
+
+	userID := pgtype.UUID{
+		Bytes: userIDBytes,
+		Valid: true,
+	}
+
+	user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
+	if err != nil {
+		log.Println("Error getting user in updatePfp:", err)
+		return err
+	}
+
+	// Delete previous profile picture if it exists and is in static/pfp directory
+	if user.Pfp != "" && strings.HasPrefix(user.Pfp, "static/pfp/") {
+		// Check if file exists before attempting to delete
+		if _, err := os.Stat(user.Pfp); err == nil {
+			if err := os.Remove(user.Pfp); err != nil {
+				// Log the error but continue with the update
+				log.Println("Warning: couldn't delete previous profile picture:", err)
+			} else {
+				log.Println("Successfully deleted previous profile picture:", user.Pfp)
+			}
+		}
+	}
+
+	file, err := ctx.FormFile("pfp")
+	if err != nil {
+		log.Println("Error retrieving uploaded file in updatePfp:", err)
+		return err
+	}
+
+	uploadsDir := "static/pfp"
+	// Ensure directory exists
+	if _, err := os.Stat(uploadsDir); os.IsNotExist(err) {
+		if err := os.MkdirAll(uploadsDir, 0755); err != nil {
+			log.Println("Error creating directory in updatePfp:", err)
+			return err
+		}
+	}
+
+	filename := fmt.Sprintf("%s-%s", uuid.New().String(), file.Filename)
+	filePath := fmt.Sprintf("%s/%s", uploadsDir, filename)
+
+	src, err := file.Open()
+	if err != nil {
+		log.Println("Error opening file in updatePfp:", err)
+		return err
+	}
+	defer src.Close()
+
+	dst, err := os.Create(filePath)
+	if err != nil {
+		log.Println("Error creating destination file in updatePfp:", err)
+		return err
+	}
+	defer dst.Close()
+
+	if _, err := io.Copy(dst, src); err != nil {
+		log.Println("Error copying file data in updatePfp:", err)
+		return err
+	}
+
+	arg := db.UpdateUserParams{
+		UserID:   userID,
+		Username: user.Username,
+		Pfp:      filePath,
+	}
+
+	err = server.store.UpdateUser(ctx.Request().Context(), arg)
+	if err != nil {
+		log.Println("Error updating user in updatePfp:", err)
+		// If update fails, delete the newly uploaded file to avoid orphaned files
+		os.Remove(filePath)
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.AdminPfp(filePath))
 }

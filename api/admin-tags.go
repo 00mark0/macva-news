@@ -27,7 +27,7 @@ func (server *Server) createTag(ctx echo.Context) error {
 	}
 
 	if err := ctx.Validate(req); err != nil {
-		message := "Ime je potrebno pri pravljenju novog taga."
+		message := "Ime je obavezno pri pravljenju novog taga."
 		// Set header to indicate error and where to show it
 		ctx.Response().Header().Set("HX-Retarget", "#create-article-modal")
 		return Render(ctx, http.StatusOK, components.ArticleError(message))

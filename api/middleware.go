@@ -205,8 +205,8 @@ func (server *Server) adminMiddleware(tokenMaker token.Maker) echo.MiddlewareFun
 					return ctx.NoContent(http.StatusNoContent)
 				}
 
-				if !user.EmailVerified.Bool {
-					log.Println("User is not verified.")
+				if user.IsDeleted.Bool {
+					log.Println("User is deleted.")
 					return ctx.NoContent(http.StatusNoContent)
 				}
 
@@ -258,15 +258,38 @@ func (server *Server) adminMiddleware(tokenMaker token.Maker) echo.MiddlewareFun
 					return ctx.NoContent(http.StatusNoContent)
 				}
 
-				if payload.Banned {
+				userIDStr := payload.UserID
+
+				parsedUserID, err := uuid.Parse(userIDStr)
+				if err != nil {
+					log.Println("Invalid content ID format in archivePubContent:", err)
+					return err
+				}
+
+				// Create a pgtype.UUID with the parsed UUID
+				userID := pgtype.UUID{
+					Bytes: parsedUserID,
+					Valid: true,
+				}
+
+				user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
+				if err != nil {
+					log.Println("Error getting user by ID:", err)
 					return ctx.NoContent(http.StatusNoContent)
 				}
 
-				if payload.IsDeleted {
+				if user.Banned.Bool {
+					log.Println("User is banned.")
 					return ctx.NoContent(http.StatusNoContent)
 				}
 
-				if payload.Role != "admin" {
+				if user.IsDeleted.Bool {
+					log.Println("User is deleted.")
+					return ctx.NoContent(http.StatusNoContent)
+				}
+
+				if user.Role != "admin" {
+					log.Println("User is not admin.")
 					return ctx.NoContent(http.StatusNoContent)
 				}
 

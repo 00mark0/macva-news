@@ -200,7 +200,7 @@ func AdminArticles(overview db.GetContentOverviewRow, nextLimit int, content []L
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"w-full min-h-screen dark:bg-black bg-gray-50 sm:p-8 p-4\"><div class=\"flex justify-between items-center\"><h1 class=\"text-3xl font-semibold text-black dark:text-white mb-10\">Artikli</h1><a href=\"/admin/content/create\" class=\"bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 mb-10\">Novi Artikl</a></div><!-- Floating Nav Container --><div id=\"article-nav\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"w-full min-h-screen dark:bg-black sm:p-8 p-4\"><div class=\"flex justify-between items-center\"><h1 class=\"text-3xl font-semibold text-black dark:text-white mb-10\">Artikli</h1><a href=\"/admin/content/create\" class=\"bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 mb-10\">Novi Artikl</a></div><!-- Floating Nav Container --><div id=\"article-nav\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

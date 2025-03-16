@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/00mark0/macva-news/components"
-	db "github.com/00mark0/macva-news/db/services"
+	"github.com/00mark0/macva-news/db/services"
 	"github.com/00mark0/macva-news/token"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -31,7 +31,26 @@ func (server *Server) widgetPage(ctx echo.Context) error {
 func (server *Server) adminDash(ctx echo.Context) error {
 	payload := ctx.Get(authorizationPayloadKey).(*token.Payload)
 
-	return Render(ctx, http.StatusOK, components.DashPage(payload))
+	userIDStr := payload.UserID
+
+	userIDBytes, err := uuid.Parse(userIDStr)
+	if err != nil {
+		log.Println("Error parsing user_id in adminDash:", err)
+		return err
+	}
+
+	userID := pgtype.UUID{
+		Bytes: userIDBytes,
+		Valid: true,
+	}
+
+	user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
+	if err != nil {
+		log.Println("Error getting user in adminDash:", err)
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.DashPage(user))
 }
 
 // htmx content insert
@@ -552,12 +571,31 @@ func (server *Server) adminSettings(ctx echo.Context) error {
 		globalSettings = []db.GlobalSetting{newSettings}
 	}
 
+	userIDStr := payload.UserID
+
+	userIDBytes, err := uuid.Parse(userIDStr)
+	if err != nil {
+		log.Println("Error parsing user_id in adminSettings:", err)
+		return err
+	}
+
+	userID := pgtype.UUID{
+		Bytes: userIDBytes,
+		Valid: true,
+	}
+
+	user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
+	if err != nil {
+		log.Println("Error getting user in adminSettings:", err)
+		return err
+	}
+
 	// Create props for the AdminSettings component
 	props := components.AdminSettingsProps{
 		// User settings from auth payload
-		UserID:   payload.UserID,
-		Username: payload.Username,
-		Pfp:      payload.Pfp,
+		UserID:   user.UserID.String(),
+		Username: user.Username,
+		Pfp:      user.Pfp,
 
 		// Global settings from the first record
 		DisableComments: globalSettings[0].DisableComments,

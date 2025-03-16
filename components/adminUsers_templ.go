@@ -134,7 +134,7 @@ func AdminUsers(overview UsersOverview, nextLimit int, users []UsersRes, url str
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"w-full min-h-screen dark:bg-black bg-gray-50 sm:p-8 p-4\"><div class=\"flex justify-between items-center\"><h1 class=\"text-3xl font-semibold text-black dark:text-white mb-10\">Korisnici</h1></div><!-- Floating Nav Container --><div id=\"user-nav\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"w-full min-h-screen dark:bg-black sm:p-8 p-4\"><div class=\"flex justify-between items-center\"><h1 class=\"text-3xl font-semibold text-black dark:text-white mb-10\">Korisnici</h1></div><!-- Floating Nav Container --><div id=\"user-nav\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

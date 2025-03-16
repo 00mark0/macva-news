@@ -3,10 +3,10 @@ package api
 import (
 	"log"
 	"net/http"
-	"regexp"
 
 	"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/db/services"
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
@@ -36,7 +36,7 @@ func (server *Server) listCats(ctx echo.Context) error {
 }
 
 type CreateCatReq struct {
-	CategoryName string `form:"category_name" validate:"required,min=3,max=50,regex=^[A-Za-z ]+$"`
+	CategoryName string `form:"category_name" validate:"required,min=3,max=50,regex"`
 }
 
 func (server *Server) createCategory(ctx echo.Context) error {
@@ -48,38 +48,29 @@ func (server *Server) createCategory(ctx echo.Context) error {
 		return err
 	}
 
-	if req.CategoryName == "" {
-		createCatErr = "Ime kategorije je obavezno"
+	// Run validation
+	if err := ctx.Validate(req); err != nil {
+		// Loop through validation errors and handle them
+		for _, fieldErr := range err.(validator.ValidationErrors) {
+			switch fieldErr.Field() {
+			case "CategoryName":
+				switch fieldErr.Tag() {
+				case "required":
+					createCatErr = "Ime kategorije je obavezno"
+				case "min":
+					createCatErr = "Ime kategorije mora imati najmanje 3 slova"
+				case "max":
+					createCatErr = "Ime kategorije može imati najviše 50 slova"
+				case "regex":
+					createCatErr = "Ime kategorije može sadržati samo slova i razmake"
+				}
+			}
+		}
 
+		// Render the form with the custom error message
 		return Render(ctx, http.StatusOK, components.CreateCategoryForm(createCatErr))
 	}
-
-	if len(req.CategoryName) < 3 {
-		createCatErr = "Ime kategorije mora imati najmanje 3 slova"
-
-		return Render(ctx, http.StatusOK, components.CreateCategoryForm(createCatErr))
-	}
-
-	if len(req.CategoryName) > 50 {
-		createCatErr = "Ime kategorije može imati najviše 50 slova"
-
-		return Render(ctx, http.StatusOK, components.CreateCategoryForm(createCatErr))
-	}
-
-	// Validate regex (only letters and spaces)
-	matched, err := regexp.MatchString(`^[A-Za-z ]+$`, req.CategoryName)
-	if err != nil {
-		// Log error but don't expose internal issues to users
-		log.Println("Error matching regex in createCategory:", err)
-		return err
-	}
-
-	if !matched {
-		createCatErr = "Ime kategorije može sadržati samo slova i razmake"
-		return Render(ctx, http.StatusOK, components.CreateCategoryForm(createCatErr))
-	}
-
-	_, err = server.store.CreateCategory(ctx.Request().Context(), req.CategoryName)
+	_, err := server.store.CreateCategory(ctx.Request().Context(), req.CategoryName)
 	if err != nil {
 		log.Println("Error creating category in createCategory:", err)
 		return err
@@ -115,7 +106,7 @@ func (server *Server) deleteCategory(ctx echo.Context) error {
 }
 
 type UpdateCatReq struct {
-	CategoryName string `form:"category_name" validate:"required,min=3,max=50,regex=^[A-Za-z ]+$"`
+	CategoryName string `form:"category_name" validate:"required,min=3,max=50,regex"`
 }
 
 func (server *Server) updateCategory(ctx echo.Context) error {
@@ -147,34 +138,26 @@ func (server *Server) updateCategory(ctx echo.Context) error {
 		return err
 	}
 
-	if req.CategoryName == "" {
-		updateCatErr = "Ime kategorije je obavezno"
+	// Run validation
+	if err := ctx.Validate(req); err != nil {
+		// Loop through validation errors and handle them
+		for _, fieldErr := range err.(validator.ValidationErrors) {
+			switch fieldErr.Field() {
+			case "CategoryName":
+				switch fieldErr.Tag() {
+				case "required":
+					updateCatErr = "Ime kategorije je obavezno"
+				case "min":
+					updateCatErr = "Ime kategorije mora imati najmanje 3 slova"
+				case "max":
+					updateCatErr = "Ime kategorije može imati najviše 50 slova"
+				case "regex":
+					updateCatErr = "Ime kategorije može sadržati samo slova i razmake"
+				}
+			}
+		}
 
-		return Render(ctx, http.StatusOK, components.UpdateCategoryForm(category, updateCatErr))
-	}
-
-	if len(req.CategoryName) < 3 {
-		updateCatErr = "Ime kategorije mora imati najmanje 3 slova"
-
-		return Render(ctx, http.StatusOK, components.UpdateCategoryForm(category, updateCatErr))
-	}
-
-	if len(req.CategoryName) > 50 {
-		updateCatErr = "Ime kategorije može imati najviše 50 slova"
-
-		return Render(ctx, http.StatusOK, components.UpdateCategoryForm(category, updateCatErr))
-	}
-
-	// Validate regex (only letters and spaces)
-	matched, err := regexp.MatchString(`^[A-Za-z ]+$`, req.CategoryName)
-	if err != nil {
-		// Log error but don't expose internal issues to users
-		log.Println("Error matching regex in updateCategory:", err)
-		return err
-	}
-
-	if !matched {
-		updateCatErr = "Ime kategorije može sadržati samo slova i razmake"
+		// Render the form with the custom error message
 		return Render(ctx, http.StatusOK, components.UpdateCategoryForm(category, updateCatErr))
 	}
 

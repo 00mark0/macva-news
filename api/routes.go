@@ -1,10 +1,11 @@
 package api
 
 import (
+	"os"
+
 	"github.com/00mark0/macva-news/utils"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"os"
 )
 
 func (server *Server) setupRouter() {
@@ -123,6 +124,10 @@ func (server *Server) setupRouter() {
 	adminRoutes.PUT("/api/admin/users/ban/:id", server.banUser)
 	adminRoutes.PUT("/api/admin/users/unban/:id", server.unbanUser)
 	adminRoutes.PUT("/api/admin/users/archive/:id", server.deleteUser)
+
+	// Admin settings
+	adminRoutes.PUT("/api/admin/settings/username/:id", server.updateUsername)
+	adminRoutes.PUT("/api/admin/settings/pfp/:id", server.updatePfp)
 
 	// Cookie
 	adminRoutes.DELETE("/api/cookie", server.deleteCookie)

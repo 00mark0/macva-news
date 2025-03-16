@@ -1,9 +1,9 @@
 // components/adminLayout.templ
 package components
 
-import "github.com/00mark0/macva-news/token"
+import "github.com/00mark0/macva-news/db/services"
 
-templ AdminLayout(payload *token.Payload, children ...templ.Component) {
+templ AdminLayout(payload db.GetUserByIDRow, children ...templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -52,7 +52,7 @@ templ AdminLayout(payload *token.Payload, children ...templ.Component) {
 							<a href="/admin" class="flex ms-2 md:me-24">
 								<img
 									src="/static/assets/macva-news-logo-cropped.jpeg"
-									class="sm:h-14 sm:w-64 h-12 w-32 object-fit rounded-lg me-3"
+									class="sm:h-14 sm:w-64 h-12 w-48 object-fit rounded-lg me-3"
 									alt="Macva News Logo"
 								/>
 								<h1 class="sm:block hidden self-center text-xl font-semibold whitespace-nowrap dark:text-white">
@@ -74,6 +74,7 @@ templ AdminLayout(payload *token.Payload, children ...templ.Component) {
 											class="w-10 h-10 rounded-full object-fit"
 											src={ payload.Pfp }
 											alt="user photo"
+											onerror="this.onerror=null; this.src='/static/assets/default-avatar-64x64.png';"
 										/>
 									</button>
 								</div>
@@ -271,7 +272,7 @@ templ AdminLayout(payload *token.Payload, children ...templ.Component) {
 					</ul>
 				</div>
 			</aside>
-			<div id="admin-content" class="sm:pl-64 sm:pt-20 pt-16">
+			<div id="admin-content" class="sm:pl-64 pt-24 dark:bg-black">
 				for _, child := range children {
 					@child
 				}

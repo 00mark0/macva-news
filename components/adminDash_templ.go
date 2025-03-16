@@ -8,7 +8,7 @@ package components
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/00mark0/macva-news/token"
+import "github.com/00mark0/macva-news/db/services"
 
 func AdminDashboard() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -60,7 +60,7 @@ func DashPage(props ...interface{}) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = AdminLayout(props[0].(*token.Payload), AdminDashboard()).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = AdminLayout(props[0].(db.GetUserByIDRow), AdminDashboard()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
