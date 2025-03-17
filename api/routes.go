@@ -128,6 +128,8 @@ func (server *Server) setupRouter() {
 	// Admin settings
 	adminRoutes.PUT("/api/admin/settings/username/:id", server.updateUsername)
 	adminRoutes.PUT("/api/admin/settings/pfp/:id", server.updatePfp)
+	adminRoutes.PUT("/api/admin/global-settings", server.updateGlobalSettings)
+	adminRoutes.PUT("/api/admin/reset-global-settings", server.resetGlobalSettings)
 
 	// Cookie
 	adminRoutes.DELETE("/api/cookie", server.deleteCookie)

@@ -96,7 +96,9 @@ templ AdminSettings(props AdminSettingsProps) {
 			<div class="flex justify-between items-center">
 				<h2 class="text-xl font-semibold text-black dark:text-white border-b border-gray-300 dark:border-gray-700 pb-2">Globalna Podešavanja</h2>
 				<button
-					hx-post="/api/admin/reset-global-settings"
+					hx-put="/api/admin/reset-global-settings"
+					hx-target="#admin-content"
+					hx-swap="innerHTML"
 					hx-trigger="click"
 					class="cursor-pointer px-3 py-1.5 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 text-black dark:text-white rounded text-sm transition-colors"
 				>
@@ -268,6 +270,163 @@ templ AdminSettings(props AdminSettingsProps) {
 templ AdminPfp(pfp string) {
 	<div class="w-28 h-28 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden border-2 border-blue-500 mb-4">
 		<img src={ pfp } alt="Profile Picture" class="w-full h-full object-cover" alt="Profile Picture" onerror="this.onerror=null; this.src='/static/assets/default-avatar-64x64.png';"/>
+	</div>
+}
+
+templ AdminGlobalSettings(props AdminSettingsProps) {
+	<div class="bg-gray-100 dark:bg-gray-800 rounded p-4">
+		<div class="space-y-3">
+			<!-- Comments Toggle -->
+			<div class="flex items-center justify-between">
+				<span class="text-sm text-gray-700 dark:text-gray-300">
+					Ugasi Komentare
+				</span>
+				<form
+					hx-put="/api/admin/global-settings"
+					hx-trigger="change"
+					hx-target="this"
+					hx-swap="none"
+				>
+					<label class="inline-flex items-center cursor-pointer">
+						<input
+							type="checkbox"
+							name="disable_comments"
+							class="sr-only peer"
+							checked?={ props.DisableComments }
+							value="true"
+						/>
+						<input
+							type="hidden"
+							name="disable_comments"
+							value="false"
+						/>
+						<div
+							class="relative w-10 h-5 bg-gray-300 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 dark:after:border-gray-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+						></div>
+					</label>
+				</form>
+			</div>
+			<!-- Likes Toggle -->
+			<div class="flex items-center justify-between">
+				<span class="text-sm text-gray-700 dark:text-gray-300">
+					Ugasi Brojač Lajkova
+				</span>
+				<form
+					hx-put="/api/admin/global-settings"
+					hx-trigger="change"
+					hx-target="this"
+					hx-swap="none"
+				>
+					<label class="inline-flex items-center cursor-pointer">
+						<input
+							type="checkbox"
+							name="disable_likes"
+							class="sr-only peer"
+							checked?={ props.DisableLikes }
+							value="true"
+						/>
+						<input
+							type="hidden"
+							name="disable_likes"
+							value="false"
+						/>
+						<div
+							class="relative w-10 h-5 bg-gray-300 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 dark:after:border-gray-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+						></div>
+					</label>
+				</form>
+			</div>
+			<!-- Dislikes Toggle -->
+			<div class="flex items-center justify-between">
+				<span class="text-sm text-gray-700 dark:text-gray-300">
+					Ugasi Brojač Dislajkova
+				</span>
+				<form
+					hx-put="/api/admin/global-settings"
+					hx-trigger="change"
+					hx-target="this"
+					hx-swap="none"
+				>
+					<label class="inline-flex items-center cursor-pointer">
+						<input
+							type="checkbox"
+							name="disable_dislikes"
+							class="sr-only peer"
+							checked?={ props.DisableDislikes }
+							value="true"
+						/>
+						<input
+							type="hidden"
+							name="disable_dislikes"
+							value="false"
+						/>
+						<div
+							class="relative w-10 h-5 bg-gray-300 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 dark:after:border-gray-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+						></div>
+					</label>
+				</form>
+			</div>
+			<!-- Views Toggle -->
+			<div class="flex items-center justify-between">
+				<span class="text-sm text-gray-700 dark:text-gray-300">
+					Brojač Pregleda
+				</span>
+				<form
+					hx-put="/api/admin/global-settings"
+					hx-trigger="change"
+					hx-target="this"
+					hx-swap="none"
+				>
+					<label class="inline-flex items-center cursor-pointer">
+						<input
+							type="checkbox"
+							name="disable_views"
+							class="sr-only peer"
+							checked?={ props.DisableViews }
+							value="true"
+						/>
+						<input
+							type="hidden"
+							name="disable_views"
+							value="false"
+						/>
+						<div
+							class="relative w-10 h-5 bg-gray-300 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 dark:after:border-gray-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+						></div>
+					</label>
+				</form>
+			</div>
+			<!-- Ads Toggle -->
+			<div class="flex items-center justify-between">
+				<span class="text-sm text-gray-700 dark:text-gray-300">
+					Ugasi Oglase
+				</span>
+				<form
+					hx-put="/api/admin/global-settings"
+					hx-trigger="change"
+					hx-target="this"
+					hx-swap="none"
+				>
+					<label class="inline-flex items-center cursor-pointer">
+						<input
+							type="checkbox"
+							name="disable_ads"
+							class="sr-only peer"
+							checked?={ props.DisableAds }
+							value="true"
+						/>
+						<input
+							type="hidden"
+							name="disable_ads"
+							value="false"
+						/>
+						<div
+							class="relative w-10 h-5 bg-gray-300 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 dark:after:border-gray-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+						></div>
+					</label>
+				</form>
+			</div>
+		</div>
 	</div>
 }
 

@@ -123,7 +123,7 @@ func AdminSettings(props AdminSettingsProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" class=\"cursor-pointer px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors text-sm\">Sačuvaj promene</button></form></div></div></div><!-- Password Reset Section --><div class=\"px-5 pb-5 space-y-4\"><h2 class=\"text-xl font-semibold text-black dark:text-white border-b border-gray-300 dark:border-gray-700 pb-2\">Podešavanja Lozinke</h2><div class=\"bg-gray-100 dark:bg-gray-800 p-4 rounded\"><div class=\"flex items-center justify-between\"><div><h3 class=\"text-md font-medium text-black dark:text-white\">Promeni Lozinku</h3><p class=\"text-sm text-gray-600 dark:text-gray-400\">Pošalji link za promenu lozinke</p></div><button hx-post=\"/api/admin/send-password-reset\" hx-trigger=\"click\" class=\"cursor-pointer px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors text-sm\">Pošalji Reset Link</button></div></div></div><!-- Global Settings Section --><div class=\"px-5 pb-5 space-y-4\"><div class=\"flex justify-between items-center\"><h2 class=\"text-xl font-semibold text-black dark:text-white border-b border-gray-300 dark:border-gray-700 pb-2\">Globalna Podešavanja</h2><button hx-post=\"/api/admin/reset-global-settings\" hx-trigger=\"click\" class=\"cursor-pointer px-3 py-1.5 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 text-black dark:text-white rounded text-sm transition-colors\">Resetuj na Podrazumevane</button></div><div class=\"bg-gray-100 dark:bg-gray-800 rounded p-4\"><div class=\"space-y-3\"><!-- Comments Toggle --><div class=\"flex items-center justify-between\"><span class=\"text-sm text-gray-700 dark:text-gray-300\">Ugasi Komentare</span><form hx-put=\"/api/admin/global-settings\" hx-trigger=\"change\" hx-target=\"this\" hx-swap=\"none\"><label class=\"inline-flex items-center cursor-pointer\"><input type=\"checkbox\" name=\"disable_comments\" class=\"sr-only peer\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" class=\"cursor-pointer px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors text-sm\">Sačuvaj promene</button></form></div></div></div><!-- Password Reset Section --><div class=\"px-5 pb-5 space-y-4\"><h2 class=\"text-xl font-semibold text-black dark:text-white border-b border-gray-300 dark:border-gray-700 pb-2\">Podešavanja Lozinke</h2><div class=\"bg-gray-100 dark:bg-gray-800 p-4 rounded\"><div class=\"flex items-center justify-between\"><div><h3 class=\"text-md font-medium text-black dark:text-white\">Promeni Lozinku</h3><p class=\"text-sm text-gray-600 dark:text-gray-400\">Pošalji link za promenu lozinke</p></div><button hx-post=\"/api/admin/send-password-reset\" hx-trigger=\"click\" class=\"cursor-pointer px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors text-sm\">Pošalji Reset Link</button></div></div></div><!-- Global Settings Section --><div class=\"px-5 pb-5 space-y-4\"><div class=\"flex justify-between items-center\"><h2 class=\"text-xl font-semibold text-black dark:text-white border-b border-gray-300 dark:border-gray-700 pb-2\">Globalna Podešavanja</h2><button hx-put=\"/api/admin/reset-global-settings\" hx-target=\"#admin-content\" hx-swap=\"innerHTML\" hx-trigger=\"click\" class=\"cursor-pointer px-3 py-1.5 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 text-black dark:text-white rounded text-sm transition-colors\">Resetuj na Podrazumevane</button></div><div class=\"bg-gray-100 dark:bg-gray-800 rounded p-4\"><div class=\"space-y-3\"><!-- Comments Toggle --><div class=\"flex items-center justify-between\"><span class=\"text-sm text-gray-700 dark:text-gray-300\">Ugasi Komentare</span><form hx-put=\"/api/admin/global-settings\" hx-trigger=\"change\" hx-target=\"this\" hx-swap=\"none\"><label class=\"inline-flex items-center cursor-pointer\"><input type=\"checkbox\" name=\"disable_comments\" class=\"sr-only peer\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -209,13 +209,92 @@ func AdminPfp(pfp string) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(pfp)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminSettings.templ`, Line: 270, Col: 16}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminSettings.templ`, Line: 272, Col: 16}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\" alt=\"Profile Picture\" class=\"w-full h-full object-cover\" alt=\"Profile Picture\" onerror=\"this.onerror=null; this.src=&#39;/static/assets/default-avatar-64x64.png&#39;;\"></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func AdminGlobalSettings(props AdminSettingsProps) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var8 == nil {
+			templ_7745c5c3_Var8 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<div class=\"bg-gray-100 dark:bg-gray-800 rounded p-4\"><div class=\"space-y-3\"><!-- Comments Toggle --><div class=\"flex items-center justify-between\"><span class=\"text-sm text-gray-700 dark:text-gray-300\">Ugasi Komentare</span><form hx-put=\"/api/admin/global-settings\" hx-trigger=\"change\" hx-target=\"this\" hx-swap=\"none\"><label class=\"inline-flex items-center cursor-pointer\"><input type=\"checkbox\" name=\"disable_comments\" class=\"sr-only peer\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if props.DisableComments {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, " checked")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, " value=\"true\"> <input type=\"hidden\" name=\"disable_comments\" value=\"false\"><div class=\"relative w-10 h-5 bg-gray-300 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[&#39;&#39;] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 dark:after:border-gray-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div></label></form></div><!-- Likes Toggle --><div class=\"flex items-center justify-between\"><span class=\"text-sm text-gray-700 dark:text-gray-300\">Ugasi Brojač Lajkova</span><form hx-put=\"/api/admin/global-settings\" hx-trigger=\"change\" hx-target=\"this\" hx-swap=\"none\"><label class=\"inline-flex items-center cursor-pointer\"><input type=\"checkbox\" name=\"disable_likes\" class=\"sr-only peer\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if props.DisableLikes {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, " checked")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, " value=\"true\"> <input type=\"hidden\" name=\"disable_likes\" value=\"false\"><div class=\"relative w-10 h-5 bg-gray-300 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[&#39;&#39;] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 dark:after:border-gray-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div></label></form></div><!-- Dislikes Toggle --><div class=\"flex items-center justify-between\"><span class=\"text-sm text-gray-700 dark:text-gray-300\">Ugasi Brojač Dislajkova</span><form hx-put=\"/api/admin/global-settings\" hx-trigger=\"change\" hx-target=\"this\" hx-swap=\"none\"><label class=\"inline-flex items-center cursor-pointer\"><input type=\"checkbox\" name=\"disable_dislikes\" class=\"sr-only peer\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if props.DisableDislikes {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, " checked")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, " value=\"true\"> <input type=\"hidden\" name=\"disable_dislikes\" value=\"false\"><div class=\"relative w-10 h-5 bg-gray-300 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[&#39;&#39;] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 dark:after:border-gray-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div></label></form></div><!-- Views Toggle --><div class=\"flex items-center justify-between\"><span class=\"text-sm text-gray-700 dark:text-gray-300\">Brojač Pregleda</span><form hx-put=\"/api/admin/global-settings\" hx-trigger=\"change\" hx-target=\"this\" hx-swap=\"none\"><label class=\"inline-flex items-center cursor-pointer\"><input type=\"checkbox\" name=\"disable_views\" class=\"sr-only peer\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if props.DisableViews {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, " checked")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, " value=\"true\"> <input type=\"hidden\" name=\"disable_views\" value=\"false\"><div class=\"relative w-10 h-5 bg-gray-300 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[&#39;&#39;] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 dark:after:border-gray-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div></label></form></div><!-- Ads Toggle --><div class=\"flex items-center justify-between\"><span class=\"text-sm text-gray-700 dark:text-gray-300\">Ugasi Oglase</span><form hx-put=\"/api/admin/global-settings\" hx-trigger=\"change\" hx-target=\"this\" hx-swap=\"none\"><label class=\"inline-flex items-center cursor-pointer\"><input type=\"checkbox\" name=\"disable_ads\" class=\"sr-only peer\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if props.DisableAds {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, " checked")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, " value=\"true\"> <input type=\"hidden\" name=\"disable_ads\" value=\"false\"><div class=\"relative w-10 h-5 bg-gray-300 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[&#39;&#39;] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 dark:after:border-gray-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div></label></form></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -239,25 +318,25 @@ func UpdateSuccess(message string) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var8 == nil {
-			templ_7745c5c3_Var8 = templ.NopComponent
+		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var9 == nil {
+			templ_7745c5c3_Var9 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<div class=\"bg-green-100 border-l-4 border-green-500 rounded-md shadow-md transform transition-all duration-300 ease-out animate-fadeIn\"><div class=\"flex flex-col gap-2 sm:gap-0 sm:flex-row justify-center items-center p-3\"><div><svg class=\"h-5 w-5 text-green-500\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z\" clip-rule=\"evenodd\"></path></svg></div><div class=\"ml-3 mr-7\"><p class=\"text-sm text-center font-medium text-green-800\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<div class=\"bg-green-100 border-l-4 border-green-500 rounded-md shadow-md transform transition-all duration-300 ease-out animate-fadeIn\"><div class=\"flex flex-col gap-2 sm:gap-0 sm:flex-row justify-center items-center p-3\"><div><svg class=\"h-5 w-5 text-green-500\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z\" clip-rule=\"evenodd\"></path></svg></div><div class=\"ml-3 mr-7\"><p class=\"text-sm text-center font-medium text-green-800\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var9 string
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(message)
+		var templ_7745c5c3_Var10 string
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(message)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminSettings.templ`, Line: 294, Col: 71}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminSettings.templ`, Line: 453, Col: 71}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</p></div><div class=\"sm:ml-auto sm:pl-3\"><div class=\"flex space-x-2\"><a href=\"/admin\" class=\"inline-flex text-xs bg-green-50 hover:bg-green-100 text-green-700 font-medium py-1 px-2 rounded-md transition-colors duration-150\">Nazad</a> <button onclick=\"document.getElementById(&#39;update-user-modal&#39;).classList.add(&#39;hidden&#39;)\" class=\"cursor-pointer inline-flex text-xs bg-green-50 hover:bg-green-100 text-green-700 font-medium py-1 px-2 rounded-md transition-colors duration-150\">Zatvori</button></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "</p></div><div class=\"sm:ml-auto sm:pl-3\"><div class=\"flex space-x-2\"><a href=\"/admin\" class=\"inline-flex text-xs bg-green-50 hover:bg-green-100 text-green-700 font-medium py-1 px-2 rounded-md transition-colors duration-150\">Nazad</a> <button onclick=\"document.getElementById(&#39;update-user-modal&#39;).classList.add(&#39;hidden&#39;)\" class=\"cursor-pointer inline-flex text-xs bg-green-50 hover:bg-green-100 text-green-700 font-medium py-1 px-2 rounded-md transition-colors duration-150\">Zatvori</button></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -281,25 +360,25 @@ func UpdateError(message string) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var10 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var10 == nil {
-			templ_7745c5c3_Var10 = templ.NopComponent
+		templ_7745c5c3_Var11 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var11 == nil {
+			templ_7745c5c3_Var11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div class=\"bg-red-100 border-l-4 border-red-500 rounded-md shadow-md transform transition-all duration-300 ease-out animate-fadeIn\"><div class=\"flex flex-col gap-2 sm:gap-0 sm:flex-row justify-center items-center p-3\"><div><svg class=\"h-5 w-5 text-red-500\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z\" clip-rule=\"evenodd\"></path></svg></div><div class=\"ml-3 mr-7\"><p class=\"text-sm text-center font-medium text-red-800\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "<div class=\"bg-red-100 border-l-4 border-red-500 rounded-md shadow-md transform transition-all duration-300 ease-out animate-fadeIn\"><div class=\"flex flex-col gap-2 sm:gap-0 sm:flex-row justify-center items-center p-3\"><div><svg class=\"h-5 w-5 text-red-500\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z\" clip-rule=\"evenodd\"></path></svg></div><div class=\"ml-3 mr-7\"><p class=\"text-sm text-center font-medium text-red-800\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var11 string
-		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(message)
+		var templ_7745c5c3_Var12 string
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(message)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminSettings.templ`, Line: 336, Col: 69}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminSettings.templ`, Line: 495, Col: 69}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</p></div><div class=\"sm:ml-auto sm:pl-3\"><div class=\"flex space-x-2\"><a href=\"/admin\" class=\"inline-flex text-xs bg-red-50 hover:bg-red-100 text-red-700 font-medium py-1 px-2 rounded-md transition-colors duration-150\">Nazad</a> <button onclick=\"document.getElementById(&#39;update-user-modal&#39;).classList.add(&#39;hidden&#39;)\" class=\"cursor-pointer inline-flex text-xs bg-red-50 hover:bg-red-100 text-red-700 font-medium py-1 px-2 rounded-md transition-colors duration-150\">Zatvori</button></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "</p></div><div class=\"sm:ml-auto sm:pl-3\"><div class=\"flex space-x-2\"><a href=\"/admin\" class=\"inline-flex text-xs bg-red-50 hover:bg-red-100 text-red-700 font-medium py-1 px-2 rounded-md transition-colors duration-150\">Nazad</a> <button onclick=\"document.getElementById(&#39;update-user-modal&#39;).classList.add(&#39;hidden&#39;)\" class=\"cursor-pointer inline-flex text-xs bg-red-50 hover:bg-red-100 text-red-700 font-medium py-1 px-2 rounded-md transition-colors duration-150\">Zatvori</button></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
