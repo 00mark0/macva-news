@@ -27,8 +27,8 @@ func (server *Server) setupRouter() {
 	}
 
 	// Set authRoutes instead of router to any routes that require middleware
-	//authRoutes := router.Group("")
-	//authRoutes.Use(authMiddleware(server.tokenMaker))
+	authRoutes := router.Group("")
+	authRoutes.Use(server.authMiddleware(server.tokenMaker))
 
 	adminRoutes := router.Group("")
 	adminRoutes.Use(server.adminMiddleware(server.tokenMaker))
@@ -136,15 +136,21 @@ func (server *Server) setupRouter() {
 
 	// Auth Pages
 	router.GET("/login", server.loginPage)
+	router.GET("/register", server.registerPage)
+	router.GET("/reset-lozinke/:token", server.passwordResetPage)
 
 	// Auth api
 	router.POST("/api/login", server.login)
-	adminRoutes.POST("/api/logout", server.logOut)
+	router.POST("/api/register", server.register)
+	router.POST("/api/send-password-reset-form", server.requestPassResetFromForm)
+	authRoutes.POST("/api/logout", server.logOut)
+	authRoutes.POST("/api/send-password-reset", server.requestPassReset)
+	router.POST("/api/reset-password", server.resetPassword)
 
 	// User Page Routes
 	router.GET("/", server.homePage)
-	router.GET("/counter", server.counterPage)
-	router.GET("/widget", server.widgetPage)
+	router.GET("/potvrdi-email/:token", server.emailVerifiedPage)
+	router.GET("/zaboravljena-lozinka", server.requestPassResetPage)
 
 	server.router = router
 }

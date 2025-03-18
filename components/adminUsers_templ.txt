@@ -35,10 +35,17 @@
 \">Najstariji</option> <option data-url=\"
 \">Po naslovu</option></select></div></div><div id=\"admin-users\" class=\"bg-white dark:bg-gray-800 rounded-lg shadow-md p-6\">
 </div></div>
-<div class=\"space-y-4\"><div class=\"overflow-x-auto\"><table class=\"min-w-full\"><thead class=\"bg-gray-50 dark:bg-gray-700\"><tr><th class=\"px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider\">Korisničko ime</th><th class=\"px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider\">Email</th><th class=\"px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider\">Status</th><th class=\"px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider\">Uloga</th><th class=\"px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider\">Datum kreiranja</th><th class=\"px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider\">Akcije</th></tr></thead> <tbody class=\"bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700\">
+<div class=\"space-y-4\"><div class=\"overflow-x-auto\"><table class=\"min-w-full\"><thead class=\"bg-gray-50 dark:bg-gray-700\"><tr><th class=\"px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider\">Korisničko ime</th><th class=\"px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider\">Email</th>
+<th class=\"px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider\">Verifikovan</th>
+<th class=\"px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider\">Status</th><th class=\"px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider\">Uloga</th><th class=\"px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider\">Datum kreiranja</th><th class=\"px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider\">Akcije</th></tr></thead> <tbody class=\"bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700\">
 <tr class=\"hover:bg-gray-50 dark:hover:bg-gray-700\"><td class=\"px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white\"><p class=\"w-64 truncate\">
 </p></td><td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300\">
-</td><td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300\">
+</td>
+<td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300\">
+<span class=\"text-green-500 px-2 bg-green-100 rounded-lg\">Da</span>
+<span class=\"text-red-500 px-2 bg-red-100 rounded-lg\">Ne</span>
+</td>
+<td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300\">
 <span class=\"text-gray-500\">Arhiviran</span>
 <span class=\"text-red-500\">Blokiran</span>
 <span class=\"text-green-500\">Aktivan</span>

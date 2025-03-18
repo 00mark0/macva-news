@@ -11,7 +11,7 @@ import (
 
 func (server *Server) scheduleDailyAnalytics() {
 	// Create a new cron scheduler (uses the local time zone by default)
-	c := cron.New(cron.WithLocation(time.Local))
+	c := cron.New(cron.WithLocation(Loc))
 
 	// Schedule the job to run every day at midnight.
 	// "@daily" is equivalent to "0 0 0 * * *"

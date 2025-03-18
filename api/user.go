@@ -10,7 +10,9 @@ import (
 
 	"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/db/services"
+	"github.com/00mark0/macva-news/token"
 	"github.com/go-playground/validator/v10"
+	"github.com/golang-jwt/jwt/v5"
 
 	//"github.com/00mark0/macva-news/token"
 	"github.com/00mark0/macva-news/utils"
@@ -41,8 +43,9 @@ type userResponse struct {
 }*/
 
 type loginUserReq struct {
-	Email    string `json:"email" form:"email" validate:"required,email"`
-	Password string `json:"password" form:"password" validate:"required,min=6"`
+	Email      string `json:"email" form:"email" validate:"required,email"`
+	Password   string `json:"password" form:"password" validate:"required"`
+	RememberMe bool   `json:"remember_me" form:"remember_me"`
 }
 
 type loginUserRes struct {
@@ -74,7 +77,9 @@ func (server *Server) login(ctx echo.Context) error {
 				loginErr = "Email je obavezan i mora biti validan."
 			case "Password":
 				// Custom error message for password validation
-				loginErr = "Lozinka je obavezna i mora imati najmanje 6 karaktera."
+				loginErr = "Lozinka je obavezna."
+			default:
+				loginErr = "Nevažecí podaci za prijavu."
 			}
 		}
 
@@ -93,6 +98,29 @@ func (server *Server) login(ctx echo.Context) error {
 		loginErr = "Nevažecí podaci za prijavu"
 
 		return Render(ctx, http.StatusOK, components.LoginForm(loginErr))
+	}
+
+	if !user.EmailVerified.Bool {
+		loginErr = "Email nije verifikovan. Poslat je nov link za verifikaciju na vašu adresu."
+
+		token, err := utils.GenerateToken(jwt.MapClaims{
+			"user_id": user.UserID.String(),
+		}, time.Hour*24)
+		if err != nil {
+			log.Println("Error generating token in requestPassReset:", err)
+			return err
+		}
+
+		verifyEmailLink := fmt.Sprintf("http://localhost:3000/potvrdi-email/%s", token)
+
+		err = utils.SendEmailVerificationEmail(req.Email, verifyEmailLink)
+		if err != nil {
+			log.Println("Error sending email verification email in login:", err)
+			return err
+		}
+
+		return Render(ctx, http.StatusOK, components.LoginForm(loginErr))
+
 	}
 
 	err = utils.CheckPassword(req.Password, user.Password)
@@ -130,6 +158,17 @@ func (server *Server) login(ctx echo.Context) error {
 	if err != nil {
 		log.Println("Error parsing duration in login:", err)
 		return err
+	}
+
+	log.Printf("Remember me value: %v", req.RememberMe)
+	if req.RememberMe {
+		extendedDurationStr := os.Getenv("REMEMBER_ME_DURATION") // Fetch from .env
+		extendedDuration, err := time.ParseDuration(extendedDurationStr)
+		if err != nil {
+			log.Println("Error parsing extended refresh token duration:", err)
+			return err
+		}
+		refreshTokenDuration = extendedDuration
 	}
 
 	refreshToken, refreshTokenPayload, err := server.tokenMaker.CreateToken(
@@ -1000,4 +1039,238 @@ func (server *Server) updatePfp(ctx echo.Context) error {
 	}
 
 	return Render(ctx, http.StatusOK, components.AdminPfp(filePath))
+}
+
+func (server *Server) requestPassReset(ctx echo.Context) error {
+	payload := ctx.Get(authorizationPayloadKey).(*token.Payload)
+
+	token, err := utils.GenerateToken(jwt.MapClaims{
+		"user_id": payload.UserID,
+	}, time.Hour)
+	if err != nil {
+		log.Println("Error generating token in requestPassReset:", err)
+		return err
+	}
+
+	resetLink := fmt.Sprintf("http://localhost:3000/reset-lozinke/%s", token)
+
+	err = utils.SendPasswordResetEmail(payload.Email, resetLink)
+	if err != nil {
+		log.Println("Error sending password reset email in requestPassReset:", err)
+		message := "Dogodila se greška prilikom slanja linka za promenu lozinke."
+
+		return Render(ctx, http.StatusOK, components.UpdateError(message))
+	}
+
+	message := "Link za promenu lozinke je poslat na vašu email adresu."
+	return Render(ctx, http.StatusOK, components.UpdateSuccess(message))
+}
+
+type ReqPassResetFormReq struct {
+	Email string `form:"email" validate:"required,email"`
+}
+
+func (server *Server) requestPassResetFromForm(ctx echo.Context) error {
+	var req ReqPassResetFormReq
+	var reqPassResetFormErr components.RequestPassResetErr
+
+	if err := ctx.Bind(&req); err != nil {
+		log.Println("Error binding request in requestPassResetFromForm:", err)
+		return err
+	}
+
+	if err := ctx.Validate(req); err != nil {
+		for _, fieldErr := range err.(validator.ValidationErrors) {
+			switch fieldErr.Field() {
+			case "Email":
+				reqPassResetFormErr = "Email mora biti validan."
+			}
+		}
+
+		return Render(ctx, http.StatusOK, components.RequestPassResetForm(reqPassResetFormErr))
+	}
+
+	user, err := server.store.GetUserByEmail(ctx.Request().Context(), req.Email)
+	if err != nil {
+		log.Println("Error getting user in requestPassResetFromForm:", err)
+		return err
+	}
+
+	token, err := utils.GenerateToken(jwt.MapClaims{
+		"user_id": user.UserID.String(),
+	}, time.Hour)
+	if err != nil {
+		log.Println("Error generating token in requestPassResetFromForm:", err)
+		return err
+	}
+
+	resetLink := fmt.Sprintf("http://localhost:3000/reset-lozinke/%s", token)
+
+	err = utils.SendPasswordResetEmail(req.Email, resetLink)
+	if err != nil {
+		log.Println("Error sending password reset email in requestPassResetFromForm:", err)
+
+		reqPassResetFormErr = "Dogodila se greška prilikom slanja linka za promenu lozinke."
+		return Render(ctx, http.StatusOK, components.RequestPassResetForm(reqPassResetFormErr))
+	}
+
+	reqPassResetFormErr = "Link za promenu lozinke je poslat na vašu email adresu."
+	return Render(ctx, http.StatusOK, components.RequestPassResetForm(reqPassResetFormErr))
+}
+
+type PasswordResetReq struct {
+	Token           string `form:"token" validate:"required"`
+	Password        string `form:"password" validate:"required,password"`
+	ConfirmPassword string `form:"confirmPassword" validate:"required,eqfield=Password"`
+}
+
+func (server *Server) resetPassword(ctx echo.Context) error {
+	var req PasswordResetReq
+	var resetErr components.ResetErr
+
+	if err := ctx.Bind(&req); err != nil {
+		log.Println("Error binding request in resetPassword:", err)
+		return err
+	}
+
+	// Run validation
+	if err := ctx.Validate(req); err != nil {
+		// Loop through validation errors and handle each field separately
+		for _, fieldErr := range err.(validator.ValidationErrors) {
+			switch fieldErr.Field() {
+			case "Token":
+				// Custom error message for email validation
+				resetErr = "Link za resetovanje lozinke je nevažeći."
+			case "Password":
+				// Custom error message for password validation
+				resetErr = "Lozinka mora imati najmanje 8 karaktera, uključujući jedno veliko slovo, jedno malo slovo, jedan broj i jedan specijalni karakter."
+			case "ConfirmPassword":
+				// Custom error message for password validation
+				resetErr = "Potvrda lozinke mora biti ista kao i originalna lozinka."
+			}
+		}
+
+		// Render the login form with the custom error message
+		return Render(ctx, http.StatusOK, components.ResetForm(req.Token, resetErr))
+	}
+
+	claims, err := utils.ValidateToken(req.Token)
+	if err != nil {
+		resetErr = "Link za resetovanje lozinke je nevažeci."
+
+		return Render(ctx, http.StatusOK, components.ResetForm(req.Token, resetErr))
+	}
+
+	// Get user ID from claims
+	userIDStr, ok := claims["user_id"].(string)
+	if !ok {
+		log.Println("Error extracting user_id from claims in resetPassword:", err)
+		return Render(ctx, http.StatusOK, components.ResetForm(req.Token, "Link za resetovanje lozinke je nevažeći."))
+	}
+
+	// Parse user ID to UUID
+	var userID pgtype.UUID
+	err = userID.Scan(userIDStr)
+	if err != nil {
+		log.Println("Error parsing user_id in resetPassword:", err)
+		return Render(ctx, http.StatusOK, components.ResetForm(req.Token, "Link za resetovanje lozinke je nevažeci."))
+	}
+
+	// Hash the password
+	hashedPassword, err := utils.HashPassword(req.Password)
+	if err != nil {
+		return Render(ctx, http.StatusOK, components.ResetForm(req.Token, "Greška pri obradi lozinke."))
+	}
+
+	arg := db.UpdateUserPasswordParams{
+		UserID:   userID,
+		Password: hashedPassword,
+	}
+
+	err = server.store.UpdateUserPassword(ctx.Request().Context(), arg)
+	if err != nil {
+		log.Println("Error updating user password in resetPassword:", err)
+		return Render(ctx, http.StatusOK, components.ResetForm(req.Token, "Greška pri obradi lozinke."))
+	}
+
+	// Password updated successfully
+	return Render(ctx, http.StatusOK, components.ResetSuccess())
+}
+
+type RegisterReq struct {
+	Username        string `form:"username" validate:"required,username"`
+	Email           string `form:"email" validate:"required,email"`
+	Password        string `form:"password" validate:"required,password"`
+	ConfirmPassword string `form:"confirmPassword" validate:"required,eqfield=Password"`
+}
+
+func (server *Server) register(ctx echo.Context) error {
+	var req RegisterReq
+	var registerErr components.RegisterErr
+
+	if err := ctx.Bind(&req); err != nil {
+		log.Println("Error binding request in register:", err)
+		return err
+	}
+
+	// Run validation
+	if err := ctx.Validate(req); err != nil {
+		// Loop through validation errors and handle them
+		for _, fieldErr := range err.(validator.ValidationErrors) {
+			switch fieldErr.Field() {
+			case "Username":
+				switch fieldErr.Tag() {
+				case "required":
+					registerErr = "Korisničko ime je obavezno."
+				case "username":
+					registerErr = "Korisničko ime mora biti između 3 i 20 karaktera, ne sme početi brojem, i može sadržavati samo slova, brojeve, donje crtice i crtice."
+				}
+			case "Email":
+				registerErr = "Email mora biti validan."
+			case "Password":
+				registerErr = "Lozinka mora imati najmanje 8 karaktera, uključujući jedno veliko slovo, jedno malo slovo, jedan broj i jedan specijalni karakter."
+			case "ConfirmPassword":
+				registerErr = "Potvrda lozinke mora biti ista kao i originalna lozinka."
+			}
+		}
+
+		// Render the form with the custom error message
+		return Render(ctx, http.StatusOK, components.RegisterForm(registerErr))
+	}
+
+	// Hash the password
+	hashedPassword, err := utils.HashPassword(req.Password)
+	if err != nil {
+		return Render(ctx, http.StatusOK, components.RegisterForm("Greška pri obradi lozinke."))
+	}
+
+	arg := db.CreateUserParams{
+		Username: req.Username,
+		Email:    req.Email,
+		Password: hashedPassword,
+	}
+
+	user, err := server.store.CreateUser(ctx.Request().Context(), arg)
+	if err != nil {
+		log.Println("Error creating user in register:", err)
+		return Render(ctx, http.StatusOK, components.RegisterForm("Greška pri pravljenju naloga."))
+	}
+
+	token, err := utils.GenerateToken(jwt.MapClaims{
+		"user_id": user.UserID.String(),
+	}, time.Hour*24)
+	if err != nil {
+		log.Println("Error generating token in requestPassReset:", err)
+		return err
+	}
+
+	verifyEmailLink := fmt.Sprintf("http://localhost:3000/potvrdi-email/%s", token)
+
+	err = utils.SendEmailVerificationEmail(req.Email, verifyEmailLink)
+	if err != nil {
+		log.Println("Error sending email verification email in register:", err)
+		return Render(ctx, http.StatusOK, components.RegisterForm("Greška pri slanju email-a za verifikaciju naloga."))
+	}
+
+	return Render(ctx, http.StatusOK, components.RegisterSuccess())
 }

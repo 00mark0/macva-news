@@ -2,6 +2,7 @@ package api
 
 import (
 	"regexp"
+	"unicode"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -21,6 +22,8 @@ func NewCustomValidator() *CustomValidator {
 	// You can add more custom validations here as needed.
 	// Register custom validations
 	v.RegisterValidation("regex", validCategoryName)
+	v.RegisterValidation("password", validPassword)
+	v.RegisterValidation("username", validUsername)
 
 	return &CustomValidator{validator: v}
 }
@@ -48,4 +51,56 @@ var validCategoryName validator.Func = func(fl validator.FieldLevel) bool {
 	// Regex pattern: only letters and spaces
 	re := regexp.MustCompile(`^[A-Za-z ]+$`)
 	return re.MatchString(fl.Field().String())
+}
+
+// validPassword enforces strong password rules
+var validPassword validator.Func = func(fl validator.FieldLevel) bool {
+	password := fl.Field().String()
+
+	// Check length constraint
+	if len(password) < 8 || len(password) > 64 {
+		return false
+	}
+
+	var hasLower, hasUpper, hasDigit, hasSpecial bool
+
+	for _, char := range password {
+		switch {
+		case unicode.IsLower(char):
+			hasLower = true
+		case unicode.IsUpper(char):
+			hasUpper = true
+		case unicode.IsDigit(char):
+			hasDigit = true
+		case unicode.IsPunct(char) || unicode.IsSymbol(char):
+			hasSpecial = true
+		}
+	}
+
+	return hasLower && hasUpper && hasDigit && hasSpecial
+}
+
+// validUsername enforces the validation rules for the "username" tag.
+var validUsername validator.Func = func(fl validator.FieldLevel) bool {
+	username := fl.Field().String()
+
+	// Check if the username length is between 3 and 20 characters
+	if len(username) < 3 || len(username) > 20 {
+		return false
+	}
+
+	// Check if the username starts with a letter
+	if unicode.IsDigit(rune(username[0])) {
+		return false
+	}
+
+	// Check each character to ensure it only contains valid characters (alphanumeric, _, or -)
+	for _, char := range username {
+		if !unicode.IsLetter(char) && !unicode.IsDigit(char) && char != '_' && char != '-' {
+			return false
+		}
+	}
+
+	// Username is valid if it passes all checks
+	return true
 }

@@ -82,11 +82,13 @@ templ AdminSettings(props AdminSettingsProps) {
 						<p class="text-sm text-gray-600 dark:text-gray-400">Pošalji link za promenu lozinke</p>
 					</div>
 					<button
-						hx-post="/api/admin/send-password-reset"
+						hx-post="/api/send-password-reset"
 						hx-trigger="click"
+						hx-target="#update-user-modal"
+						hx-swap="innerHTML"
 						class="cursor-pointer px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors text-sm"
 					>
-						Pošalji Reset Link
+						Pošalji Link
 					</button>
 				</div>
 			</div>

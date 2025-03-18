@@ -144,7 +144,7 @@ export default function TrendingContent() {
 			setHasMore(responseData.length === limit);
 		} catch (error) {
 			console.error('Error fetching trending content:', error);
-			setError('Failed to fetch trending content');
+			setError(`Failed to fetch trending content: ${error.message || error}`);
 			setTrendingContent([]);
 		} finally {
 			setLoading(false);

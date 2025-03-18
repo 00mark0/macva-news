@@ -8,6 +8,7 @@ import (
 	"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/db/services"
 	"github.com/00mark0/macva-news/token"
+	"github.com/00mark0/macva-news/utils"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
@@ -17,14 +18,6 @@ var Loc, _ = time.LoadLocation("Europe/Belgrade")
 
 func (server *Server) homePage(ctx echo.Context) error {
 	return Render(ctx, http.StatusOK, components.Index())
-}
-
-func (server *Server) counterPage(ctx echo.Context) error {
-	return Render(ctx, http.StatusOK, components.CounterLayout())
-}
-
-func (server *Server) widgetPage(ctx echo.Context) error {
-	return Render(ctx, http.StatusOK, components.WidgetLayout())
 }
 
 // full page to be served
@@ -607,4 +600,70 @@ func (server *Server) adminSettings(ctx echo.Context) error {
 
 	// Render the AdminSettings component with the props
 	return Render(ctx, http.StatusOK, components.AdminSettings(props))
+}
+
+func (server *Server) passwordResetPage(ctx echo.Context) error {
+	token := ctx.Param("token")
+
+	// Validate the token
+	claims, err := utils.ValidateToken(token)
+	if err != nil {
+		return Render(ctx, http.StatusOK, components.PasswordReset("", "Link za resetovanje lozinke je nevažeći."))
+	}
+
+	// Verify that user_id exists in the claims
+	if _, exists := claims["user_id"]; !exists {
+		return Render(ctx, http.StatusOK, components.PasswordReset("", "Link za resetovanje lozinke je nevažeći."))
+	}
+
+	// Token is valid, show the password reset form
+	return Render(ctx, http.StatusOK, components.PasswordReset(token, ""))
+}
+
+func (server *Server) registerPage(ctx echo.Context) error {
+	return Render(ctx, http.StatusOK, components.RegisterPage(""))
+}
+
+func (server *Server) emailVerifiedPage(ctx echo.Context) error {
+	token := ctx.Param("token")
+
+	// Validate the token
+	claims, err := utils.ValidateToken(token)
+	if err != nil {
+		log.Println("Error validating token in emailVerifiedPage:", err)
+		return Render(ctx, http.StatusOK, components.VerificationError())
+	}
+
+	// Verify that user_id exists in the claims
+	if _, exists := claims["user_id"]; !exists {
+		log.Println("Error extracting user_id from claims in emailVerifiedPage:", err)
+		return Render(ctx, http.StatusOK, components.VerificationError())
+	}
+
+	// Get user ID from claims
+	userIDStr, ok := claims["user_id"].(string)
+	if !ok {
+		log.Println("Error extracting user_id from claims in resetPassword:", err)
+		return Render(ctx, http.StatusOK, components.VerificationError())
+	}
+
+	// Parse user ID to UUID
+	var userID pgtype.UUID
+	err = userID.Scan(userIDStr)
+	if err != nil {
+		log.Println("Error parsing user_id in resetPassword:", err)
+		return Render(ctx, http.StatusOK, components.VerificationError())
+	}
+
+	err = server.store.SetEmailVerified(ctx.Request().Context(), userID)
+	if err != nil {
+		log.Println("Error setting email_verified in emailVerifiedPage:", err)
+		return Render(ctx, http.StatusOK, components.VerificationError())
+	}
+
+	return Render(ctx, http.StatusOK, components.VerificationSuccess())
+}
+
+func (server *Server) requestPassResetPage(ctx echo.Context) error {
+	return Render(ctx, http.StatusOK, components.RequestPassReset())
 }

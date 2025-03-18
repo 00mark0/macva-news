@@ -421,6 +421,13 @@ templ Users(nextLimit int, users []UsersRes, url string) {
 							>
 								Email
 							</th>
+							if !users[0].IsDeleted && !users[0].Banned {
+								<th
+									class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+								>
+									Verifikovan
+								</th>
+							}
 							<th
 								class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
 							>
@@ -452,6 +459,15 @@ templ Users(nextLimit int, users []UsersRes, url string) {
 								<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
 									{ user.Email }
 								</td>
+								if !user.IsDeleted && !user.Banned {
+									<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+										if user.EmailVerified && !user.IsDeleted && !user.Banned {
+											<span class="text-green-500 px-2 bg-green-100 rounded-lg">Da</span>
+										} else if !user.EmailVerified && !user.IsDeleted && !user.Banned {
+											<span class="text-red-500 px-2 bg-red-100 rounded-lg">Ne</span>
+										}
+									</td>
+								}
 								<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
 									if user.IsDeleted {
 										<span class="text-gray-500">Arhiviran</span>

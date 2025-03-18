@@ -26,17 +26,15 @@ func (server *Server) authMiddleware(tokenMaker token.Maker) echo.MiddlewareFunc
 			cookie, err := ctx.Cookie("access_token")
 			if err != nil {
 				refreshCookie, err := ctx.Cookie("refresh_token")
-				log.Println("Refresh cookie: ", refreshCookie)
 				if err != nil {
-					// For other requests, return an error
-					log.Println("Error getting refresh cookie in adminMiddleware:", err)
+					log.Println("Error getting refresh cookie in authMiddleware:", err)
 					return ctx.NoContent(http.StatusNoContent)
 				}
 				refreshToken := refreshCookie.Value
 
 				refreshPayload, err := tokenMaker.VerifyToken(refreshToken)
 				if err != nil {
-					log.Println("Error verifying refresh token:", err)
+					log.Println("Error verifying refresh token in authMiddleware:", err)
 					return ctx.NoContent(http.StatusNoContent)
 				}
 
@@ -44,7 +42,7 @@ func (server *Server) authMiddleware(tokenMaker token.Maker) echo.MiddlewareFunc
 
 				parsedUserID, err := uuid.Parse(userIDStr)
 				if err != nil {
-					log.Println("Invalid content ID format in archivePubContent:", err)
+					log.Println("Invalid content ID format in authMiddleware:", err)
 					return err
 				}
 
@@ -121,7 +119,7 @@ func (server *Server) authMiddleware(tokenMaker token.Maker) echo.MiddlewareFunc
 
 				parsedUserID, err := uuid.Parse(userIDStr)
 				if err != nil {
-					log.Println("Invalid content ID format in archivePubContent:", err)
+					log.Println("Invalid content ID format in authMiddleware:", err)
 					return err
 				}
 
@@ -168,7 +166,6 @@ func (server *Server) adminMiddleware(tokenMaker token.Maker) echo.MiddlewareFun
 			if err != nil {
 				refreshCookie, err := ctx.Cookie("refresh_token")
 				if err != nil {
-					// For other requests, return an error
 					log.Println("Error getting refresh cookie in adminMiddleware:", err)
 					return ctx.NoContent(http.StatusNoContent)
 				}
@@ -176,7 +173,7 @@ func (server *Server) adminMiddleware(tokenMaker token.Maker) echo.MiddlewareFun
 
 				refreshPayload, err := tokenMaker.VerifyToken(refreshToken)
 				if err != nil {
-					log.Println("Error verifying refresh token:", err)
+					log.Println("Error verifying refresh token in adminMiddleware:", err)
 					return ctx.NoContent(http.StatusNoContent)
 				}
 
@@ -184,7 +181,7 @@ func (server *Server) adminMiddleware(tokenMaker token.Maker) echo.MiddlewareFun
 
 				parsedUserID, err := uuid.Parse(userIDStr)
 				if err != nil {
-					log.Println("Invalid content ID format in archivePubContent:", err)
+					log.Println("Invalid content ID format in adminMiddleware:", err)
 					return err
 				}
 
@@ -218,7 +215,7 @@ func (server *Server) adminMiddleware(tokenMaker token.Maker) echo.MiddlewareFun
 				accessTokenDurationStr := os.Getenv("ACCESS_TOKEN_DURATION")
 				accessTokenDuration, err := time.ParseDuration(accessTokenDurationStr)
 				if err != nil {
-					log.Println("Error parsing access token duration:", err)
+					log.Println("Error parsing access token duration in adminMiddleware:", err)
 					return ctx.NoContent(http.StatusNoContent)
 				}
 
@@ -234,7 +231,7 @@ func (server *Server) adminMiddleware(tokenMaker token.Maker) echo.MiddlewareFun
 					accessTokenDuration,
 				)
 				if err != nil {
-					log.Println("Error creating access token:", err)
+					log.Println("Error creating access token in adminMiddleware:", err)
 					return ctx.NoContent(http.StatusNoContent)
 				}
 
@@ -253,7 +250,7 @@ func (server *Server) adminMiddleware(tokenMaker token.Maker) echo.MiddlewareFun
 
 				payload, err := tokenMaker.VerifyToken(accessToken)
 				if err != nil {
-					log.Println("Error verifying access token:", err)
+					log.Println("Error verifying access token in adminMiddleware:", err)
 					// Invalid token; redirect to login page
 					return ctx.NoContent(http.StatusNoContent)
 				}
@@ -262,7 +259,7 @@ func (server *Server) adminMiddleware(tokenMaker token.Maker) echo.MiddlewareFun
 
 				parsedUserID, err := uuid.Parse(userIDStr)
 				if err != nil {
-					log.Println("Invalid content ID format in archivePubContent:", err)
+					log.Println("Invalid content ID format in adminMiddleware:", err)
 					return err
 				}
 

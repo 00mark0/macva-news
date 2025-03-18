@@ -123,7 +123,7 @@ func AdminSettings(props AdminSettingsProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" class=\"cursor-pointer px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors text-sm\">Sačuvaj promene</button></form></div></div></div><!-- Password Reset Section --><div class=\"px-5 pb-5 space-y-4\"><h2 class=\"text-xl font-semibold text-black dark:text-white border-b border-gray-300 dark:border-gray-700 pb-2\">Podešavanja Lozinke</h2><div class=\"bg-gray-100 dark:bg-gray-800 p-4 rounded\"><div class=\"flex items-center justify-between\"><div><h3 class=\"text-md font-medium text-black dark:text-white\">Promeni Lozinku</h3><p class=\"text-sm text-gray-600 dark:text-gray-400\">Pošalji link za promenu lozinke</p></div><button hx-post=\"/api/admin/send-password-reset\" hx-trigger=\"click\" class=\"cursor-pointer px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors text-sm\">Pošalji Reset Link</button></div></div></div><!-- Global Settings Section --><div class=\"px-5 pb-5 space-y-4\"><div class=\"flex justify-between items-center\"><h2 class=\"text-xl font-semibold text-black dark:text-white border-b border-gray-300 dark:border-gray-700 pb-2\">Globalna Podešavanja</h2><button hx-put=\"/api/admin/reset-global-settings\" hx-target=\"#admin-content\" hx-swap=\"innerHTML\" hx-trigger=\"click\" class=\"cursor-pointer px-3 py-1.5 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 text-black dark:text-white rounded text-sm transition-colors\">Resetuj na Podrazumevane</button></div><div class=\"bg-gray-100 dark:bg-gray-800 rounded p-4\"><div class=\"space-y-3\"><!-- Comments Toggle --><div class=\"flex items-center justify-between\"><span class=\"text-sm text-gray-700 dark:text-gray-300\">Ugasi Komentare</span><form hx-put=\"/api/admin/global-settings\" hx-trigger=\"change\" hx-target=\"this\" hx-swap=\"none\"><label class=\"inline-flex items-center cursor-pointer\"><input type=\"checkbox\" name=\"disable_comments\" class=\"sr-only peer\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" class=\"cursor-pointer px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors text-sm\">Sačuvaj promene</button></form></div></div></div><!-- Password Reset Section --><div class=\"px-5 pb-5 space-y-4\"><h2 class=\"text-xl font-semibold text-black dark:text-white border-b border-gray-300 dark:border-gray-700 pb-2\">Podešavanja Lozinke</h2><div class=\"bg-gray-100 dark:bg-gray-800 p-4 rounded\"><div class=\"flex items-center justify-between\"><div><h3 class=\"text-md font-medium text-black dark:text-white\">Promeni Lozinku</h3><p class=\"text-sm text-gray-600 dark:text-gray-400\">Pošalji link za promenu lozinke</p></div><button hx-post=\"/api/send-password-reset\" hx-trigger=\"click\" hx-target=\"#update-user-modal\" hx-swap=\"innerHTML\" class=\"cursor-pointer px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors text-sm\">Pošalji Link</button></div></div></div><!-- Global Settings Section --><div class=\"px-5 pb-5 space-y-4\"><div class=\"flex justify-between items-center\"><h2 class=\"text-xl font-semibold text-black dark:text-white border-b border-gray-300 dark:border-gray-700 pb-2\">Globalna Podešavanja</h2><button hx-put=\"/api/admin/reset-global-settings\" hx-target=\"#admin-content\" hx-swap=\"innerHTML\" hx-trigger=\"click\" class=\"cursor-pointer px-3 py-1.5 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 text-black dark:text-white rounded text-sm transition-colors\">Resetuj na Podrazumevane</button></div><div class=\"bg-gray-100 dark:bg-gray-800 rounded p-4\"><div class=\"space-y-3\"><!-- Comments Toggle --><div class=\"flex items-center justify-between\"><span class=\"text-sm text-gray-700 dark:text-gray-300\">Ugasi Komentare</span><form hx-put=\"/api/admin/global-settings\" hx-trigger=\"change\" hx-target=\"this\" hx-swap=\"none\"><label class=\"inline-flex items-center cursor-pointer\"><input type=\"checkbox\" name=\"disable_comments\" class=\"sr-only peer\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -209,7 +209,7 @@ func AdminPfp(pfp string) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(pfp)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminSettings.templ`, Line: 272, Col: 16}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminSettings.templ`, Line: 274, Col: 16}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -330,7 +330,7 @@ func UpdateSuccess(message string) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(message)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminSettings.templ`, Line: 453, Col: 71}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminSettings.templ`, Line: 455, Col: 71}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -372,7 +372,7 @@ func UpdateError(message string) templ.Component {
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(message)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminSettings.templ`, Line: 495, Col: 69}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/adminSettings.templ`, Line: 497, Col: 69}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {

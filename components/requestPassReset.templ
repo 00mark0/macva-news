@@ -1,15 +1,15 @@
 package components
 
-type LoginErr string
+type RequestPassResetErr string
 
-templ Login(props ...interface{}) {
+templ RequestPassReset() {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
-			<title>Admin Prijava</title>
-			<meta name="description" content="Mačva News Admin Prijava"/>
+			<title>Zaboravljena lozinka</title>
+			<meta name="description" content="Mačva News Zaboravljena lozinka"/>
 			<link rel="preload" href="/static/css/output.css" as="style"/>
 			<link rel="preload" href="/static/js/htmx.min.js" as="script"/>
 			<link href="/static/css/output.css" rel="stylesheet"/>
@@ -36,10 +36,10 @@ templ Login(props ...interface{}) {
 						alt="Mačva News Logo"
 						class="w-48 h-28 mx-auto mb-4 rounded-lg"
 					/>
-					<h1 class="text-2xl font-bold text-gray-900">Dobrodošli!</h1>
+					<h1 class="text-2xl font-bold text-gray-900">Zaboravljena lozinka</h1>
 				</div>
-				<div id="login-form">
-					@LoginForm(props[0].(LoginErr))
+				<div id="req-pass-reset-form">
+					@RequestPassResetForm("")
 				</div>
 				<p class="mt-6 text-center text-sm text-gray-600">
 					Nemate nalog?
@@ -52,16 +52,15 @@ templ Login(props ...interface{}) {
 	</html>
 }
 
-templ LoginForm(loginErr LoginErr) {
-	<form class="space-y-6" hx-post="/api/login" hx-target="#login-form" hx-swap="innerHTML">
+templ RequestPassResetForm(requestPassResetErr RequestPassResetErr) {
+	<form class="space-y-6" hx-post="/api/send-password-reset-form" hx-target="#req-pass-reset-form" hx-swap="innerHTML">
 		<div>
-			if string(loginErr) != "" {
+			if string(requestPassResetErr) != "" {
 				<div
-					class="bg-red-100 border border-red-400 mb-4 text-center text-sm text-red-700 px-4 py-2 rounded relative"
-					role="alert"
+					class="bg-gray-100 border border-gray-400 mb-4 text-center text-sm text-red-700 px-4 py-2 rounded relative"
 				>
 					<span class="block sm:inline">
-						{ string(loginErr) }
+						{ string(requestPassResetErr) }
 					</span>
 				</div>
 			}
@@ -73,44 +72,14 @@ templ LoginForm(loginErr LoginErr) {
 				type="email"
 				name="email"
 				class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-				placeholder="ime@primer.com"
+				placeholder="you@example.com"
 			/>
-		</div>
-		<div>
-			<label htmlFor="password" class="block text-sm font-medium text-gray-700 mb-1">
-				Lozinka
-			</label>
-			<input
-				id="password"
-				type="password"
-				name="password"
-				class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-				placeholder="••••••••"
-			/>
-		</div>
-		<div class="flex items-center justify-between">
-			<div class="flex items-center">
-				<input
-					id="remember-me"
-					name="remember_me"
-					type="checkbox"
-					value="true"
-					class="h-4 w-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500"
-				/>
-				<input type="hidden" name="remember_me" value="false"/>
-				<label htmlFor="remember-me" class="ml-2 text-sm text-gray-600">
-					Zapamti me
-				</label>
-			</div>
-			<a href="/zaboravljena-lozinka" class="text-sm text-blue-500 hover:text-blue-600">
-				Zaboravio/la lozinku?
-			</a>
 		</div>
 		<button
 			type="submit"
 			class="cursor-pointer w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200"
 		>
-			Prijava
+			Pošalji Reset Link
 		</button>
 		<a
 			href="/"

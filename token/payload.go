@@ -58,3 +58,4 @@ func (payload *Payload) Valid() error {
 
 	return nil
 }
+
