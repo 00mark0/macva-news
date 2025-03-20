@@ -169,21 +169,23 @@ func (server *Server) createAd(ctx echo.Context) error {
 	}
 
 	// 2. Start date must not be in the past (you might consider allowing today by comparing to midnight or adding a small margin).
-	if startDate.Before(time.Now()) {
+	now := time.Now().In(Loc)
+	midnightNow := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, Loc)
+	if startDate.Before(midnightNow) {
 		createAddErr = "Datum početka oglasa mora biti veći od trenutnog datuma."
 		ctx.Response().Header().Set("HX-Retarget", "#create-ad-modal")
 		return Render(ctx, http.StatusOK, components.CreateAdModal(createAddErr))
 	}
 
 	// 3. End date must not be in the past.
-	if endDate.Before(time.Now().Add(time.Hour * 1)) {
+	if endDate.Before(midnightNow) {
 		createAddErr = "Datum završetka oglasa mora biti veći od trenutnog datuma."
 		ctx.Response().Header().Set("HX-Retarget", "#create-ad-modal")
 		return Render(ctx, http.StatusOK, components.CreateAdModal(createAddErr))
 	}
 
 	// 4. Start date must not be more than one year in the future.
-	maxFutureDate := time.Now().AddDate(1, 0, 0)
+	maxFutureDate := midnightNow.AddDate(1, 0, 0)
 	if startDate.After(maxFutureDate) {
 		createAddErr = "Datum početka oglasa ne moze biti više od godinu dana unapred."
 		ctx.Response().Header().Set("HX-Retarget", "#create-ad-modal")
@@ -199,9 +201,79 @@ func (server *Server) createAd(ctx echo.Context) error {
 	}
 
 	// 6. End date must not be more than 5 years in the future.
-	maxEndDate := time.Now().AddDate(5, 0, 0)
+	maxEndDate := midnightNow.AddDate(5, 0, 0)
 	if endDate.After(maxEndDate) {
 		createAddErr = "Datum kraja oglasa ne može biti više od 5 godina u budućnosti."
+		ctx.Response().Header().Set("HX-Retarget", "#create-ad-modal")
+		return Render(ctx, http.StatusOK, components.CreateAdModal(createAddErr))
+	}
+
+	scheduledAds, err := server.store.ListScheduledAds(ctx.Request().Context(), 100)
+	if err != nil {
+		log.Println("Error listing scheduled ads in createAd:", err)
+		return err
+	}
+
+	for _, ad := range scheduledAds {
+		if req.Status == "active" && req.Placement == ad.Placement.String && startDate.After(midnightNow.Add(24*time.Hour)) {
+			createAddErr = "Već postoji zakazani oglas za ovu poziciju."
+			ctx.Response().Header().Set("HX-Retarget", "#create-ad-modal")
+			return Render(ctx, http.StatusOK, components.CreateAdModal(createAddErr))
+		}
+	}
+
+	activeAds, err := server.store.ListActiveAds(ctx.Request().Context(), 100)
+	if err != nil {
+		log.Println("Error listing active ads in createAd:", err)
+		return err
+	}
+
+	for _, ad := range activeAds {
+		if req.Status == "active" && req.Placement == ad.Placement.String && startDate.After(midnightNow) && startDate.Before(midnightNow.Add(24*time.Hour)) {
+			createAddErr = "Već postoji aktivan oglas za ovu poziciju."
+			ctx.Response().Header().Set("HX-Retarget", "#create-ad-modal")
+			return Render(ctx, http.StatusOK, components.CreateAdModal(createAddErr))
+		}
+
+		// Check for overlaps between new scheduled ads and existing active ads
+		if req.Status == "active" {
+			for _, ad := range activeAds {
+				// If same position and the existing ad's end date is after the new ad's start date
+				if req.Placement == ad.Placement.String && ad.EndDate.Time.After(startDate) {
+					// Calc duration before adjustment to make up for snipped time
+					duration := endDate.Sub(startDate)
+
+					// Adjust start date to midnight of the day after the existing ad ends
+					adjustedStartDate := time.Date(
+						ad.EndDate.Time.Year(),
+						ad.EndDate.Time.Month(),
+						ad.EndDate.Time.Day()+1,
+						0, 0, 0, 0,
+						Loc,
+					)
+
+					// Update the start date
+					startDate = adjustedStartDate
+
+					// Also update end date to maintain the original duration
+					endDate = adjustedStartDate.Add(duration)
+
+					// You might want to inform the user about this adjustment
+					ctx.Response().Header().Add("HX-Trigger", "adDatesAdjusted")
+					break // Stop after finding the first conflict
+				}
+			}
+		}
+	}
+
+	if len(activeAds) >= 4 && startDate.After(midnightNow) && startDate.Before(midnightNow.Add(24*time.Hour)) {
+		createAddErr = "Maksimalan broj aktivnih oglasa je 4."
+		ctx.Response().Header().Set("HX-Retarget", "#create-ad-modal")
+		return Render(ctx, http.StatusOK, components.CreateAdModal(createAddErr))
+	}
+
+	if len(scheduledAds) >= 4 && startDate.After(midnightNow.Add(24*time.Hour)) {
+		createAddErr = "Maksimalan broj zakazanih oglasa je 4."
 		ctx.Response().Header().Set("HX-Retarget", "#create-ad-modal")
 		return Render(ctx, http.StatusOK, components.CreateAdModal(createAddErr))
 	}
@@ -235,11 +307,50 @@ func (server *Server) createAd(ctx echo.Context) error {
 		return err
 	}
 
-	if req.Status == "active" {
-		ctx.Response().Header().Set("HX-Trigger", "createAdSuccess")
+	if req.Status == "active" && startDate.After(midnightNow) && startDate.Before(midnightNow.Add(24*time.Hour)) {
+		ctx.Response().Header().Add("HX-Trigger", "createAdSuccess")
 		return server.activeAdsList(ctx)
-	} else {
-		ctx.Response().Header().Set("HX-Trigger", "createAdSuccess")
+	} else if req.Status == "inactive" {
+		ctx.Response().Header().Add("HX-Trigger", "createAdSuccess")
 		return server.inactiveAdsList(ctx)
+	} else {
+		ctx.Response().Header().Add("HX-Trigger", "createAdSuccess")
+		return server.scheduledAdsList(ctx)
 	}
+}
+
+func (server *Server) deleteAd(ctx echo.Context) error {
+	adIDStr := ctx.Param("id")
+
+	// Parse string UUID into proper UUID format
+	adIDBytes, err := uuid.Parse(adIDStr)
+	if err != nil {
+		log.Println("Invalid ad ID format in deleteAd:", err)
+		return err
+	}
+
+	// Create a pgtype.UUID with the parsed UUID
+	adID := pgtype.UUID{
+		Bytes: adIDBytes,
+		Valid: true,
+	}
+
+	ad, err := server.store.GetAd(ctx.Request().Context(), adID)
+	if err != nil {
+		log.Println("Error getting ad in deleteAd:", err)
+		return err
+	}
+
+	filePath := strings.TrimPrefix(ad.ImageUrl.String, "/")
+	if err := os.Remove(filePath); err != nil {
+		log.Printf("Error removing file from filesystem at %s: %v", filePath, err)
+	}
+
+	err = server.store.DeleteAd(ctx.Request().Context(), adID)
+	if err != nil {
+		log.Println("Error deleting ad in deleteAd:", err)
+		return err
+	}
+
+	return ctx.NoContent(http.StatusOK)
 }

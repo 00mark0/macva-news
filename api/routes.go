@@ -59,12 +59,12 @@ func (server *Server) setupRouter() {
 	adminRoutes.GET("/admin/deleted-users", server.deletedUsersList)
 	// Admin ads
 	adminRoutes.GET("/admin/ads", server.adminAds)
-	// Admin settings
-	adminRoutes.GET("/admin/settings", server.adminSettings)
-	// Admin ads
 	adminRoutes.GET("/admin/active-ads", server.activeAdsList)
 	adminRoutes.GET("/admin/inactive-ads", server.inactiveAdsList)
+	adminRoutes.GET("/admin/scheduled-ads", server.scheduledAdsList)
 	adminRoutes.GET("/admin/create-ad-modal", server.createAdModal)
+	// Admin settings
+	adminRoutes.GET("/admin/settings", server.adminSettings)
 
 	// Admin API Routes
 	// Admin overview
@@ -142,6 +142,7 @@ func (server *Server) setupRouter() {
 	adminRoutes.GET("/api/admin/ads/active", server.listActiveAds)
 	adminRoutes.GET("/api/admin/ads/inactive", server.listInactiveAds)
 	adminRoutes.POST("/api/admin/ads", server.createAd)
+	adminRoutes.DELETE("/api/admin/ads/:id", server.deleteAd)
 
 	// Cookie
 	adminRoutes.DELETE("/api/cookie", server.deleteCookie)

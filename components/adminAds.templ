@@ -38,6 +38,27 @@ templ AdminAds(nextLimit int, ads []db.Ad, url string) {
 		</div>
 	</div>
 	<div id="create-ad-modal" class="hidden fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+	<div id="date-adjustment-alert" class="hidden fixed top-4 right-4 max-w-md bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded shadow-md z-50" role="alert">
+		<div class="flex items-center">
+			<div class="flex-shrink-0">
+				<svg class="h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+					<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+				</svg>
+			</div>
+			<div class="ml-3">
+				<p class="text-sm font-medium">
+					Datumi vašeg oglasa su automatski prilagođeni kako bi se izbegli konflikti sa postojećim oglasima na istoj poziciji. Trajanje oglasa je ostalo isto.
+				</p>
+			</div>
+			<div class="ml-auto pl-3">
+				<button type="button" class="inline-flex text-blue-500 hover:text-blue-800 focus:outline-none" id="close-alert">
+					<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+						<path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+					</svg>
+				</button>
+			</div>
+		</div>
+	</div>
 	<script>
 	document.body.addEventListener('htmx:beforeSwap', function(evt) {
 	    // Check if there's an HX-Retarget header
@@ -53,6 +74,22 @@ templ AdminAds(nextLimit int, ads []db.Ad, url string) {
 	  const modal = document.getElementById("create-ad-modal");
 	  modal.classList.add("hidden");
 	});
+
+    // Listen for the HTMX trigger
+    document.body.addEventListener("adDatesAdjusted", function() {
+      const alert = document.getElementById('date-adjustment-alert');
+      alert.classList.remove('hidden');
+      
+     // Automatically hide after 8 seconds
+      setTimeout(function() {
+        alert.classList.add('hidden');
+      }, 8000);
+    });
+    
+    // Close button functionality
+    document.getElementById('close-alert').addEventListener('click', function() {
+      document.getElementById('date-adjustment-alert').classList.add('hidden');
+    });
 	</script>
 }
 
@@ -94,6 +131,22 @@ templ AdsNav() {
 					class="absolute bottom-0 left-0 w-full h-1 bg-blue-500 rounded-b-lg opacity-0 transition-all duration-200 group-[.active]:opacity-100"
 				></span>
 			</button>
+			<button
+				hx-trigger="click"
+				hx-get="/admin/scheduled-ads"
+				hx-target="#ads-sort"
+				hx-swap="innerHTML"
+				class="cursor-pointer relative px-6 py-3 rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600 group bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 w-full sm:w-auto"
+				id="scheduled-btn"
+				_="on click add .active to me remove .active from #published-btn remove .active from #draft-btn remove .active from #deleted-btn"
+			>
+				<span class="inline-flex items-center justify-center px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-md">
+					<span>Zakazani</span>
+				</span>
+				<span
+					class="absolute bottom-0 left-0 w-full h-1 bg-blue-500 rounded-b-lg opacity-0 transition-all duration-200 group-[.active]:opacity-100"
+				></span>
+			</button>
 		</div>
 	</nav>
 }
@@ -117,6 +170,19 @@ templ InactiveAdsSort(nextLimit int, ads []db.Ad, url string) {
 			class="flex flex-col gap-4 sm:gap-0 sm:flex-row items-center justify-between pb-4 border-b dark:border-gray-700"
 		>
 			<h2 class="text-xl font-medium text-gray-800 dark:text-gray-200">Neaktivni Oglasi</h2>
+		</div>
+		<div id="admin-ads" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+			@Ads(nextLimit, ads, url)
+		</div>
+	</div>
+}
+
+templ ScheduledAdsSort(nextLimit int, ads []db.Ad, url string) {
+	<div class="space-y-4">
+		<div
+			class="flex flex-col gap-4 sm:gap-0 sm:flex-row items-center justify-between pb-4 border-b dark:border-gray-700"
+		>
+			<h2 class="text-xl font-medium text-gray-800 dark:text-gray-200">Zakazani Oglasi</h2>
 		</div>
 		<div id="admin-ads" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
 			@Ads(nextLimit, ads, url)
@@ -221,6 +287,24 @@ templ Ads(nextLimit int, ads []db.Ad, url string) {
 										{ ad.EndDate.Time.Format("02.01.2006.") }
 									</td>
 								}
+								<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+									<button
+										class="cursor-pointer text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3"
+									>Uredi</button>
+									if ad.Status.String == "active" {
+										<button
+											onclick="this.parentElement.parentElement.classList.add('hidden')"
+											class="cursor-pointer text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 mr-3"
+										>Deaktiviraj</button>
+									}
+									<button
+										hx-delete={ fmt.Sprintf("/api/admin/ads/%v", ad.ID) }
+										hx-swap="none"
+										hx-trigger="click"
+										onclick="this.parentElement.parentElement.classList.add('hidden')"
+										class="cursor-pointer text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+									>Obriši</button>
+								</td>
 							</tr>
 						}
 					</tbody>
@@ -380,7 +464,6 @@ templ CreateAdModal(err CreateAdErr) {
 					>
 						<option value="active">Aktivan</option>
 						<option value="inactive">Neaktivan</option>
-						<option value="scheduled">Zakazan</option>
 					</select>
 				</div>
 				<div class="grid grid-cols-2 gap-4">

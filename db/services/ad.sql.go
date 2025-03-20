@@ -12,9 +12,9 @@ import (
 )
 
 const createAd = `-- name: CreateAd :one
-INSERT INTO "ads" 
+INSERT INTO "ads"
 ("title", "description", "image_url", "target_url", "placement", "status", "start_date", "end_date")
-VALUES 
+VALUES
 ($1, $2, $3, $4, $5, $6, $7, $8)
 RETURNING id, title, description, image_url, target_url, placement, status, clicks, start_date, end_date, created_at, updated_at
 `
@@ -61,7 +61,7 @@ func (q *Queries) CreateAd(ctx context.Context, arg CreateAdParams) (Ad, error) 
 
 const deactivateAd = `-- name: DeactivateAd :one
 UPDATE "ads"
-SET 
+SET
   "status" = 'inactive', 
   "updated_at" = now(),
   "start_date" = NULL,
@@ -101,7 +101,7 @@ func (q *Queries) DeleteAd(ctx context.Context, id pgtype.UUID) error {
 }
 
 const getAd = `-- name: GetAd :one
-SELECT id, title, description, image_url, target_url, placement, status, clicks, start_date, end_date, created_at, updated_at 
+SELECT id, title, description, image_url, target_url, placement, status, clicks, start_date, end_date, created_at, updated_at
 FROM "ads"
 WHERE "id" = $1
 `
@@ -128,7 +128,7 @@ func (q *Queries) GetAd(ctx context.Context, id pgtype.UUID) (Ad, error) {
 
 const incrementAdClicks = `-- name: IncrementAdClicks :one
 UPDATE "ads"
-SET 
+SET
   "clicks" = "clicks" + 1, 
   "updated_at" = now()
 WHERE "id" = $1
@@ -143,7 +143,7 @@ func (q *Queries) IncrementAdClicks(ctx context.Context, id pgtype.UUID) (pgtype
 }
 
 const listActiveAds = `-- name: ListActiveAds :many
-SELECT id, title, description, image_url, target_url, placement, status, clicks, start_date, end_date, created_at, updated_at 
+SELECT id, title, description, image_url, target_url, placement, status, clicks, start_date, end_date, created_at, updated_at
 FROM "ads"
 WHERE "status" = 'active'
   AND "start_date" <= now() 
@@ -186,7 +186,7 @@ func (q *Queries) ListActiveAds(ctx context.Context, limit int32) ([]Ad, error) 
 }
 
 const listAds = `-- name: ListAds :many
-SELECT id, title, description, image_url, target_url, placement, status, clicks, start_date, end_date, created_at, updated_at 
+SELECT id, title, description, image_url, target_url, placement, status, clicks, start_date, end_date, created_at, updated_at
 FROM "ads"
 LIMIT $1
 `
@@ -225,7 +225,7 @@ func (q *Queries) ListAds(ctx context.Context, limit int32) ([]Ad, error) {
 }
 
 const listAdsByPlacement = `-- name: ListAdsByPlacement :many
-SELECT id, title, description, image_url, target_url, placement, status, clicks, start_date, end_date, created_at, updated_at 
+SELECT id, title, description, image_url, target_url, placement, status, clicks, start_date, end_date, created_at, updated_at
 FROM "ads"
 WHERE "placement" = $1
   AND "status" = 'active'
@@ -273,7 +273,7 @@ func (q *Queries) ListAdsByPlacement(ctx context.Context, arg ListAdsByPlacement
 }
 
 const listInactiveAds = `-- name: ListInactiveAds :many
-SELECT id, title, description, image_url, target_url, placement, status, clicks, start_date, end_date, created_at, updated_at 
+SELECT id, title, description, image_url, target_url, placement, status, clicks, start_date, end_date, created_at, updated_at
 FROM "ads"
 WHERE "status" = 'inactive'
 ORDER BY "created_at" DESC
@@ -313,9 +313,51 @@ func (q *Queries) ListInactiveAds(ctx context.Context, limit int32) ([]Ad, error
 	return items, nil
 }
 
+const listScheduledAds = `-- name: ListScheduledAds :many
+SELECT id, title, description, image_url, target_url, placement, status, clicks, start_date, end_date, created_at, updated_at
+FROM "ads"
+WHERE "status" = 'active'
+  AND "start_date" > now()
+ORDER BY "start_date" ASC
+LIMIT $1
+`
+
+func (q *Queries) ListScheduledAds(ctx context.Context, limit int32) ([]Ad, error) {
+	rows, err := q.db.Query(ctx, listScheduledAds, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Ad
+	for rows.Next() {
+		var i Ad
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.ImageUrl,
+			&i.TargetUrl,
+			&i.Placement,
+			&i.Status,
+			&i.Clicks,
+			&i.StartDate,
+			&i.EndDate,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateAd = `-- name: UpdateAd :one
 UPDATE "ads"
-SET 
+SET
   "title" = $1,
   "description" = $2,
   "image_url" = $3,

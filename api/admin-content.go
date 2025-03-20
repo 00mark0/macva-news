@@ -688,7 +688,6 @@ func (server *Server) deleteContent(ctx echo.Context) error {
 			if err := os.Remove(filePath); err != nil {
 				log.Printf("Error removing file from filesystem at %s: %v", filePath, err)
 				// Consider whether to return this error or continue
-				return err
 			}
 		}
 	}

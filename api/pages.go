@@ -502,10 +502,6 @@ func (server *Server) activeAdsList(ctx echo.Context) error {
 	return Render(ctx, http.StatusOK, components.ActiveAdsSort(int(nextLimit), activeAds, url))
 }
 
-func (server *Server) createAdModal(ctx echo.Context) error {
-	return Render(ctx, http.StatusOK, components.CreateAdModal(""))
-}
-
 func (server *Server) inactiveAdsList(ctx echo.Context) error {
 	var req ListAdsReq
 
@@ -520,6 +516,26 @@ func (server *Server) inactiveAdsList(ctx echo.Context) error {
 	url := "/api/admin/ads/inactive?limit="
 
 	return Render(ctx, http.StatusOK, components.InactiveAdsSort(int(nextLimit), inactiveAds, url))
+}
+
+func (server *Server) scheduledAdsList(ctx echo.Context) error {
+	var req ListAdsReq
+
+	nextLimit := req.Limit + 20
+
+	scheduledAds, err := server.store.ListScheduledAds(ctx.Request().Context(), nextLimit)
+	if err != nil {
+		log.Println("Error listing scheduled ads in scheduledAdsList:", err)
+		return err
+	}
+
+	url := "/api/admin/ads/scheduled?limit="
+
+	return Render(ctx, http.StatusOK, components.ScheduledAdsSort(int(nextLimit), scheduledAds, url))
+}
+
+func (server *Server) createAdModal(ctx echo.Context) error {
+	return Render(ctx, http.StatusOK, components.CreateAdModal(""))
 }
 
 func (server *Server) loginPage(ctx echo.Context) error {
