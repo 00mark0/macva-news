@@ -48,6 +48,7 @@ LIMIT $1;
 SELECT * 
 FROM "ads"
 WHERE "status" = 'inactive'
+ORDER BY "created_at" DESC
 LIMIT $1;
 
 -- name: ListActiveAds :many
@@ -56,6 +57,7 @@ FROM "ads"
 WHERE "status" = 'active'
   AND "start_date" <= now() 
   AND "end_date" >= now()
+ORDER BY "created_at" DESC
 LIMIT $1;
 
 -- name: ListAdsByPlacement :many

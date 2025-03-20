@@ -19,6 +19,9 @@ func (server *Server) setupRouter() {
 	// Run cron job to create daily analytics
 	go server.scheduleDailyAnalytics()
 
+	// Run cron job to deactivate expired ads
+	go server.deactivateAds()
+
 	// Serve static files
 	router.Static("/static", "static")
 
@@ -58,6 +61,10 @@ func (server *Server) setupRouter() {
 	adminRoutes.GET("/admin/ads", server.adminAds)
 	// Admin settings
 	adminRoutes.GET("/admin/settings", server.adminSettings)
+	// Admin ads
+	adminRoutes.GET("/admin/active-ads", server.activeAdsList)
+	adminRoutes.GET("/admin/inactive-ads", server.inactiveAdsList)
+	adminRoutes.GET("/admin/create-ad-modal", server.createAdModal)
 
 	// Admin API Routes
 	// Admin overview
@@ -130,6 +137,11 @@ func (server *Server) setupRouter() {
 	adminRoutes.PUT("/api/admin/settings/pfp/:id", server.updatePfp)
 	adminRoutes.PUT("/api/admin/global-settings", server.updateGlobalSettings)
 	adminRoutes.PUT("/api/admin/reset-global-settings", server.resetGlobalSettings)
+
+	// Admin ads
+	adminRoutes.GET("/api/admin/ads/active", server.listActiveAds)
+	adminRoutes.GET("/api/admin/ads/inactive", server.listInactiveAds)
+	adminRoutes.POST("/api/admin/ads", server.createAd)
 
 	// Cookie
 	adminRoutes.DELETE("/api/cookie", server.deleteCookie)

@@ -148,6 +148,7 @@ FROM "ads"
 WHERE "status" = 'active'
   AND "start_date" <= now() 
   AND "end_date" >= now()
+ORDER BY "created_at" DESC
 LIMIT $1
 `
 
@@ -275,6 +276,7 @@ const listInactiveAds = `-- name: ListInactiveAds :many
 SELECT id, title, description, image_url, target_url, placement, status, clicks, start_date, end_date, created_at, updated_at 
 FROM "ads"
 WHERE "status" = 'inactive'
+ORDER BY "created_at" DESC
 LIMIT $1
 `
 

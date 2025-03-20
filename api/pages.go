@@ -466,8 +466,60 @@ func (server *Server) deletedUsersList(ctx echo.Context) error {
 	return Render(ctx, http.StatusOK, components.DelUsersSort(int(nextLimit), users, url))
 }
 
+type ListAdsReq struct {
+	Limit int32 `query:"limit"`
+}
+
 func (server *Server) adminAds(ctx echo.Context) error {
-	return Render(ctx, http.StatusOK, components.AdminAds())
+	var req ListAdsReq
+
+	nextLimit := req.Limit + 20
+
+	activeAds, err := server.store.ListActiveAds(ctx.Request().Context(), nextLimit)
+	if err != nil {
+		log.Println("Error listing active ads in adminAds:", err)
+		return err
+	}
+
+	url := "/api/admin/ads/active?limit="
+
+	return Render(ctx, http.StatusOK, components.AdminAds(int(nextLimit), activeAds, url))
+}
+
+func (server *Server) activeAdsList(ctx echo.Context) error {
+	var req ListAdsReq
+
+	nextLimit := req.Limit + 20
+
+	activeAds, err := server.store.ListActiveAds(ctx.Request().Context(), nextLimit)
+	if err != nil {
+		log.Println("Error listing active ads in activeAdsList:", err)
+		return err
+	}
+
+	url := "/api/admin/ads/active?limit="
+
+	return Render(ctx, http.StatusOK, components.ActiveAdsSort(int(nextLimit), activeAds, url))
+}
+
+func (server *Server) createAdModal(ctx echo.Context) error {
+	return Render(ctx, http.StatusOK, components.CreateAdModal(""))
+}
+
+func (server *Server) inactiveAdsList(ctx echo.Context) error {
+	var req ListAdsReq
+
+	nextLimit := req.Limit + 20
+
+	inactiveAds, err := server.store.ListInactiveAds(ctx.Request().Context(), nextLimit)
+	if err != nil {
+		log.Println("Error listing inactive ads in inactiveAdsList:", err)
+		return err
+	}
+
+	url := "/api/admin/ads/inactive?limit="
+
+	return Render(ctx, http.StatusOK, components.InactiveAdsSort(int(nextLimit), inactiveAds, url))
 }
 
 func (server *Server) loginPage(ctx echo.Context) error {
