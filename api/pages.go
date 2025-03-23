@@ -538,6 +538,29 @@ func (server *Server) createAdModal(ctx echo.Context) error {
 	return Render(ctx, http.StatusOK, components.CreateAdModal(""))
 }
 
+func (server *Server) updateAdModal(ctx echo.Context) error {
+	adIDStr := ctx.Param("id")
+
+	adIDBytes, err := uuid.Parse(adIDStr)
+	if err != nil {
+		log.Println("Invalid ad ID format in updateAdModal:", err)
+		return err
+	}
+
+	adID := pgtype.UUID{
+		Bytes: adIDBytes,
+		Valid: true,
+	}
+
+	ad, err := server.store.GetAd(ctx.Request().Context(), adID)
+	if err != nil {
+		log.Println("Error getting ad in updateAdModal:", err)
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.UpdateAdModal("", ad))
+}
+
 func (server *Server) loginPage(ctx echo.Context) error {
 	var loginErr components.LoginErr
 

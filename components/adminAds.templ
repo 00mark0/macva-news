@@ -2,17 +2,39 @@ package components
 
 import "github.com/00mark0/macva-news/db/services"
 import "fmt"
+import "strings"
+import "path/filepath"
 
 type CreateAdErr string
+type UpdateAdErr string
 
 script openCreateAdModal() {
 const modal = document.getElementById("create-ad-modal");
 modal.classList.remove("hidden");
 }
 
+script openUpdateAdModal() {
+const modal = document.getElementById("update-ad-modal");
+modal.classList.remove("hidden");
+}
+
 script closeCreateAdModal() {
 const modal = document.getElementById("create-ad-modal");
 modal.classList.add("hidden");
+}
+
+script closeUpdateAdModal() {
+const modal = document.getElementById("update-ad-modal");
+modal.classList.add("hidden");
+}
+
+func ExtractImageName(path string) string {
+	filename := filepath.Base(path)
+	parts := strings.Split(filename, "-")
+	if len(parts) > 1 {
+		return parts[len(parts)-1]
+	}
+	return filename
 }
 
 templ AdminAds(nextLimit int, ads []db.Ad, url string) {
@@ -38,6 +60,7 @@ templ AdminAds(nextLimit int, ads []db.Ad, url string) {
 		</div>
 	</div>
 	<div id="create-ad-modal" class="hidden fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+	<div id="update-ad-modal" class="hidden fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
 	<div id="date-adjustment-alert" class="hidden fixed top-4 right-4 max-w-md bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded shadow-md z-50" role="alert">
 		<div class="flex items-center">
 			<div class="flex-shrink-0">
@@ -72,6 +95,11 @@ templ AdminAds(nextLimit int, ads []db.Ad, url string) {
 
 	document.body.addEventListener("createAdSuccess", function() {
 	  const modal = document.getElementById("create-ad-modal");
+	  modal.classList.add("hidden");
+	});
+
+	document.body.addEventListener("updateAdSuccess", function() {
+	  const modal = document.getElementById("update-ad-modal");
 	  modal.classList.add("hidden");
 	});
 
@@ -131,6 +159,7 @@ templ AdsNav() {
 					class="absolute bottom-0 left-0 w-full h-1 bg-blue-500 rounded-b-lg opacity-0 transition-all duration-200 group-[.active]:opacity-100"
 				></span>
 			</button>
+			<div class="hidden sm:block h-6 w-px bg-gray-300 dark:bg-gray-600 mx-1"></div>
 			<button
 				hx-trigger="click"
 				hx-get="/admin/scheduled-ads"
@@ -289,10 +318,17 @@ templ Ads(nextLimit int, ads []db.Ad, url string) {
 								}
 								<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
 									<button
+										hx-get={ fmt.Sprintf("/admin/update-ad-modal/%v", ad.ID) }
+										hx-target="#update-ad-modal"
+										hx-swap="innerHTML"
+										onClick={ openUpdateAdModal() }
 										class="cursor-pointer text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3"
 									>Uredi</button>
 									if ad.Status.String == "active" {
 										<button
+											hx-put={ fmt.Sprintf("/api/admin/ads/deactivate/%v", ad.ID) }
+											hx-swap="none"
+											hx-trigger="click"
 											onclick="this.parentElement.parentElement.classList.add('hidden')"
 											class="cursor-pointer text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 mr-3"
 										>Deaktiviraj</button>
@@ -501,6 +537,199 @@ templ CreateAdModal(err CreateAdErr) {
 				<button
 					type="button"
 					onClick={ closeCreateAdModal() }
+					class="cursor-pointer px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
+				>
+					Odustani
+				</button>
+			</div>
+		</form>
+	</div>
+	<script>
+			document.getElementById('image_upload').addEventListener('change', function(e) {
+				const fileName = e.target.files[0]?.name || 'No file selected';
+				document.getElementById('file-name').textContent = fileName;
+			});
+    </script>
+}
+
+templ UpdateAdModal(err UpdateAdErr, ad db.Ad) {
+	<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 max-w-md w-full mx-auto max-h-[60vh] overflow-y-auto flex flex-col">
+		<div class="flex justify-between items-center mb-4">
+			<h2 class="text-xl font-medium text-gray-900 dark:text-white mr-4">Uredi oglas</h2>
+			<button
+				onClick={ closeUpdateAdModal() }
+				class="cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition duration-150 ease-in-out"
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-6 w-6"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke="currentColor"
+				>
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+				</svg>
+			</button>
+		</div>
+		if string(err) != "" {
+			<div
+				class="bg-red-100 border border-red-400 mb-4 text-center text-sm text-red-700 px-4 py-2 rounded relative"
+				role="alert"
+			>
+				<span class="block sm:inline">
+					{ string(err) }
+				</span>
+			</div>
+		}
+		<form
+			hx-put={ fmt.Sprintf("/api/admin/ads/%v", ad.ID) }
+			hx-target="#ads-sort"
+			hx-encoding="multipart/form-data"
+			class="flex flex-col h-full"
+		>
+			<div class="space-y-4 pr-2 flex-grow">
+				<div>
+					<label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+						Naslov oglasa
+					</label>
+					<input
+						type="text"
+						id="title"
+						name="title"
+						value={ ad.Title.String }
+						class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+						placeholder="Unesite naslov oglasa"
+					/>
+				</div>
+				<div>
+					<label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+						Opis oglasa
+					</label>
+					<textarea
+						id="description"
+						name="description"
+						rows="2"
+						class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+						placeholder="Unesite opis oglasa"
+					>
+						{ ad.Description.String }
+					</textarea>
+				</div>
+				<div>
+					<label for="image_upload" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+						Slika oglasa
+					</label>
+					<div class="mt-1 flex items-center">
+						<label for="image_upload" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm cursor-pointer transition-colors">
+							Odaberi sliku
+							<input
+								id="image_upload"
+								name="image_url"
+								type="file"
+								accept="image/*"
+								value={ ad.ImageUrl.String }
+								class="sr-only"
+							/>
+						</label>
+						<span id="file-name" class="ml-3 text-sm text-gray-500 dark:text-gray-400">{ ExtractImageName(ad.ImageUrl.String) }</span>
+					</div>
+				</div>
+				<div>
+					<label for="target_url" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+						URL destinacije (link)
+					</label>
+					<input
+						type="text"
+						id="target_url"
+						name="target_url"
+						value={ ad.TargetUrl.String }
+						class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+						placeholder="https://example.com"
+					/>
+				</div>
+				<div>
+					<label for="placement" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+						Pozicija oglasa
+					</label>
+					<select
+						id="placement"
+						name="placement"
+						class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+					>
+						<option value={ ad.Placement.String } selected>{ strings.ToUpper(ad.Placement.String[:1]) + ad.Placement.String[1:] }</option>
+						if ad.Placement.String != "header" {
+							<option value="header">Header</option>
+						}
+						if ad.Placement.String != "sidebar" {
+							<option value="sidebar">Sidebar</option>
+						}
+						if ad.Placement.String != "footer" {
+							<option value="footer">Footer</option>
+						}
+						if ad.Placement.String != "article" {
+							<option value="article">Članak</option>
+						}
+					</select>
+				</div>
+				<div>
+					<label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+						Status
+					</label>
+					<select
+						id="status"
+						name="status"
+						class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+					>
+						if ad.Status.String == "active" {
+							<option value="active" selected>{ strings.ToUpper(ad.Status.String[:1]) + ad.Status.String[1:] }</option>
+							<option value="inactive">Neaktivan</option>
+						} else if ad.Status.String == "inactive" {
+							<option value="active">Active</option>
+							<option value="inactive" selected>Neaktivan</option>
+						} else {
+							<option value={ ad.Status.String } selected>{ strings.ToUpper(ad.Status.String[:1]) + ad.Status.String[1:] }</option>
+							<option value="inactive">Neaktivan</option>
+							<option value="active">Active</option>
+						}
+					</select>
+				</div>
+				<div class="grid grid-cols-2 gap-4">
+					<div>
+						<label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+							Datum početka
+						</label>
+						<input
+							type="date"
+							id="start_date"
+							name="start_date"
+							value={ ad.StartDate.Time.Format("2006-01-02") }
+							class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+						/>
+					</div>
+					<div>
+						<label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+							Datum završetka
+						</label>
+						<input
+							type="date"
+							id="end_date"
+							name="end_date"
+							value={ ad.EndDate.Time.Format("2006-01-02") }
+							class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+						/>
+					</div>
+				</div>
+			</div>
+			<div class="flex justify-center space-x-3 mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+				<button
+					type="submit"
+					class="cursor-pointer px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
+				>
+					Sačuvaj
+				</button>
+				<button
+					type="button"
+					onClick={ closeUpdateAdModal() }
 					class="cursor-pointer px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
 				>
 					Odustani

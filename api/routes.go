@@ -63,6 +63,7 @@ func (server *Server) setupRouter() {
 	adminRoutes.GET("/admin/inactive-ads", server.inactiveAdsList)
 	adminRoutes.GET("/admin/scheduled-ads", server.scheduledAdsList)
 	adminRoutes.GET("/admin/create-ad-modal", server.createAdModal)
+	adminRoutes.GET("/admin/update-ad-modal/:id", server.updateAdModal)
 	// Admin settings
 	adminRoutes.GET("/admin/settings", server.adminSettings)
 
@@ -143,6 +144,8 @@ func (server *Server) setupRouter() {
 	adminRoutes.GET("/api/admin/ads/inactive", server.listInactiveAds)
 	adminRoutes.POST("/api/admin/ads", server.createAd)
 	adminRoutes.DELETE("/api/admin/ads/:id", server.deleteAd)
+	adminRoutes.PUT("/api/admin/ads/:id", server.updateAd)
+	adminRoutes.PUT("/api/admin/ads/deactivate/:id", server.deactivateAd)
 
 	// Cookie
 	adminRoutes.DELETE("/api/cookie", server.deleteCookie)
