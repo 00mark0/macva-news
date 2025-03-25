@@ -1,6 +1,8 @@
 package api
 
 import (
+	"os"
+
 	"github.com/00mark0/macva-news/db/services"
 	"github.com/00mark0/macva-news/token"
 
@@ -8,6 +10,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 )
+
+var BaseUrl = os.Getenv("BASE_URL")
 
 // Server serves HTTP requests
 type Server struct {

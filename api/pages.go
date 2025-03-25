@@ -17,7 +17,67 @@ import (
 var Loc, _ = time.LoadLocation("Europe/Belgrade")
 
 func (server *Server) homePage(ctx echo.Context) error {
-	return Render(ctx, http.StatusOK, components.Index())
+	var userData db.GetUserByIDRow
+	cookie, err := ctx.Cookie("refresh_token")
+	if err != nil {
+		log.Println("User is not logged in.")
+	} else {
+		payload, err := server.tokenMaker.VerifyToken(cookie.Value)
+
+		userIDBytes, err := uuid.Parse(payload.UserID)
+		if err != nil {
+			log.Println("Error parsing user_id in homePage:", err)
+			return err
+		}
+
+		userID := pgtype.UUID{
+			Bytes: userIDBytes,
+			Valid: true,
+		}
+
+		user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
+		if err != nil {
+			log.Println("Error getting user in homePage:", err)
+			return err
+		}
+
+		userData = user
+	}
+
+	// Prepare meta information dynamically
+	meta := components.Meta{
+		Title:       "Mačva News | Vaš izvor vesti", // More localized
+		Description: "Najnovije vesti i dešavanja iz Mačve i Srbije – budite u toku sa svim bitnim informacijama.",
+		Canonical:   BaseUrl, // Update with your actual domain
+		OpenGraph: components.OpenGraphMeta{
+			Title:       "Mačva News | Vesti iz srca Mačve i Srbije",
+			Description: "Pouzdane, tačne i pravovremene informacije o događajima u Mačvi i regionu.",
+			URL:         BaseUrl, // Update with your actual domain
+			Type:        "website",
+			Image:       "/static/assets/macva-news-logo-cropped.jpeg", // Prepare an Open Graph image
+		},
+		Twitter: components.TwitterCardMeta{
+			Card:        "summary_large_image",
+			Title:       "Mačva News | Prava vest u pravo vreme",
+			Description: "Najnovije lokalne i regionalne vesti iz Mačve – obavešteni, povezani, korak ispred.",
+			Image:       "/static/assets/macva-news-logo-cropped.jpeg", // Prepare a Twitter card image
+			Creator:     "@MacvaNews",                                  // Optional: your Twitter handle
+		},
+	}
+
+	activeAds, err := server.store.ListActiveAds(ctx.Request().Context(), 4)
+	if err != nil {
+		log.Println("Error listing active ads in homePage:", err)
+		return err
+	}
+
+	categories, err := server.store.ListCategories(ctx.Request().Context(), 1000)
+	if err != nil {
+		log.Println("Error listing categories in homePage:", err)
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.Index(userData, meta, activeAds, categories))
 }
 
 // full page to be served
@@ -757,4 +817,97 @@ func (server *Server) emailVerifiedPage(ctx echo.Context) error {
 
 func (server *Server) requestPassResetPage(ctx echo.Context) error {
 	return Render(ctx, http.StatusOK, components.RequestPassReset())
+}
+
+func (server *Server) searchResultsPage(ctx echo.Context) error {
+	var req SearchContentReq
+	var userData db.GetUserByIDRow
+
+	if err := ctx.Bind(&req); err != nil {
+		log.Println("Error binding request in searchResultsPage:", err)
+		return err
+	}
+
+	if err := ctx.Validate(req); err != nil {
+		log.Println("Error validating request in searchResultsPage:", err)
+		return ctx.NoContent(http.StatusNoContent)
+	}
+
+	arg := db.SearchContentParams{
+		Limit:      req.Limit + 20,
+		SearchTerm: req.SearchTerm,
+	}
+
+	searchResults, err := server.store.SearchContent(ctx.Request().Context(), arg)
+	if err != nil {
+		log.Println("Error searching content in searchResultsPage:", err)
+		return err
+	}
+
+	searchResultsCount, err := server.store.GetSearchContentCount(ctx.Request().Context(), req.SearchTerm)
+	if err != nil {
+		log.Println("Error counting search results in searchResultsPage:", err)
+		return err
+	}
+
+	cookie, err := ctx.Cookie("refresh_token")
+	if err != nil {
+		log.Println("User is not logged in.")
+	} else {
+		payload, err := server.tokenMaker.VerifyToken(cookie.Value)
+
+		userIDBytes, err := uuid.Parse(payload.UserID)
+		if err != nil {
+			log.Println("Error parsing user_id in homePage:", err)
+			return err
+		}
+
+		userID := pgtype.UUID{
+			Bytes: userIDBytes,
+			Valid: true,
+		}
+
+		user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
+		if err != nil {
+			log.Println("Error getting user in homePage:", err)
+			return err
+		}
+
+		userData = user
+	}
+
+	// Prepare meta information dynamically for the search page
+	meta := components.Meta{
+		Title:       "Mačva News | Pretraga", // Updated for the search page
+		Description: "Pretražite najnovije vesti i dešavanja iz Mačve i Srbije – brzo i jednostavno.",
+		Canonical:   BaseUrl + "/search", // Updated for the search page URL
+		OpenGraph: components.OpenGraphMeta{
+			Title:       "Mačva News | Pretraga vesti iz Mačve i Srbije",
+			Description: "Pronađite relevantne vesti iz Mačve i Srbije pomoću naše pretrage.",
+			URL:         BaseUrl + "/search", // Updated for the search page URL
+			Type:        "website",
+			Image:       "/static/assets/macva-news-logo-cropped.jpeg", // Use the same image
+		},
+		Twitter: components.TwitterCardMeta{
+			Card:        "summary_large_image",
+			Title:       "Mačva News | Pretraga vesti u Mačvi i Srbiji",
+			Description: "Pretražujte najnovije vesti i informacije iz Mačve sa jednostavnim pretraživačem.",
+			Image:       "/static/assets/macva-news-logo-cropped.jpeg", // Use the same image
+			Creator:     "@MacvaNews",                                  // Optional: your Twitter handle
+		},
+	}
+
+	activeAds, err := server.store.ListActiveAds(ctx.Request().Context(), 4)
+	if err != nil {
+		log.Println("Error listing active ads in homePage:", err)
+		return err
+	}
+
+	categories, err := server.store.ListCategories(ctx.Request().Context(), 1000)
+	if err != nil {
+		log.Println("Error listing categories in homePage:", err)
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.SearchPage(userData, meta, activeAds, categories, searchResults, searchResultsCount))
 }

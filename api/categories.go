@@ -70,7 +70,21 @@ func (server *Server) createCategory(ctx echo.Context) error {
 		// Render the form with the custom error message
 		return Render(ctx, http.StatusOK, components.CreateCategoryForm(createCatErr))
 	}
-	_, err := server.store.CreateCategory(ctx.Request().Context(), req.CategoryName)
+
+	categories, err := server.store.ListCategories(ctx.Request().Context(), 1000)
+	if err != nil {
+		log.Println("Error listing categories in createCategory:", err)
+		return err
+	}
+
+	for _, category := range categories {
+		if category.CategoryName == req.CategoryName {
+			createCatErr = "Kategorija sa ovim imenom već postoji"
+			return Render(ctx, http.StatusOK, components.CreateCategoryForm(createCatErr))
+		}
+	}
+
+	_, err = server.store.CreateCategory(ctx.Request().Context(), req.CategoryName)
 	if err != nil {
 		log.Println("Error creating category in createCategory:", err)
 		return err
@@ -159,6 +173,19 @@ func (server *Server) updateCategory(ctx echo.Context) error {
 
 		// Render the form with the custom error message
 		return Render(ctx, http.StatusOK, components.UpdateCategoryForm(category, updateCatErr))
+	}
+
+	categories, err := server.store.ListCategories(ctx.Request().Context(), 1000)
+	if err != nil {
+		log.Println("Error listing categories in updateCategory:", err)
+		return err
+	}
+
+	for _, category := range categories {
+		if category.CategoryName == req.CategoryName {
+			updateCatErr = "Kategorija sa ovim imenom već postoji"
+			return Render(ctx, http.StatusOK, components.UpdateCategoryForm(category, updateCatErr))
+		}
 	}
 
 	arg := db.UpdateCategoryParams{

@@ -448,7 +448,7 @@ func (server *Server) listDelContentTitle(ctx echo.Context) error {
 }
 
 type SearchContentReq struct {
-	SearchTerm string `query:"search_term" validate:"required"`
+	SearchTerm string `query:"search_term" validate:"required,min=3"`
 	Limit      int32  `query:"limit"`
 }
 

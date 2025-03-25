@@ -168,5 +168,8 @@ func (server *Server) setupRouter() {
 	router.GET("/potvrdi-email/:token", server.emailVerifiedPage)
 	router.GET("/zaboravljena-lozinka", server.requestPassResetPage)
 
+	// User Search
+	router.GET("/search", server.searchResultsPage)
+
 	server.router = router
 }

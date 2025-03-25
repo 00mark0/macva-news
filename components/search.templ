@@ -1,0 +1,22 @@
+package components
+
+import "github.com/00mark0/macva-news/db/services"
+import "fmt"
+
+templ Search(content []db.SearchContentRow, searchCount int64) {
+	<h1>Search Results</h1>
+	if searchCount >= 20 {
+		<p>Showing 20 out of { fmt.Sprint(searchCount) } results</p>
+	} else {
+		<p>Showing { fmt.Sprint(searchCount) } out of { fmt.Sprint(searchCount) } results</p>
+	}
+	for _, v := range content {
+		<div>
+			<p class="truncate">{ v.Title }</p>
+		</div>
+	}
+}
+
+templ SearchPage(props ...interface{}) {
+	@Layout(props[0].(db.GetUserByIDRow), props[1].(Meta), props[2].([]db.Ad), props[3].([]db.Category), Search(props[4].([]db.SearchContentRow), props[5].(int64)))
+}

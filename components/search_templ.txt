@@ -1,0 +1,8 @@
+<h1>Search Results</h1>
+<p>Showing 20 out of 
+ results</p>
+<p>Showing 
+ out of 
+ results</p>
+<div><p class=\"truncate\">
+</p></div>

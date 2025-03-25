@@ -2,6 +2,8 @@
 package components
 
 import "github.com/00mark0/macva-news/db/services"
+import "time"
+import "fmt"
 
 templ AdminLayout(payload db.GetUserByIDRow, children ...templ.Component) {
 	<!DOCTYPE html>
@@ -120,6 +122,13 @@ templ AdminLayout(payload db.GetUserByIDRow, children ...templ.Component) {
 												class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
 												role="menuitem"
 											>Earnings</a>
+										</li>
+										<li>
+											<a
+												href="/"
+												class="cursor-pointer block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+												role="menuitem"
+											>Naslovna</a>
 										</li>
 										<li>
 											<a
@@ -277,6 +286,13 @@ templ AdminLayout(payload db.GetUserByIDRow, children ...templ.Component) {
 					@child
 				}
 			</div>
+			<footer class="w-full bg-white p-2 dark:bg-black dark:text-gray-400">
+				<p class="block text-sm text-gray-500 sm:text-center ">
+					© { fmt.Sprint(time.Now().Year()) } <a href="/" class="hover:underline">Mačva News™</a>. All Rights
+					Reserved.
+				</p>
+				>
+			</footer>
 		</body>
 	</html>
 }
