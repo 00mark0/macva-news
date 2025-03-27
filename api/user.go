@@ -1024,6 +1024,13 @@ func (server *Server) updatePfp(ctx echo.Context) error {
 		return err
 	}
 
+	convertedPath, err := ConvertToWebPWithResize(filePath, 400, 400, 80)
+	if err != nil {
+		log.Println("Error converting file to WebP in createAd:", err)
+	} else {
+		filePath = convertedPath
+	}
+
 	arg := db.UpdateUserParams{
 		UserID:   userID,
 		Username: user.Username,

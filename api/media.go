@@ -2,6 +2,9 @@ package api
 
 import (
 	"fmt"
+	"image"
+	"image/jpeg"
+	"image/png"
 	"io"
 	"log"
 	"net/http"
@@ -11,10 +14,66 @@ import (
 
 	"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/db/services"
+	"github.com/chai2010/webp"
+	"github.com/disintegration/imaging"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )
+
+// ConvertToWebPWithResize converts an image file to WebP format, resizing it to fit within maxWidth and maxHeight.
+// quality is a value from 0 to 100.
+func ConvertToWebPWithResize(inputPath string, maxWidth, maxHeight int, quality float32) (string, error) {
+	// Open the input file
+	file, err := os.Open(inputPath)
+	if err != nil {
+		return "", fmt.Errorf("error opening input file: %v", err)
+	}
+	defer file.Close()
+
+	// Decode the image based on its extension
+	var img image.Image
+	ext := strings.ToLower(filepath.Ext(inputPath))
+	switch ext {
+	case ".jpg", ".jpeg":
+		img, err = jpeg.Decode(file)
+	case ".png":
+		img, err = png.Decode(file)
+	default:
+		return inputPath, fmt.Errorf("unsupported image format: %s", ext)
+	}
+	if err != nil {
+		return "", fmt.Errorf("error decoding image: %v", err)
+	}
+
+	// Resize the image if maxWidth or maxHeight is specified (> 0)
+	if maxWidth > 0 || maxHeight > 0 {
+		// imaging.Fit maintains aspect ratio and fits within the given bounds.
+		img = imaging.Fit(img, maxWidth, maxHeight, imaging.Lanczos)
+	}
+
+	// Generate WebP filename (replace original extension with .webp)
+	webpPath := strings.TrimSuffix(inputPath, ext) + ".webp"
+
+	// Create WebP output file
+	output, err := os.Create(webpPath)
+	if err != nil {
+		return "", fmt.Errorf("error creating WebP output file: %v", err)
+	}
+	defer output.Close()
+
+	// Encode to WebP (Lossy conversion with specified quality)
+	if err := webp.Encode(output, img, &webp.Options{Lossless: false, Quality: quality}); err != nil {
+		return "", fmt.Errorf("error encoding to WebP: %v", err)
+	}
+
+	// Optionally: Remove the original file if you don't need it
+	if err := os.Remove(inputPath); err != nil {
+		log.Printf("Warning: could not remove original file %s: %v", inputPath, err)
+	}
+
+	return webpPath, nil
+}
 
 func (server *Server) addMediaToNewContent(ctx echo.Context) error {
 	contentIDCookie, err := ctx.Cookie("content_id")
@@ -83,6 +142,18 @@ func (server *Server) addMediaToNewContent(ctx echo.Context) error {
 		mediaType = "video"
 	} else if ext == ".mp3" || ext == ".wav" || ext == ".ogg" {
 		mediaType = "audio"
+	}
+
+	// If the file is an image, convert it to WebP
+	if mediaType == "image" {
+		convertedPath, err := ConvertToWebPWithResize(filePath, 800, 600, 80)
+		if err != nil {
+			log.Println("Error converting image to WebP:", err)
+			// Optionally, you might want to continue with the original file in case of error
+		} else {
+			// Update filePath to the new WebP file.
+			filePath = convertedPath
+		}
 	}
 
 	existingMedia, err := server.store.ListMediaForContent(ctx.Request().Context(), contentID)
@@ -182,6 +253,18 @@ func (server *Server) addMediaToUpdateContent(ctx echo.Context) error {
 		mediaType = "audio"
 	}
 
+	// If the file is an image, convert it to WebP
+	if mediaType == "image" {
+		convertedPath, err := ConvertToWebPWithResize(filePath, 800, 600, 80)
+		if err != nil {
+			log.Println("Error converting image to WebP:", err)
+			// Optionally, you might want to continue with the original file in case of error
+		} else {
+			// Update filePath to the new WebP file.
+			filePath = convertedPath
+		}
+	}
+
 	existingMedia, err := server.store.ListMediaForContent(ctx.Request().Context(), contentID)
 	if err != nil {
 		log.Println("Error listing existing media in addMediaToUpdateContent:", err)
@@ -202,10 +285,23 @@ func (server *Server) addMediaToUpdateContent(ctx echo.Context) error {
 		MediaOrder:   nextOrder,
 	}
 
-	_, err = server.store.InsertMedia(ctx.Request().Context(), arg)
+	media, err := server.store.InsertMedia(ctx.Request().Context(), arg)
 	if err != nil {
 		log.Println("Error inserting media record in addMediaToUpdateContent:", err)
 		return err
+	}
+
+	if media.MediaOrder == 1 {
+		arg := db.AddThumbnailParams{
+			ContentID: contentID,
+			Thumbnail: pgtype.Text{String: "/" + filePath, Valid: true},
+		}
+
+		_, err := server.store.AddThumbnail(ctx.Request().Context(), arg)
+		if err != nil {
+			log.Println("Error adding thumbnail in addMediaToUpdateContent:", err)
+			return err
+		}
 	}
 
 	updatedMedia, err := server.store.ListMediaForContent(ctx.Request().Context(), contentID)

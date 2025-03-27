@@ -27,6 +27,14 @@ SET
 WHERE content_id = $1
 RETURNING *;
 
+-- name: AddThumbnail :one
+UPDATE content
+SET
+    thumbnail = $2,
+    updated_at = now()
+WHERE content_id = $1
+RETURNING *;
+
 -- name: PublishContent :one
 UPDATE content
 SET

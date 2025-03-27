@@ -42,14 +42,14 @@ func createRandomUser(t *testing.T) User {
 }
 
 func createAdminUser(t *testing.T) User {
-	hashedPassword, err := utils.HashPassword("123456")
+	hashedPassword, err := utils.HashPassword("HlebIsir69!")
 	if err != nil {
 		log.Println(err)
 	}
 
 	arg := CreateUserAdminParams{
 		Username: "admin",
-		Email:    "admin@gmail.com",
+		Email:    "00marko.r@gmail.com",
 		Password: hashedPassword,
 		Role:     "admin",
 	}

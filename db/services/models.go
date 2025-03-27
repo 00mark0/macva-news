@@ -61,6 +61,7 @@ type Content struct {
 	UserID              pgtype.UUID
 	CategoryID          pgtype.UUID
 	Title               string
+	Thumbnail           pgtype.Text
 	ContentDescription  string
 	CommentsEnabled     bool
 	ViewCountEnabled    bool

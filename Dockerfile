@@ -2,6 +2,14 @@
 # 1. Base Stage
 # =========================
 FROM golang:1.24-alpine AS base
+# Enable CGO and install required dependencies
+ENV CGO_ENABLED=1
+RUN apk add --no-cache \
+    gcc \
+    g++ \
+    make \
+    libwebp-dev
+
 # Install dependencies required for both dev and build stages
 RUN apk add --no-cache nodejs npm make
 WORKDIR /app
@@ -20,6 +28,7 @@ FROM base AS dev
 # Install dev tools for live reloading, templating, etc.
 RUN go install github.com/a-h/templ/cmd/templ@latest
 RUN go install github.com/air-verse/air@latest
+RUN apk add --no-cache libwebp-dev
 RUN npm install
 EXPOSE 3000
 # Mounting the project in the dev compose file will allow live editing.
@@ -30,6 +39,7 @@ CMD ["make", "live"]
 # =========================
 FROM base AS builder
 # Run Tailwind to generate production-ready CSS before building the Go binary
+RUN apk add --no-cache libwebp-dev
 RUN make prod/tailwind
 # Build the Go binary (add any production build flags if desired)
 RUN go build -o app

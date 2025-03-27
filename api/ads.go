@@ -149,6 +149,13 @@ func (server *Server) createAd(ctx echo.Context) error {
 		return err
 	}
 
+	convertedPath, err := ConvertToWebPWithResize(filePath, 800, 600, 80)
+	if err != nil {
+		log.Println("Error converting file to WebP in createAd:", err)
+	} else {
+		filePath = convertedPath
+	}
+
 	startDate, err := time.Parse("2006-01-02", req.StartDate)
 	if err != nil {
 		log.Println("Error parsing start date in createAd:", err)
@@ -283,7 +290,7 @@ func (server *Server) createAd(ctx echo.Context) error {
 			Valid:  true,
 		},
 		ImageUrl: pgtype.Text{
-			String: filePath,
+			String: "/" + filePath,
 			Valid:  true,
 		},
 		TargetUrl: pgtype.Text{String: req.TargetUrl, Valid: true},
@@ -427,6 +434,13 @@ func (server *Server) updateAd(ctx echo.Context) error {
 		if _, err := io.Copy(dst, src); err != nil {
 			log.Println("Error copying file in updateAd:", err)
 			return err
+		}
+
+		convertedPath, err := ConvertToWebPWithResize(filePath, 800, 600, 80)
+		if err != nil {
+			log.Println("Error converting file to WebP in createAd:", err)
+		} else {
+			filePath = convertedPath
 		}
 
 		// Delete old image file if it's not the default image
@@ -593,7 +607,7 @@ func (server *Server) updateAd(ctx echo.Context) error {
 			Valid:  true,
 		},
 		ImageUrl: pgtype.Text{
-			String: filePath,
+			String: "/" + filePath,
 			Valid:  true,
 		},
 		TargetUrl: pgtype.Text{

@@ -1103,3 +1103,85 @@ func (server *Server) createAndPublishContent(ctx echo.Context) error {
 
 	return Render(ctx, http.StatusOK, components.ArticleSuccess(message))
 }
+
+func (server *Server) loadMoreSearch(ctx echo.Context) error {
+	var req SearchContentReq
+
+	if err := ctx.Bind(&req); err != nil {
+		log.Println("Error binding request in loadMoreSearch:", err)
+		return err
+	}
+
+	if err := ctx.Validate(req); err != nil {
+		log.Println("Error validating request in loadMoreSearch:", err)
+		return ctx.NoContent(http.StatusNoContent)
+	}
+
+	nextLimit := req.Limit + 20
+
+	arg := db.SearchContentParams{
+		Limit:      nextLimit,
+		SearchTerm: req.SearchTerm,
+	}
+
+	searchCount, err := server.store.GetSearchContentCount(ctx.Request().Context(), req.SearchTerm)
+	if err != nil {
+		log.Println("Error getting search count in loadMoreSearch:", err)
+		return err
+	}
+
+	searchResults, err := server.store.SearchContent(ctx.Request().Context(), arg)
+	if err != nil {
+		log.Println("Error searching content in loadMoreSearch:", err)
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.SearchResults(searchResults, searchCount, req.SearchTerm, int(nextLimit)))
+}
+
+func (server *Server) listOtherContent(ctx echo.Context) error {
+	var req ListPublishedLimitReq
+
+	if err := ctx.Bind(&req); err != nil {
+		log.Println("Error binding request in listPubContent:", err)
+		return err
+	}
+
+	nextLimit := req.Limit + 20
+
+	data, err := server.store.ListPublishedContentLimit(ctx.Request().Context(), nextLimit)
+	if err != nil {
+		log.Println("Error listing published content in listPubContent:", err)
+		return err
+	}
+
+	var content []components.ListPublishedContentRes
+
+	for _, v := range data {
+		content = append(content, components.ListPublishedContentRes{
+			ContentID:           v.ContentID.String(),
+			UserID:              v.UserID.String(),
+			CategoryID:          v.CategoryID.String(),
+			Title:               v.Title,
+			Thumbnail:           v.Thumbnail.String,
+			ContentDescription:  v.ContentDescription,
+			CommentsEnabled:     v.CommentsEnabled,
+			ViewCountEnabled:    v.ViewCountEnabled,
+			LikeCountEnabled:    v.LikeCountEnabled,
+			DislikeCountEnabled: v.DislikeCountEnabled,
+			Status:              v.Status,
+			ViewCount:           v.ViewCount,
+			LikeCount:           v.LikeCount,
+			DislikeCount:        v.DislikeCount,
+			CommentCount:        v.CommentCount,
+			CreatedAt:           v.CreatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			UpdatedAt:           v.UpdatedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			PublishedAt:         v.PublishedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			IsDeleted:           v.IsDeleted.Bool,
+			Username:            v.Username,
+			CategoryName:        v.CategoryName,
+		})
+	}
+
+	return Render(ctx, http.StatusOK, components.OtherContent(content, int(nextLimit)))
+}

@@ -833,9 +833,12 @@ func (server *Server) searchResultsPage(ctx echo.Context) error {
 		return ctx.NoContent(http.StatusNoContent)
 	}
 
+	nextLimit := req.Limit + 20
+	searchTerm := req.SearchTerm
+
 	arg := db.SearchContentParams{
-		Limit:      req.Limit + 20,
-		SearchTerm: req.SearchTerm,
+		Limit:      nextLimit,
+		SearchTerm: searchTerm,
 	}
 
 	searchResults, err := server.store.SearchContent(ctx.Request().Context(), arg)
@@ -909,5 +912,5 @@ func (server *Server) searchResultsPage(ctx echo.Context) error {
 		return err
 	}
 
-	return Render(ctx, http.StatusOK, components.SearchPage(userData, meta, activeAds, categories, searchResults, searchResultsCount))
+	return Render(ctx, http.StatusOK, components.SearchPage(userData, meta, activeAds, categories, searchResults, searchResultsCount, searchTerm, int(nextLimit)))
 }

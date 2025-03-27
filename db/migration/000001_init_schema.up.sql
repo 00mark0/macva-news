@@ -30,6 +30,7 @@ CREATE TABLE "content" (
   "user_id" UUID NOT NULL,
   "category_id" UUID NOT NULL,
   "title" TEXT NOT NULL,
+  "thumbnail" TEXT,
   "content_description" TEXT NOT NULL,
   "comments_enabled" BOOL NOT NULL DEFAULT true,
   "view_count_enabled" BOOL NOT NULL DEFAULT true,
