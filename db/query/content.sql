@@ -227,9 +227,11 @@ WHERE category_id = $1
 -- name: ListContentByCategory :many
 SELECT
   c.*,
-  u.username
+  u.username,
+  cat.category_name
 FROM content c
 JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
 WHERE c.category_id = $1
   AND c.status = 'published'
   AND c.is_deleted = false

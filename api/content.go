@@ -1185,3 +1185,39 @@ func (server *Server) listOtherContent(ctx echo.Context) error {
 
 	return Render(ctx, http.StatusOK, components.OtherContent(content, int(nextLimit)))
 }
+
+type CategoryWithContent struct {
+	Category db.Category
+	Content  []db.ListContentByCategoryRow
+}
+
+func (server *Server) newsSlider(ctx echo.Context) error {
+	// Fetch categories (limit to 5 for example)
+	categories, err := server.store.ListCategories(ctx.Request().Context(), 20)
+	if err != nil {
+		log.Print("Error fetching categories in newsSlider:", err)
+		return err
+	}
+
+	// Create a map to store content by category ID
+	contentByCategory := make(map[pgtype.UUID][]db.ListContentByCategoryRow)
+
+	// Fetch content for each category
+	for _, category := range categories {
+		contentParams := db.ListContentByCategoryParams{
+			CategoryID: category.CategoryID,
+			Limit:      1, // Limit number of articles per category
+			Offset:     0,
+		}
+		content, err := server.store.ListContentByCategory(ctx.Request().Context(), contentParams)
+		if err != nil {
+			log.Printf("Error fetching content for category %v: %v", category.CategoryName, err)
+			continue // Skip this category if content fetch fails
+		}
+
+		// Store content in the map using category ID as the key
+		contentByCategory[category.CategoryID] = content
+	}
+
+	return Render(ctx, http.StatusOK, components.NewsSlider(categories, contentByCategory))
+}

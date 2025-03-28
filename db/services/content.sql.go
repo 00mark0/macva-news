@@ -414,9 +414,11 @@ func (q *Queries) InsertOrUpdateContentReaction(ctx context.Context, arg InsertO
 const listContentByCategory = `-- name: ListContentByCategory :many
 SELECT
   c.content_id, c.user_id, c.category_id, c.title, c.thumbnail, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
-  u.username
+  u.username,
+  cat.category_name
 FROM content c
 JOIN "user" u ON c.user_id = u.user_id
+JOIN category cat ON c.category_id = cat.category_id
 WHERE c.category_id = $1
   AND c.status = 'published'
   AND c.is_deleted = false
@@ -451,6 +453,7 @@ type ListContentByCategoryRow struct {
 	PublishedAt         pgtype.Timestamptz
 	IsDeleted           pgtype.Bool
 	Username            string
+	CategoryName        string
 }
 
 func (q *Queries) ListContentByCategory(ctx context.Context, arg ListContentByCategoryParams) ([]ListContentByCategoryRow, error) {
@@ -483,6 +486,7 @@ func (q *Queries) ListContentByCategory(ctx context.Context, arg ListContentByCa
 			&i.PublishedAt,
 			&i.IsDeleted,
 			&i.Username,
+			&i.CategoryName,
 		); err != nil {
 			return nil, err
 		}

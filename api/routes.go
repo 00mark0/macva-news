@@ -177,6 +177,8 @@ func (server *Server) setupRouter() {
 	// User Search
 	router.GET("/api/search", server.loadMoreSearch)
 	router.GET("/api/content/other", server.listOtherContent)
+	// Home Page
+	router.GET("/api/news-slider", server.newsSlider)
 
 	server.router = router
 }
