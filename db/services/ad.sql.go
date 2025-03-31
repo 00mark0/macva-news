@@ -146,8 +146,8 @@ const listActiveAds = `-- name: ListActiveAds :many
 SELECT id, title, description, image_url, target_url, placement, status, clicks, start_date, end_date, created_at, updated_at
 FROM "ads"
 WHERE "status" = 'active'
-  AND "start_date" <= now() 
-  AND "end_date" >= now()
+  AND "start_date" <= now() AT TIME ZONE 'Europe/Belgrade'
+  AND "end_date" >= now() AT TIME ZONE 'Europe/Belgrade'
 ORDER BY "created_at" DESC
 LIMIT $1
 `
@@ -229,8 +229,8 @@ SELECT id, title, description, image_url, target_url, placement, status, clicks,
 FROM "ads"
 WHERE "placement" = $1
   AND "status" = 'active'
-  AND "start_date" <= now() 
-  AND "end_date" >= now()
+  AND "start_date" <= now() AT TIME ZONE 'Europe/Belgrade' 
+  AND "end_date" >= now() AT TIME ZONE 'Europe/Belgrade'
 LIMIT $2
 `
 
@@ -317,7 +317,7 @@ const listScheduledAds = `-- name: ListScheduledAds :many
 SELECT id, title, description, image_url, target_url, placement, status, clicks, start_date, end_date, created_at, updated_at
 FROM "ads"
 WHERE "status" = 'active'
-  AND "start_date" > now()
+  AND "start_date" > now() AT TIME ZONE 'Europe/Belgrade'
 ORDER BY "start_date" ASC
 LIMIT $1
 `

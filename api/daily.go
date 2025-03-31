@@ -45,34 +45,33 @@ func (server *Server) deactivateAds() {
 	// Schedule the job to run every day at midnight.
 	// "@daily" is equivalent to "0 0 0 * * *"
 	var err error
-	_, err = c.AddFunc("@daily", func() {
+	_, err = c.AddFunc("1 0 * * *", func() {
 		// Get the current time
 		now := time.Now().In(Loc)
+		log.Print("deactivateAds job is running..")
 
 		// Create a context with timeout for database operations
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 
 		// List all active ads
+		log.Print("Listing active ads...")
 		ads, err := server.store.ListAds(ctx, 1000)
 		if err != nil {
 			log.Printf("Failed to list ads: %v\n", err)
 			return
 		}
 
+		log.Print("Deactivating expired ads...")
 		for _, ad := range ads {
-			// Check if the ad is expired
-			// Assuming EndDate is pgtype.Timestamptz, convert it to time.Time for comparison
-
 			if ad.EndDate.Valid {
-				// Extract just the date part from EndDate (removes any time component)
-				endDateOnly := ad.EndDate.Time.Truncate(24 * time.Hour)
+				nowYear, nowMonth, nowDay := now.Date()
+				endYear, endMonth, endDay := ad.EndDate.Time.In(Loc).Date() // convert ad end date to local time
+				todayDate := time.Date(nowYear, nowMonth, nowDay, 0, 0, 0, 0, Loc)
+				adEndDate := time.Date(endYear, endMonth, endDay, 0, 0, 0, 0, Loc)
 
-				// Get today's date (just the date part, no time)
-				todayDateOnly := now.Truncate(24 * time.Hour)
-
-				// If today's date is after the end date, deactivate the ad
-				if todayDateOnly.Equal(endDateOnly) || todayDateOnly.After(endDateOnly) {
+				// If today's date is the same as or after the ad's end date, deactivate the ad
+				if !todayDate.Before(adEndDate) {
 					_, err := server.store.DeactivateAd(ctx, ad.ID)
 					if err != nil {
 						log.Printf("Failed to deactivate ad %v: %v\n", ad.ID, err)

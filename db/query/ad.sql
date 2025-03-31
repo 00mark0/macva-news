@@ -55,7 +55,7 @@ LIMIT $1;
 SELECT *
 FROM "ads"
 WHERE "status" = 'active'
-  AND "start_date" > now()
+  AND "start_date" > now() AT TIME ZONE 'Europe/Belgrade'
 ORDER BY "start_date" ASC
 LIMIT $1;
 
@@ -63,8 +63,8 @@ LIMIT $1;
 SELECT *
 FROM "ads"
 WHERE "status" = 'active'
-  AND "start_date" <= now() 
-  AND "end_date" >= now()
+  AND "start_date" <= now() AT TIME ZONE 'Europe/Belgrade'
+  AND "end_date" >= now() AT TIME ZONE 'Europe/Belgrade'
 ORDER BY "created_at" DESC
 LIMIT $1;
 
@@ -73,8 +73,8 @@ SELECT *
 FROM "ads"
 WHERE "placement" = $1
   AND "status" = 'active'
-  AND "start_date" <= now() 
-  AND "end_date" >= now()
+  AND "start_date" <= now() AT TIME ZONE 'Europe/Belgrade' 
+  AND "end_date" >= now() AT TIME ZONE 'Europe/Belgrade'
 LIMIT $2;
 
 -- name: IncrementAdClicks :one

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/00mark0/macva-news/db/services"
 	"strconv"
+	"github.com/00mark0/macva-news/utils"
 )
 
 var contentTags []db.Tag
@@ -685,9 +686,8 @@ templ PublishedContent(nextLimit int, content []ListPublishedContentRes, url str
 													</h3>
 													<div>
 														<p class="text-xs text-gray-500 dark:text-gray-400">Opis</p>
-														<p class="truncate text-sm text-gray-800 dark:text-gray-200 mt-1">
-															{ 
-												v.ContentDescription }
+														<p class="truncate text-sm text-gray-800 dark:text-gray-200 mt-1 line-clamp-3">
+															@utils.ParseHTML(v.ContentDescription)
 														</p>
 													</div>
 													<!-- Is Deleted -->

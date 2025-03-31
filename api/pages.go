@@ -912,5 +912,11 @@ func (server *Server) searchResultsPage(ctx echo.Context) error {
 		return err
 	}
 
-	return Render(ctx, http.StatusOK, components.SearchPage(userData, meta, activeAds, categories, searchResults, searchResultsCount, searchTerm, int(nextLimit)))
+	globalSettings, err := server.store.GetGlobalSettings(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error getting global settings in homePage:", err)
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.SearchPage(userData, meta, activeAds, categories, searchResults, searchResultsCount, searchTerm, int(nextLimit), globalSettings[0]))
 }

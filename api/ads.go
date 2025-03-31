@@ -595,6 +595,12 @@ func (server *Server) updateAd(ctx echo.Context) error {
 		return Render(ctx, http.StatusOK, components.UpdateAdModal(updateAdErr, existingAd))
 	}
 
+	// Ensure ImageUrl does not have a double leading slash
+	imagePath := filePath
+	if !strings.HasPrefix(filePath, "/") {
+		imagePath = "/" + filePath
+	}
+
 	// Prepare the update parameters
 	arg := db.UpdateAdParams{
 		ID: adID,
@@ -607,7 +613,7 @@ func (server *Server) updateAd(ctx echo.Context) error {
 			Valid:  true,
 		},
 		ImageUrl: pgtype.Text{
-			String: "/" + filePath,
+			String: imagePath,
 			Valid:  true,
 		},
 		TargetUrl: pgtype.Text{

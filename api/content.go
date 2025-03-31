@@ -13,6 +13,7 @@ import (
 
 	"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/db/services"
+	"github.com/00mark0/macva-news/utils"
 )
 
 func (server *Server) listPubContent(ctx echo.Context) error {
@@ -1136,7 +1137,13 @@ func (server *Server) loadMoreSearch(ctx echo.Context) error {
 		return err
 	}
 
-	return Render(ctx, http.StatusOK, components.SearchResults(searchResults, searchCount, req.SearchTerm, int(nextLimit)))
+	globalSettings, err := server.store.GetGlobalSettings(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error getting global settings in loadMoreSearch:", err)
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.SearchResults(searchResults, searchCount, req.SearchTerm, int(nextLimit), globalSettings[0]))
 }
 
 func (server *Server) listOtherContent(ctx echo.Context) error {
@@ -1147,7 +1154,7 @@ func (server *Server) listOtherContent(ctx echo.Context) error {
 		return err
 	}
 
-	nextLimit := req.Limit + 20
+	nextLimit := req.Limit + 5
 
 	data, err := server.store.ListPublishedContentLimit(ctx.Request().Context(), nextLimit)
 	if err != nil {
@@ -1176,14 +1183,20 @@ func (server *Server) listOtherContent(ctx echo.Context) error {
 			CommentCount:        v.CommentCount,
 			CreatedAt:           v.CreatedAt.Time.In(Loc).Format("02-01-06 15:04"),
 			UpdatedAt:           v.UpdatedAt.Time.In(Loc).Format("02-01-06 15:04"),
-			PublishedAt:         v.PublishedAt.Time.In(Loc).Format("02-01-06 15:04"),
+			PublishedAt:         utils.TimeAgo(v.PublishedAt.Time.In(Loc)),
 			IsDeleted:           v.IsDeleted.Bool,
 			Username:            v.Username,
 			CategoryName:        v.CategoryName,
 		})
 	}
 
-	return Render(ctx, http.StatusOK, components.OtherContent(content, int(nextLimit)))
+	globalSettings, err := server.store.GetGlobalSettings(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error getting global settings in listPubContent:", err)
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.OtherContent(content, int(nextLimit), globalSettings[0]))
 }
 
 type CategoryWithContent struct {
@@ -1192,7 +1205,7 @@ type CategoryWithContent struct {
 }
 
 func (server *Server) newsSlider(ctx echo.Context) error {
-	// Fetch categories (limit to 5 for example)
+	// Fetch categories (limit to 20 for example)
 	categories, err := server.store.ListCategories(ctx.Request().Context(), 20)
 	if err != nil {
 		log.Print("Error fetching categories in newsSlider:", err)
@@ -1202,6 +1215,9 @@ func (server *Server) newsSlider(ctx echo.Context) error {
 	// Create a map to store content by category ID
 	contentByCategory := make(map[pgtype.UUID][]db.ListContentByCategoryRow)
 
+	// Filtered categories that actually have content
+	var filteredCategories []db.Category
+
 	// Fetch content for each category
 	for _, category := range categories {
 		contentParams := db.ListContentByCategoryParams{
@@ -1209,15 +1225,30 @@ func (server *Server) newsSlider(ctx echo.Context) error {
 			Limit:      1, // Limit number of articles per category
 			Offset:     0,
 		}
+
 		content, err := server.store.ListContentByCategory(ctx.Request().Context(), contentParams)
 		if err != nil {
 			log.Printf("Error fetching content for category %v: %v", category.CategoryName, err)
 			continue // Skip this category if content fetch fails
 		}
 
+		if len(content) == 0 {
+			log.Printf("No content found for category %v", category.CategoryName)
+			continue // Skip this category if no content is found
+		}
+
 		// Store content in the map using category ID as the key
 		contentByCategory[category.CategoryID] = content
+
+		// Add category to filtered list since it has content
+		filteredCategories = append(filteredCategories, category)
 	}
 
-	return Render(ctx, http.StatusOK, components.NewsSlider(categories, contentByCategory))
+	globalSettings, err := server.store.GetGlobalSettings(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error getting global settings in newsSlider:", err)
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.NewsSlider(filteredCategories, contentByCategory, globalSettings[0]))
 }

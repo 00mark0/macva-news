@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { format, startOfDay, startOfWeek, subDays } from 'date-fns'
 import fetch from './axios';
+import parse from "html-react-parser";
 
 // Extracted components to reduce main component complexity
 const LoadingSpinner = ({ size = 'large' }) => (
@@ -16,7 +17,7 @@ const ContentCard = ({ item }) => (
 		<div className="p-4 flex flex-col flex-grow">
 			<h2 className="h-12 text-lg font-semibold text-black dark:text-white mb-2 truncate">{item.title}</h2>
 			<p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3 flex-grow">
-				{item.content_description}
+				{parse(item.content_description)}
 			</p>
 
 			<div className="flex flex-wrap overflow-auto items-center justify-between text-sm text-gray-500 dark:text-gray-400 mt-auto">
