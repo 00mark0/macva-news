@@ -2,6 +2,7 @@ package api
 
 import (
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"strings"
@@ -1251,4 +1252,95 @@ func (server *Server) newsSlider(ctx echo.Context) error {
 	}
 
 	return Render(ctx, http.StatusOK, components.NewsSlider(filteredCategories, contentByCategory, globalSettings[0]))
+}
+
+func (server *Server) categoriesWithContent(ctx echo.Context) error {
+	categories, err := server.store.ListCategories(ctx.Request().Context(), 100)
+	if err != nil {
+		log.Println("Error listing categories in categoriesWithContent:", err)
+		return err
+	}
+
+	source := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(source)
+	r.Shuffle(len(categories), func(i, j int) {
+		categories[i], categories[j] = categories[j], categories[i]
+	})
+
+	// Pick up to 4 categories (or fewer if there aren't enough)
+	limit := 4
+	if len(categories) < limit {
+		limit = len(categories) // Take whatever is available
+	}
+	randomCategories := categories[:limit]
+
+	// Prepare the final content structure
+	var allCategoryContent []components.ContentDataSlice
+
+	// For each random category, fetch its content
+	for _, category := range randomCategories {
+		// Fetch content for this category (limit to 20 items per category)
+		contentItems, err := server.store.ListContentByCategoryLimit(ctx.Request().Context(), db.ListContentByCategoryLimitParams{
+			CategoryID: category.CategoryID,
+			Limit:      20,
+		})
+		if err != nil {
+			log.Printf("Error fetching content for category %s: %v", category.CategoryName, err)
+			continue // Skip this category if there's an error
+		}
+
+		// Skip empty results
+		if len(contentItems) == 0 {
+			continue
+		}
+
+		// Convert DB content items to ContentData
+		var categoryContent []components.ContentData
+		for _, item := range contentItems {
+			categoryContent = append(categoryContent, components.ContentData{
+				ContentID:           item.ContentID,
+				UserID:              item.UserID,
+				CategoryID:          item.CategoryID,
+				CategoryName:        category.CategoryName, // Use the category name from the category object
+				Title:               item.Title,
+				Thumbnail:           item.Thumbnail,
+				ContentDescription:  item.ContentDescription,
+				CommentsEnabled:     item.CommentsEnabled,
+				ViewCountEnabled:    item.ViewCountEnabled,
+				LikeCountEnabled:    item.LikeCountEnabled,
+				DislikeCountEnabled: item.DislikeCountEnabled,
+				Status:              item.Status,
+				ViewCount:           item.ViewCount,
+				LikeCount:           item.LikeCount,
+				DislikeCount:        item.DislikeCount,
+				CommentCount:        item.CommentCount,
+				CreatedAt:           item.CreatedAt,
+				UpdatedAt:           item.UpdatedAt,
+				PublishedAt:         item.PublishedAt,
+				IsDeleted:           item.IsDeleted,
+			})
+		}
+
+		// Add this category's content to the final result
+		if len(categoryContent) > 0 {
+			allCategoryContent = append(allCategoryContent, components.ContentDataSlice{
+				Content: categoryContent,
+			})
+		}
+	}
+
+	// If we don't have any content, return an empty page
+	if len(allCategoryContent) == 0 {
+		return ctx.NoContent(http.StatusNoContent)
+	}
+
+	// Get global settings
+	globalSettings, err := server.store.GetGlobalSettings(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error getting global settings in categoriesWithContent:", err)
+		return err
+	}
+
+	// Render the template with all category content
+	return Render(ctx, http.StatusOK, components.CategoriesWithContent(allCategoryContent, globalSettings[0]))
 }

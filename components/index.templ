@@ -104,6 +104,9 @@ templ main() {
 		<section id="popular-content" hx-get="/api/content/popular" hx-trigger="load" hx-target="#popular-content" hx-swap="innerHTML" class="mt-10">
 			@LoadingSpinner()
 		</section>
+		<section id="categories-content" hx-get="/api/content/categories" hx-trigger="load" hx-target="#categories-content" hx-swap="innerHTML" class="mt-10">
+			@LoadingSpinner()
+		</section>
 	</div>
 }
 
@@ -367,7 +370,7 @@ templ GridCards(content []ContentData, globalSettings db.GlobalSetting, nextLimi
 			</article>
 		}
 	</div>
-	if len(content) < 18 {
+	if nextLimit < 18 {
 		<div class="text-center mt-8">
 			<button
 				hx-get={ "/api/content/popular?limit=" + fmt.Sprint(nextLimit) }
@@ -387,6 +390,33 @@ templ GridCards(content []ContentData, globalSettings db.GlobalSetting, nextLimi
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
 				</svg>
 			</button>
+		</div>
+	}
+}
+
+type ContentDataSlice struct {
+	Content []ContentData
+}
+
+templ CategoriesWithContent(content []ContentDataSlice, globalSettings db.GlobalSetting) {
+	if len(content) > 0 {
+		<div class="mt-10">
+			@GridCards(content[0].Content, globalSettings, 20, content[0].Content[0].CategoryName)
+		</div>
+	}
+	if len(content) > 1 {
+		<div class="mt-10">
+			@GridCards(content[1].Content, globalSettings, 20, content[1].Content[0].CategoryName)
+		</div>
+	}
+	if len(content) > 2 {
+		<div class="mt-10">
+			@GridCards(content[2].Content, globalSettings, 20, content[2].Content[0].CategoryName)
+		</div>
+	}
+	if len(content) > 3 {
+		<div class="mt-10">
+			@GridCards(content[3].Content, globalSettings, 20, content[3].Content[0].CategoryName)
 		</div>
 	}
 }

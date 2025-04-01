@@ -180,6 +180,7 @@ func (server *Server) setupRouter() {
 	// Home Page
 	router.GET("/api/news-slider", server.newsSlider)
 	router.GET("/api/content/popular", server.listTrendingContentUser)
+	router.GET("/api/content/categories", server.categoriesWithContent)
 
 	server.router = router
 }
