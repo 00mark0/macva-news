@@ -847,7 +847,7 @@ func UpdateAdModal(err UpdateAdErr, ad db.Ad) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		} else if ad.Status.String == "inactive" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 71, "<option value=\"active\">Active</option> <option value=\"inactive\" selected>Neaktivan</option>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 71, "<option value=\"active\">Aktivan</option> <option value=\"inactive\" selected>Neaktivan</option>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -878,7 +878,7 @@ func UpdateAdModal(err UpdateAdErr, ad db.Ad) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 74, "</option> <option value=\"inactive\">Neaktivan</option> <option value=\"active\">Active</option>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 74, "</option> <option value=\"inactive\">Neaktivan</option> <option value=\"active\">Aktivan</option>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

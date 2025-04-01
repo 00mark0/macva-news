@@ -684,12 +684,12 @@ templ UpdateAdModal(err UpdateAdErr, ad db.Ad) {
 							<option value="active" selected>{ strings.ToUpper(ad.Status.String[:1]) + ad.Status.String[1:] }</option>
 							<option value="inactive">Neaktivan</option>
 						} else if ad.Status.String == "inactive" {
-							<option value="active">Active</option>
+							<option value="active">Aktivan</option>
 							<option value="inactive" selected>Neaktivan</option>
 						} else {
 							<option value={ ad.Status.String } selected>{ strings.ToUpper(ad.Status.String[:1]) + ad.Status.String[1:] }</option>
 							<option value="inactive">Neaktivan</option>
-							<option value="active">Active</option>
+							<option value="active">Aktivan</option>
 						}
 					</select>
 				</div>

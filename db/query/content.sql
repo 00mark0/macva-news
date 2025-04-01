@@ -408,8 +408,10 @@ LIMIT $2;
 -- name: ListTrendingContent :many
 SELECT 
   c.*,
+  cat.category_name,
   (c.view_count + c.like_count + c.comment_count) AS total_interactions
 FROM content c
+JOIN category cat ON c.category_id = cat.category_id
 WHERE c.status = 'published'
   AND c.is_deleted = false
   AND c.published_at >= $1

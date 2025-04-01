@@ -1628,8 +1628,10 @@ func (q *Queries) ListRelatedContent(ctx context.Context, arg ListRelatedContent
 const listTrendingContent = `-- name: ListTrendingContent :many
 SELECT 
   c.content_id, c.user_id, c.category_id, c.title, c.thumbnail, c.content_description, c.comments_enabled, c.view_count_enabled, c.like_count_enabled, c.dislike_count_enabled, c.status, c.view_count, c.like_count, c.dislike_count, c.comment_count, c.created_at, c.updated_at, c.published_at, c.is_deleted,
+  cat.category_name,
   (c.view_count + c.like_count + c.comment_count) AS total_interactions
 FROM content c
+JOIN category cat ON c.category_id = cat.category_id
 WHERE c.status = 'published'
   AND c.is_deleted = false
   AND c.published_at >= $1
@@ -1662,6 +1664,7 @@ type ListTrendingContentRow struct {
 	UpdatedAt           pgtype.Timestamptz
 	PublishedAt         pgtype.Timestamptz
 	IsDeleted           pgtype.Bool
+	CategoryName        string
 	TotalInteractions   int32
 }
 
@@ -1694,6 +1697,7 @@ func (q *Queries) ListTrendingContent(ctx context.Context, arg ListTrendingConte
 			&i.UpdatedAt,
 			&i.PublishedAt,
 			&i.IsDeleted,
+			&i.CategoryName,
 			&i.TotalInteractions,
 		); err != nil {
 			return nil, err

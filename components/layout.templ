@@ -69,6 +69,7 @@ templ Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []
 			<link rel="preload" href="/static/js/htmx.min.js" as="script"/>
 			<link rel="preload" href="/static/js/layout.js" as="script"/>
 			<link rel="preload" href="/static/js/dark-mode.js" as="script"/>
+			<link rel="preload" href="/static/js/sticky-ad.js" as="script"/>
 			if len(activeAds) > 0 {
 				<link rel="preload" as="image" href={ activeAds[0].ImageUrl.String }/>
 			}
@@ -87,6 +88,7 @@ templ Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []
 			<script src="/static/js/htmx.min.js" defer></script>
 			<script src="/static/js/layout.js" defer></script>
 			<script src="/static/js/dark-mode.js" defer></script>
+			<script src="/static/js/sticky-ad.js" defer></script>
 		</head>
 		<body class="bg-gray-50 dark:bg-black min-h-screen flex flex-col">
 			<div class="fixed top-0 left-0 w-full z-50">
@@ -96,22 +98,24 @@ templ Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []
 							<img src="/static/assets/macva-news-logo-cropped.jpeg" width="220" class="h-14 rounded-lg" alt="Mačva News Logo"/>
 						</a>
 						<div class="flex items-center md:order-2">
-							<button data-collapse-toggle="navbar-user" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="navbar-user" aria-expanded="false">
-								<span class="sr-only">Open main menu</span>
-								<svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
-									<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"></path>
-								</svg>
-							</button>
-							if user.Email != "" {
-								<button type="button" class="flex text-sm bg-gray-800 rounded-full md:me-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown" data-dropdown-placement="bottom">
-									<span class="sr-only">Open user menu</span>
-									<img class="w-10 h-10 rounded-full" src={ user.Pfp } alt="user photo"/>
+							<div class="flex items-center">
+								<button data-collapse-toggle="navbar-user" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
+									<svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+										<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"></path>
+									</svg>
+									<span class="sr-only">Search</span>
 								</button>
-							} else {
-								<a href="/login" class="inline-block px-4 py-2 text-sm text-white bg-gray-800 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-600 transition-colors duration-200">
-									Prijavi se
-								</a>
-							}
+								if user.Email != "" {
+									<button type="button" class="flex text-sm bg-gray-800 rounded-full md:me-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown" data-dropdown-placement="bottom">
+										<span class="sr-only">Open user menu</span>
+										<img class="w-10 h-10 rounded-full" src={ user.Pfp } alt="user photo"/>
+									</button>
+								} else {
+									<a href="/login" class="inline-block px-4 py-2 text-sm text-white bg-gray-800 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-600 transition-colors duration-200">
+										Prijavi se
+									</a>
+								}
+							</div>
 							<!-- Dropdown menu -->
 							<div class="z-50 absolute hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-black dark:divide-gray-600" id="dropdown-user">
 								<div class="px-4 py-3">
@@ -201,9 +205,11 @@ templ Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []
 				for _, ad := range activeAds {
 					if ad.Placement.String == "sidebar" {
 						<aside class="lg:block lg:col-span-1">
-							<a href={ templ.SafeURL(ad.TargetUrl.String) } target="_blank" class="mb-6 w-full">
-								<img src={ ad.ImageUrl.String } alt={ ad.Description.String } class="object-fit mb-6 w-full h-96"/>
-							</a>
+							<div id="sticky-ad-container" class="sticky-ad">
+								<a href={ templ.SafeURL(ad.TargetUrl.String) } target="_blank" class="mb-6 w-full">
+									<img src={ ad.ImageUrl.String } alt={ ad.Description.String } class="object-fit mb-6 w-full h-96"/>
+								</a>
+							</div>
 						</aside>
 					}
 				}
@@ -306,6 +312,19 @@ templ Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []
 					-ms-overflow-style: none;  /* IE and Edge */
 					scrollbar-width: none;  /* Firefox */
 				}
+
+				.sticky-ad {
+				 position: relative;
+				 transition: top 0.3s ease-in-out;
+				}
+  
+				/* Only apply sticky positioning on large screens */
+				@media (min-width: 1024px) {
+					.sticky-ad.is-sticky {
+					position: sticky;
+					top: 180px;
+					}
+                }
 			</style>
 		</body>
 	</html>

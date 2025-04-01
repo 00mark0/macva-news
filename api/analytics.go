@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/db/services"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
@@ -175,4 +176,77 @@ func (server *Server) getDailyAnalytics(ctx echo.Context) error {
 	}
 
 	return nil
+}
+
+func (server *Server) listTrendingContentUser(ctx echo.Context) error {
+	var req TrendingContentReq
+
+	if err := ctx.Bind(&req); err != nil {
+		log.Println("Error binding request in listTrendingContent:", err)
+		return err
+	}
+
+	// Calculate the published date as 30 days ago from now
+	publishedDate := time.Now().In(Loc).AddDate(0, 0, -30)
+
+	// Adjust the timezone here if needed.
+	publishedDate = time.Date(publishedDate.Year(), publishedDate.Month(), publishedDate.Day(), 0, 0, 0, 0, Loc)
+
+	// Convert to pgtype.Timestamptz so we can pass it to the database.
+	var publishedTimestamptz pgtype.Timestamptz
+	publishedTimestamptz = pgtype.Timestamptz{
+		Time:  publishedDate,
+		Valid: true,
+	}
+
+	nextLimit := req.Limit + 6
+
+	arg := db.ListTrendingContentParams{
+		PublishedAt: publishedTimestamptz,
+		Limit:       nextLimit,
+	}
+
+	data, err := server.store.ListTrendingContent(ctx.Request().Context(), arg)
+	if err != nil {
+		log.Println("Error listing trending content in listTrendingContent:", err)
+		return err
+	}
+
+	var trendingContent []components.ContentData
+
+	for _, content := range data {
+		trendingContent = append(trendingContent, components.ContentData{
+			ContentID:           content.ContentID,
+			UserID:              content.UserID,
+			CategoryID:          content.CategoryID,
+			CategoryName:        content.CategoryName,
+			Title:               content.Title,
+			Thumbnail:           content.Thumbnail,
+			ContentDescription:  content.ContentDescription,
+			CommentsEnabled:     content.CommentsEnabled,
+			ViewCountEnabled:    content.ViewCountEnabled,
+			LikeCountEnabled:    content.LikeCountEnabled,
+			DislikeCountEnabled: content.DislikeCountEnabled,
+			Status:              content.Status,
+			ViewCount:           content.ViewCount,
+			LikeCount:           content.LikeCount,
+			DislikeCount:        content.DislikeCount,
+			CommentCount:        content.CommentCount,
+			CreatedAt:           content.CreatedAt,
+			UpdatedAt:           content.UpdatedAt,
+			PublishedAt:         content.PublishedAt,
+			IsDeleted:           content.IsDeleted,
+			TotalInteractions:   content.TotalInteractions,
+		})
+	}
+
+	globalSettings, err := server.store.GetGlobalSettings(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error getting global settings in listTrendingContent:", err)
+		return err
+	}
+
+	title := "Popularno"
+
+	return Render(ctx, http.StatusOK, components.GridCards(trendingContent, globalSettings[0], int(nextLimit), title))
 }

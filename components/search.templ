@@ -57,12 +57,13 @@ templ SearchResults(content []db.SearchContentRow, searchCount int64, searchTerm
 						</p>
 						<div class="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
 							<div class="flex space-x-3 text-xs text-gray-600 dark:text-gray-300">
-								if v.CommentsEnabled && !globalSettings.DisableComments {
-									<span class="flex items-center hover:text-blue-600 transition-colors">
+								if v.ViewCountEnabled && !globalSettings.DisableViews {
+									<span class="flex items-center hover:text-green-600 transition-colors">
 										<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-											<path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd"></path>
+											<path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+											<path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
 										</svg>
-										{ fmt.Sprint(v.CommentCount) }
+										{ fmt.Sprint(v.ViewCount) }
 									</span>
 								}
 								if v.LikeCountEnabled && !globalSettings.DisableLikes {
@@ -73,13 +74,12 @@ templ SearchResults(content []db.SearchContentRow, searchCount int64, searchTerm
 										{ fmt.Sprint(v.LikeCount) }
 									</span>
 								}
-								if v.ViewCountEnabled && !globalSettings.DisableViews {
-									<span class="flex items-center hover:text-green-600 transition-colors">
+								if v.CommentsEnabled && !globalSettings.DisableComments {
+									<span class="flex items-center hover:text-blue-600 transition-colors">
 										<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-											<path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
-											<path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+											<path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd"></path>
 										</svg>
-										{ fmt.Sprint(v.ViewCount) }
+										{ fmt.Sprint(v.CommentCount) }
 									</span>
 								}
 							</div>
@@ -153,12 +153,13 @@ templ OtherContent(content []ListPublishedContentRes, nextLimit int, globalSetti
 					</a>
 					<div class="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
 						<div class="flex space-x-3 text-xs text-gray-600 dark:text-gray-300">
-							if v.CommentsEnabled && !globalSettings.DisableComments {
-								<span class="flex items-center hover:text-blue-600 transition-colors">
+							if v.ViewCountEnabled && !globalSettings.DisableViews {
+								<span class="flex items-center hover:text-green-600 transition-colors">
 									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-										<path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd"></path>
+										<path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+										<path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
 									</svg>
-									{ fmt.Sprint(v.CommentCount) }
+									{ fmt.Sprint(v.ViewCount) }
 								</span>
 							}
 							if v.LikeCountEnabled && !globalSettings.DisableLikes {
@@ -169,13 +170,12 @@ templ OtherContent(content []ListPublishedContentRes, nextLimit int, globalSetti
 									{ fmt.Sprint(v.LikeCount) }
 								</span>
 							}
-							if v.ViewCountEnabled && !globalSettings.DisableViews {
-								<span class="flex items-center hover:text-green-600 transition-colors">
+							if v.CommentsEnabled && !globalSettings.DisableComments {
+								<span class="flex items-center hover:text-blue-600 transition-colors">
 									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-										<path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
-										<path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+										<path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd"></path>
 									</svg>
-									{ fmt.Sprint(v.ViewCount) }
+									{ fmt.Sprint(v.CommentCount) }
 								</span>
 							}
 						</div>
