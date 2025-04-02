@@ -307,7 +307,7 @@ templ ArticleCardSlider(article db.ListContentByCategoryRow, globalSettings db.G
 	</article>
 }
 
-templ GridCards(content []ContentData, globalSettings db.GlobalSetting, nextLimit int, title string) {
+templ GridCards(content []ContentData, globalSettings db.GlobalSetting, nextLimit int, url string, target string, title string) {
 	<h3 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-200">{ title }</h3>
 	<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 		for _, v := range content {
@@ -317,12 +317,12 @@ templ GridCards(content []ContentData, globalSettings db.GlobalSetting, nextLimi
 						<img
 							src={ v.Thumbnail.String }
 							alt={ v.Title }
-							class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 brightness-90 group-hover:brightness-100"
+							class="thumbnail absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 brightness-90 group-hover:brightness-100"
 						/>
 						<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
 					</div>
 				}
-				<div class="p-4 relative mt-auto z-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm">
+				<div class="p-4 relative mt-auto z-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm max-h-[40%]">
 					<div class="absolute top-0 left-0 w-1 h-full bg-gray-800 group-hover:bg-blue-600 transition-colors duration-300"></div>
 					<div class="flex justify-between items-center text-xs text-gray-600 dark:text-gray-300 mb-2 space-x-2">
 						<span class="dark:text-gray-300">{ utils.TimeAgo(v.PublishedAt.Time) }</span>
@@ -373,8 +373,8 @@ templ GridCards(content []ContentData, globalSettings db.GlobalSetting, nextLimi
 	if nextLimit < 18 {
 		<div class="text-center mt-8">
 			<button
-				hx-get={ "/api/content/popular?limit=" + fmt.Sprint(nextLimit) }
-				hx-target="#popular-content"
+				hx-get={ url + fmt.Sprint(nextLimit) }
+				hx-target={ target }
 				hx-swap="innerHTML"
 				hx-trigger="click"
 				class="cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
@@ -401,22 +401,22 @@ type ContentDataSlice struct {
 templ CategoriesWithContent(content []ContentDataSlice, globalSettings db.GlobalSetting) {
 	if len(content) > 0 {
 		<div class="mt-10">
-			@GridCards(content[0].Content, globalSettings, 20, content[0].Content[0].CategoryName)
+			@GridCards(content[0].Content, globalSettings, 20, "", "", content[0].Content[0].CategoryName)
 		</div>
 	}
 	if len(content) > 1 {
 		<div class="mt-10">
-			@GridCards(content[1].Content, globalSettings, 20, content[1].Content[0].CategoryName)
+			@GridCards(content[1].Content, globalSettings, 20, "", "", content[1].Content[0].CategoryName)
 		</div>
 	}
 	if len(content) > 2 {
 		<div class="mt-10">
-			@GridCards(content[2].Content, globalSettings, 20, content[2].Content[0].CategoryName)
+			@GridCards(content[2].Content, globalSettings, 20, "", "", content[2].Content[0].CategoryName)
 		</div>
 	}
 	if len(content) > 3 {
 		<div class="mt-10">
-			@GridCards(content[3].Content, globalSettings, 20, content[3].Content[0].CategoryName)
+			@GridCards(content[3].Content, globalSettings, 20, "", "", content[3].Content[0].CategoryName)
 		</div>
 	}
 }

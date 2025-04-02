@@ -1031,10 +1031,16 @@ func (server *Server) updatePfp(ctx echo.Context) error {
 		filePath = convertedPath
 	}
 
+	// Ensure ImageUrl does not have a double leading slash
+	imagePath := filePath
+	if !strings.HasPrefix(filePath, "/") {
+		imagePath = "/" + filePath
+	}
+
 	arg := db.UpdateUserParams{
 		UserID:   userID,
 		Username: user.Username,
-		Pfp:      filePath,
+		Pfp:      imagePath,
 	}
 
 	err = server.store.UpdateUser(ctx.Request().Context(), arg)

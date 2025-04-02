@@ -17,6 +17,8 @@ import (
 	"github.com/00mark0/macva-news/utils"
 )
 
+var ThumbnailURL = "/static/assets/f4a004a8-8612-4152-b96e-2212646d7bdf-article-placeholder.webp"
+
 func (server *Server) listPubContent(ctx echo.Context) error {
 	var req ListPublishedLimitReq
 
@@ -1138,6 +1140,12 @@ func (server *Server) loadMoreSearch(ctx echo.Context) error {
 		return err
 	}
 
+	for i := range searchResults {
+		if searchResults[i].Thumbnail.String == "" {
+			searchResults[i].Thumbnail = pgtype.Text{String: ThumbnailURL, Valid: true}
+		}
+	}
+
 	globalSettings, err := server.store.GetGlobalSettings(ctx.Request().Context())
 	if err != nil {
 		log.Println("Error getting global settings in loadMoreSearch:", err)
@@ -1167,11 +1175,17 @@ func (server *Server) listOtherContent(ctx echo.Context) error {
 
 	for _, v := range data {
 		content = append(content, components.ListPublishedContentRes{
-			ContentID:           v.ContentID.String(),
-			UserID:              v.UserID.String(),
-			CategoryID:          v.CategoryID.String(),
-			Title:               v.Title,
-			Thumbnail:           v.Thumbnail.String,
+			ContentID:  v.ContentID.String(),
+			UserID:     v.UserID.String(),
+			CategoryID: v.CategoryID.String(),
+			Title:      v.Title,
+			Thumbnail: func() string {
+				if v.Thumbnail.Valid && v.Thumbnail.String != "" {
+					return v.Thumbnail.String
+				}
+
+				return ThumbnailURL
+			}(),
 			ContentDescription:  v.ContentDescription,
 			CommentsEnabled:     v.CommentsEnabled,
 			ViewCountEnabled:    v.ViewCountEnabled,
@@ -1234,7 +1248,6 @@ func (server *Server) newsSlider(ctx echo.Context) error {
 		}
 
 		if len(content) == 0 {
-			log.Printf("No content found for category %v", category.CategoryName)
 			continue // Skip this category if no content is found
 		}
 
@@ -1298,12 +1311,18 @@ func (server *Server) categoriesWithContent(ctx echo.Context) error {
 		var categoryContent []components.ContentData
 		for _, item := range contentItems {
 			categoryContent = append(categoryContent, components.ContentData{
-				ContentID:           item.ContentID,
-				UserID:              item.UserID,
-				CategoryID:          item.CategoryID,
-				CategoryName:        category.CategoryName, // Use the category name from the category object
-				Title:               item.Title,
-				Thumbnail:           item.Thumbnail,
+				ContentID:    item.ContentID,
+				UserID:       item.UserID,
+				CategoryID:   item.CategoryID,
+				CategoryName: category.CategoryName, // Use the category name from the category object
+				Title:        item.Title,
+				Thumbnail: func() pgtype.Text {
+					if item.Thumbnail.Valid && item.Thumbnail.String != "" {
+						return item.Thumbnail
+					}
+
+					return pgtype.Text{String: ThumbnailURL, Valid: true}
+				}(),
 				ContentDescription:  item.ContentDescription,
 				CommentsEnabled:     item.CommentsEnabled,
 				ViewCountEnabled:    item.ViewCountEnabled,

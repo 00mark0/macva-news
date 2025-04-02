@@ -172,15 +172,19 @@ func (server *Server) setupRouter() {
 	router.GET("/zaboravljena-lozinka", server.requestPassResetPage)
 	// User Search
 	router.GET("/search", server.searchResultsPage)
+	// Categories Page
+	router.GET("/kategorije/:category/:id", server.categoriesPage)
 
 	//User API
 	// User Search
 	router.GET("/api/search", server.loadMoreSearch)
 	router.GET("/api/content/other", server.listOtherContent)
-	// Home Page
+	// Home
 	router.GET("/api/news-slider", server.newsSlider)
 	router.GET("/api/content/popular", server.listTrendingContentUser)
 	router.GET("/api/content/categories", server.categoriesWithContent)
+	// Categories
+	router.GET("/api/category/content/recent/:id", server.listRecentCategoryContent)
 
 	server.router = router
 }

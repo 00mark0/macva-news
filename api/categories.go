@@ -202,3 +202,81 @@ func (server *Server) updateCategory(ctx echo.Context) error {
 	ctx.Response().Header().Set("HX-Trigger", `{"categoriesUpdated": ""}`)
 	return ctx.NoContent(http.StatusOK)
 }
+
+func (server *Server) listRecentCategoryContent(ctx echo.Context) error {
+	var req ListPublishedLimitReq
+	categoryIDStr := ctx.Param("id")
+
+	categoryIDBytes, err := uuid.Parse(categoryIDStr)
+	if err != nil {
+		log.Println("Invalid category ID format in listRecentCategoryContent:", err)
+		return err
+	}
+
+	categoryID := pgtype.UUID{
+		Bytes: categoryIDBytes,
+		Valid: true,
+	}
+
+	category, err := server.store.GetCategoryByID(ctx.Request().Context(), categoryID)
+	if err != nil {
+		log.Println("Error getting category in listRecentCategoryContent:", err)
+		return err
+	}
+
+	nextLimit := req.Limit + 18
+
+	arg := db.ListContentByCategoryLimitParams{
+		CategoryID: categoryID,
+		Limit:      nextLimit,
+	}
+
+	data, err := server.store.ListContentByCategoryLimit(ctx.Request().Context(), arg)
+	if err != nil {
+		log.Println("Error listing content in listRecentCategoryContent:", err)
+		return err
+	}
+
+	// Convert DB content items to ContentData
+	var categoryContent []components.ContentData
+	for _, item := range data {
+		categoryContent = append(categoryContent, components.ContentData{
+			ContentID:    item.ContentID,
+			UserID:       item.UserID,
+			CategoryID:   item.CategoryID,
+			CategoryName: category.CategoryName, // Use the category name from the category object
+			Title:        item.Title,
+			Thumbnail: func() pgtype.Text {
+				if item.Thumbnail.Valid && item.Thumbnail.String != "" {
+					return item.Thumbnail
+				}
+
+				return pgtype.Text{String: ThumbnailURL, Valid: true}
+			}(),
+			ContentDescription:  item.ContentDescription,
+			CommentsEnabled:     item.CommentsEnabled,
+			ViewCountEnabled:    item.ViewCountEnabled,
+			LikeCountEnabled:    item.LikeCountEnabled,
+			DislikeCountEnabled: item.DislikeCountEnabled,
+			Status:              item.Status,
+			ViewCount:           item.ViewCount,
+			LikeCount:           item.LikeCount,
+			DislikeCount:        item.DislikeCount,
+			CommentCount:        item.CommentCount,
+			CreatedAt:           item.CreatedAt,
+			UpdatedAt:           item.UpdatedAt,
+			PublishedAt:         item.PublishedAt,
+			IsDeleted:           item.IsDeleted,
+		})
+	}
+
+	globalSettings, err := server.store.GetGlobalSettings(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error getting global settings in listRecentCategoryContent:", err)
+		return err
+	}
+
+	title := "Najnovije"
+
+	return Render(ctx, http.StatusOK, components.GridCards(categoryContent, globalSettings[0], int(nextLimit), "", "", title))
+}

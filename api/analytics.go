@@ -21,6 +21,7 @@ type TrendingContentRes struct {
 	UserID              string `json:"user_id"`
 	CategoryID          string `json:"category_id"`
 	Title               string `json:"title"`
+	Thumbnail           string `json:"thumbnail"`
 	ContentDescription  string `json:"content_description"`
 	CommentsEnabled     bool   `json:"comments_enabled"`
 	ViewCountEnabled    bool   `json:"view_count_enabled"`
@@ -80,10 +81,17 @@ func (server *Server) listTrendingContent(ctx echo.Context) error {
 
 	for _, content := range data {
 		trendingContent = append(trendingContent, TrendingContentRes{
-			ContentID:           content.ContentID.String(),
-			UserID:              content.UserID.String(),
-			CategoryID:          content.CategoryID.String(),
-			Title:               content.Title,
+			ContentID:  content.ContentID.String(),
+			UserID:     content.UserID.String(),
+			CategoryID: content.CategoryID.String(),
+			Title:      content.Title,
+			Thumbnail: func() string {
+				if content.Thumbnail.Valid && content.Thumbnail.String != "" {
+					return content.Thumbnail.String
+				}
+
+				return ThumbnailURL
+			}(),
 			ContentDescription:  content.ContentDescription,
 			CommentsEnabled:     content.CommentsEnabled,
 			ViewCountEnabled:    content.ViewCountEnabled,
@@ -216,12 +224,18 @@ func (server *Server) listTrendingContentUser(ctx echo.Context) error {
 
 	for _, content := range data {
 		trendingContent = append(trendingContent, components.ContentData{
-			ContentID:           content.ContentID,
-			UserID:              content.UserID,
-			CategoryID:          content.CategoryID,
-			CategoryName:        content.CategoryName,
-			Title:               content.Title,
-			Thumbnail:           content.Thumbnail,
+			ContentID:    content.ContentID,
+			UserID:       content.UserID,
+			CategoryID:   content.CategoryID,
+			CategoryName: content.CategoryName,
+			Title:        content.Title,
+			Thumbnail: func() pgtype.Text {
+				if content.Thumbnail.Valid && content.Thumbnail.String != "" {
+					return content.Thumbnail
+				}
+
+				return pgtype.Text{String: ThumbnailURL, Valid: true}
+			}(),
 			ContentDescription:  content.ContentDescription,
 			CommentsEnabled:     content.CommentsEnabled,
 			ViewCountEnabled:    content.ViewCountEnabled,
@@ -246,7 +260,11 @@ func (server *Server) listTrendingContentUser(ctx echo.Context) error {
 		return err
 	}
 
+	url := "/api/content/popular?limit="
+
+	target := "#popular-content"
+
 	title := "Popularno"
 
-	return Render(ctx, http.StatusOK, components.GridCards(trendingContent, globalSettings[0], int(nextLimit), title))
+	return Render(ctx, http.StatusOK, components.GridCards(trendingContent, globalSettings[0], int(nextLimit), url, target, title))
 }

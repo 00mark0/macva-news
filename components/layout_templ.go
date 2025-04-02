@@ -13,6 +13,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import "github.com/00mark0/macva-news/db/services"
 import "fmt"
 import "time"
+import "github.com/00mark0/macva-news/utils"
 
 type Meta struct {
 	Title       string
@@ -66,7 +67,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(meta.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 39, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 40, Col: 22}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -79,7 +80,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(meta.Description)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 40, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 41, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -97,7 +98,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(meta.Canonical)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 43, Col: 47}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 44, Col: 47}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -115,7 +116,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(DefaultString(meta.OpenGraph.Type, "website"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 46, Col: 83}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 47, Col: 83}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -128,7 +129,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(DefaultString(meta.OpenGraph.Title, meta.Title))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 47, Col: 86}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 48, Col: 86}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -141,7 +142,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(DefaultString(meta.OpenGraph.Description, meta.Description))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 48, Col: 104}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 49, Col: 104}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -154,7 +155,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(meta.OpenGraph.URL)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 49, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 50, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -172,7 +173,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(meta.OpenGraph.Image)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 51, Col: 60}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 52, Col: 60}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -185,7 +186,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(meta.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 52, Col: 60}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 53, Col: 60}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -203,7 +204,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(DefaultString(meta.Twitter.Card, "summary_large_image"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 55, Col: 94}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 56, Col: 94}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -216,7 +217,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(DefaultString(meta.Twitter.Title, meta.Title))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 56, Col: 85}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 57, Col: 85}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -229,7 +230,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(DefaultString(meta.Twitter.Description, meta.Description))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 57, Col: 103}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 58, Col: 103}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -247,7 +248,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(meta.Twitter.Image)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 59, Col: 59}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 60, Col: 59}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -266,7 +267,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(meta.Twitter.Creator)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 62, Col: 63}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 63, Col: 63}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -289,7 +290,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(activeAds[0].ImageUrl.String)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 74, Col: 70}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 75, Col: 70}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
@@ -308,7 +309,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(activeAds[1].ImageUrl.String)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 77, Col: 70}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 78, Col: 70}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -327,7 +328,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(activeAds[2].ImageUrl.String)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 80, Col: 70}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 81, Col: 70}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -346,7 +347,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(activeAds[3].ImageUrl.String)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 83, Col: 70}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 84, Col: 70}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
@@ -357,7 +358,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<link href=\"/static/css/output.css\" rel=\"stylesheet\"><script src=\"/static/js/htmx.min.js\" defer></script><script src=\"/static/js/layout.js\" defer></script><script src=\"/static/js/dark-mode.js\" defer></script><script src=\"/static/js/sticky-ad.js\" defer></script></head><body class=\"bg-gray-50 dark:bg-black min-h-screen flex flex-col\"><div class=\"fixed top-0 left-0 w-full z-50\"><nav class=\"bg-white border-b border-gray-200 dark:border-gray-500 dark:bg-black shadow-sm\"><div class=\"max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4\"><a href=\"/\" class=\"flex items-center space-x-3 rtl:space-x-reverse\"><img src=\"/static/assets/macva-news-logo-cropped.jpeg\" width=\"220\" class=\"h-14 rounded-lg\" alt=\"Mačva News Logo\"></a><div class=\"flex items-center md:order-2\"><div class=\"flex items-center\"><button data-collapse-toggle=\"navbar-user\" type=\"button\" class=\"inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600\"><svg class=\"w-6 h-6\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 20 20\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z\"></path></svg> <span class=\"sr-only\">Search</span></button> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<link href=\"/static/css/output.css\" rel=\"stylesheet\"><script src=\"/static/js/htmx.min.js\" defer></script><script src=\"/static/js/layout.js\" defer></script><script src=\"/static/js/dark-mode.js\" defer></script><script src=\"/static/js/sticky-ad.js\" defer></script></head><body class=\"bg-gray-50 dark:bg-black min-h-screen flex flex-col\"><div class=\"fixed top-0 left-0 w-full z-50\"><nav class=\"bg-white border-b border-gray-200 dark:border-gray-500 dark:bg-black shadow-sm\"><div class=\"max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4\"><a href=\"/\" class=\"flex items-center space-x-3 rtl:space-x-reverse\"><img src=\"/static/assets/f72dd544-c70b-4e10-a211-6c07a9478b44-macva-news-logo-cropped.webp\" width=\"220\" class=\"h-14 rounded-lg\" alt=\"Mačva News Logo\"></a><div class=\"flex items-center md:order-2\"><div class=\"flex items-center\"><button data-collapse-toggle=\"navbar-user\" type=\"button\" class=\"inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600\"><svg class=\"w-6 h-6\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 20 20\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z\"></path></svg> <span class=\"sr-only\">Search</span></button> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -369,7 +370,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 			var templ_7745c5c3_Var20 string
 			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(user.Pfp)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 111, Col: 60}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 112, Col: 60}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
@@ -392,7 +393,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 122, Col: 82}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 123, Col: 82}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -405,7 +406,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(user.Email)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 123, Col: 91}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 124, Col: 91}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -426,72 +427,81 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 			return templ_7745c5c3_Err
 		}
 		for _, category := range categories {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "<a href=\"#\" class=\"flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:text-white dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors duration-200\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "<a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var23 string
-			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(category.CategoryName)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 172, Col: 32}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
+			var templ_7745c5c3_Var23 templ.SafeURL = templ.SafeURL("/kategorije/" + utils.Slugify(category.CategoryName) + "/" + category.CategoryID.String())
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var23)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "</a>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "\" class=\"flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:text-white dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors duration-200\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var24 string
+			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(category.CategoryName)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 173, Col: 32}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "</a>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "</div></div></div></div><!-- Page Content with Ad Spaces --><div class=\"mt-40 container mx-auto px-4 sm:px-32 py-8 grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1\"><!-- Header Ad Placement (Full Width) -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "</div></div></div></div><!-- Page Content with Ad Spaces --><div class=\"mt-40 container mx-auto px-4 sm:px-32 py-8 grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1\"><!-- Header Ad Placement (Full Width) -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for _, ad := range activeAds {
 			if ad.Placement.String == "header" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "<a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "<a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var24 templ.SafeURL = templ.SafeURL(ad.TargetUrl.String)
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var24)))
+				var templ_7745c5c3_Var25 templ.SafeURL = templ.SafeURL(ad.TargetUrl.String)
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var25)))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "\" target=\"_blank\" class=\"lg:col-span-4 mb-6 w-full\"><div class=\"lg:col-span-4 mb-6 w-full\"><img src=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var25 string
-				templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(ad.ImageUrl.String)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 186, Col: 37}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "\" alt=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "\" target=\"_blank\" class=\"lg:col-span-4 mb-6 w-full\"><div class=\"lg:col-span-4 mb-6 w-full\"><img src=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var26 string
-				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(ad.Description.String)
+				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(ad.ImageUrl.String)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 186, Col: 67}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 187, Col: 37}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "\" class=\"object-fit mb-6 w-full h-64\"></div></a>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "\" alt=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var27 string
+				templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(ad.Description.String)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 187, Col: 67}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "\" class=\"object-fit mb-6 w-full h-64\"></div></a>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "<!-- Sidebar Ad (Desktop) --><!-- Main Content Area --><main class=\"lg:col-span-3\"><div class=\"mt-10\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "<!-- Sidebar Ad (Desktop) --><!-- Main Content Area --><main class=\"lg:col-span-3\"><div class=\"mt-10\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -501,137 +511,146 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "</div></main>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "</div></main>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for _, ad := range activeAds {
 			if ad.Placement.String == "sidebar" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "<aside class=\"lg:block lg:col-span-1\"><div id=\"sticky-ad-container\" class=\"sticky-ad\"><a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "<aside class=\"lg:block lg:col-span-1\"><div id=\"sticky-ad-container\" class=\"sticky-ad\"><a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var27 templ.SafeURL = templ.SafeURL(ad.TargetUrl.String)
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var27)))
+				var templ_7745c5c3_Var28 templ.SafeURL = templ.SafeURL(ad.TargetUrl.String)
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var28)))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "\" target=\"_blank\" class=\"mb-6 w-full\"><img src=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var28 string
-				templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(ad.ImageUrl.String)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 210, Col: 38}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "\" alt=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "\" target=\"_blank\" class=\"mb-6 w-full\"><img src=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var29 string
-				templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(ad.Description.String)
+				templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(ad.ImageUrl.String)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 210, Col: 68}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 211, Col: 38}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, "\" class=\"object-fit mb-6 w-full h-96\"></a></div></aside>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, "\" alt=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var30 string
+				templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(ad.Description.String)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 211, Col: 68}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "\" class=\"object-fit mb-6 w-full h-96\"></a></div></aside>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "<!-- Footer Ad Placement (Full Width) -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "<!-- Footer Ad Placement (Full Width) -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for _, ad := range activeAds {
 			if ad.Placement.String == "footer" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "<div class=\"lg:col-span-4 mt-6\"><a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "<div class=\"lg:col-span-4 mt-6\"><a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var30 templ.SafeURL = templ.SafeURL(ad.TargetUrl.String)
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var30)))
+				var templ_7745c5c3_Var31 templ.SafeURL = templ.SafeURL(ad.TargetUrl.String)
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var31)))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "\" target=\"_blank\" class=\"mb-6 w-full\"><img src=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var31 string
-				templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(ad.ImageUrl.String)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 221, Col: 37}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "\" alt=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "\" target=\"_blank\" class=\"mb-6 w-full\"><img src=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var32 string
-				templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(ad.Description.String)
+				templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(ad.ImageUrl.String)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 221, Col: 67}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 222, Col: 37}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, "\" class=\"object-fit mb-6 w-full h-64\"></a></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, "\" alt=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var33 string
+				templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(ad.Description.String)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 222, Col: 67}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "\" class=\"object-fit mb-6 w-full h-64\"></a></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "</div><footer class=\"w-full bg-gray-100 border-t border-gray-200 dark:border-gray-500 dark:bg-black text-gray-900 dark:text-gray-100 py-8 mx-auto\"><!-- First Row --><div class=\"container mx-auto px-4 sm:px-6 lg:px-8\"><div class=\"flex flex-col md:flex-row justify-between gap-8\"><!-- Categories Column --><div class=\"w-full md:w-1/3\"><h3 class=\"text-xl font-bold mb-4 text-gray-800 dark:text-gray-200\">Kategorije</h3><div class=\"grid grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-2\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 59, "</div><footer class=\"w-full bg-gray-100 border-t border-gray-200 dark:border-gray-500 dark:bg-black text-gray-900 dark:text-gray-100 py-8 mx-auto\"><!-- First Row --><div class=\"container mx-auto px-4 sm:px-6 lg:px-8\"><div class=\"flex flex-col md:flex-row justify-between gap-8\"><!-- Categories Column --><div class=\"w-full md:w-1/3\"><h3 class=\"text-xl font-bold mb-4 text-gray-800 dark:text-gray-200\">Kategorije</h3><div class=\"grid grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for _, category := range categories {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 59, "<ul><li><a href=\"#\" class=\"text-gray-700 dark:text-gray-300 hover:text-primary\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, "<ul><li><a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var33 string
-			templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(category.CategoryName)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 237, Col: 109}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
+			var templ_7745c5c3_Var34 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/kategorije/%s/%s", utils.Slugify(category.CategoryName), category.CategoryID.String()))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var34)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, "</a></li></ul>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 61, "\" class=\"text-gray-700 dark:text-gray-300 hover:text-primary\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var35 string
+			templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(category.CategoryName)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 238, Col: 225}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 62, "</a></li></ul>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 61, "</div></div><!-- Social Media Column --><div class=\"w-full md:w-1/3\"><h3 class=\"text-xl font-bold mb-4 text-gray-800 dark:text-gray-200\">Zapratite nas</h3><ul class=\"flex space-x-4\"><li><a href=\"https://facebook.com\" class=\"text-gray-800 dark:text-gray-200 hover:text-primary-light flex items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" class=\"w-6 h-6 fill-current\"><path d=\"M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z\"></path></svg></a></li><li><a href=\"https://twitter.com\" class=\"text-gray-800 dark:text-gray-200 hover:text-primary-light flex items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" class=\"w-6 h-6 fill-current\"><path d=\"M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z\"></path></svg></a></li><li><a href=\"https://instagram.com\" class=\"text-gray-800 dark:text-gray-200 hover:text-primary-light flex items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" class=\"w-6 h-6 fill-current\"><path d=\"M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.415 2.227.056 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.415-1.274.056-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.164-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.256-1.814.42-2.234.21-.569.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.795.646-1.44 1.44-1.44.793-.001 1.44.645 1.44 1.44z\"></path></svg></a></li><li><a href=\"https://youtube.com\" class=\"text-gray-800 dark:text-gray-200 hover:text-primary-light flex items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" class=\"w-6 h-6 fill-current\"><path d=\"M23.498 6.186c-.274-1.03-1.084-1.84-2.114-2.114C19.246 3.5 12 3.5 12 3.5s-7.246 0-9.384.572C1.584 4.346.774 5.156.5 6.186.001 8.372 0 12 0 12s.001 3.628.5 5.814c.274 1.03 1.084 1.84 2.114 2.114C4.754 20.5 12 20.5 12 20.5s7.246 0 9.384-.572c1.03-.274 1.84-1.084 2.114-2.114.499-2.186.5-5.814.5-5.814s-.001-3.628-.5-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z\"></path></svg></a></li></ul></div></div></div><!-- Second Row --><div class=\"bg-gray-200 dark:bg-gray-800 mt-8 py-4\"><div class=\"container mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap justify-between items-center\"><!-- Main Navigation Links --><nav class=\"flex flex-wrap space-x-4 text-sm mb-4 md:mb-0\"><a href=\"/\" class=\"text-gray-800 dark:text-gray-200 hover:text-primary\">Naslovna</a> <a href=\"/about\" class=\"text-gray-800 dark:text-gray-200 hover:text-primary\">O nama</a><p class=\"text-gray-800 dark:text-gray-200 hover:text-primary\">Kontakt: macvanews@gmail.com</p></nav><!-- Copyright Text --><p class=\"text-sm text-gray-800 dark:text-gray-200\">© ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 63, "</div></div><!-- Social Media Column --><div class=\"w-full md:w-1/3\"><h3 class=\"text-xl font-bold mb-4 text-gray-800 dark:text-gray-200\">Zapratite nas</h3><ul class=\"flex space-x-4\"><li><a href=\"https://facebook.com\" class=\"text-gray-800 dark:text-gray-200 hover:text-primary-light flex items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" class=\"w-6 h-6 fill-current\"><path d=\"M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z\"></path></svg></a></li><li><a href=\"https://twitter.com\" class=\"text-gray-800 dark:text-gray-200 hover:text-primary-light flex items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" class=\"w-6 h-6 fill-current\"><path d=\"M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z\"></path></svg></a></li><li><a href=\"https://instagram.com\" class=\"text-gray-800 dark:text-gray-200 hover:text-primary-light flex items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" class=\"w-6 h-6 fill-current\"><path d=\"M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.415 2.227.056 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.415-1.274.056-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.164-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.256-1.814.42-2.234.21-.569.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.795.646-1.44 1.44-1.44.793-.001 1.44.645 1.44 1.44z\"></path></svg></a></li><li><a href=\"https://youtube.com\" class=\"text-gray-800 dark:text-gray-200 hover:text-primary-light flex items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" class=\"w-6 h-6 fill-current\"><path d=\"M23.498 6.186c-.274-1.03-1.084-1.84-2.114-2.114C19.246 3.5 12 3.5 12 3.5s-7.246 0-9.384.572C1.584 4.346.774 5.156.5 6.186.001 8.372 0 12 0 12s.001 3.628.5 5.814c.274 1.03 1.084 1.84 2.114 2.114C4.754 20.5 12 20.5 12 20.5s7.246 0 9.384-.572c1.03-.274 1.84-1.084 2.114-2.114.499-2.186.5-5.814.5-5.814s-.001-3.628-.5-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z\"></path></svg></a></li></ul></div></div></div><!-- Second Row --><div class=\"bg-gray-200 dark:bg-gray-800 mt-8 py-4\"><div class=\"container mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap justify-between items-center\"><!-- Main Navigation Links --><nav class=\"flex flex-wrap space-x-4 text-sm mb-4 md:mb-0\"><a href=\"/\" class=\"text-gray-800 dark:text-gray-200 hover:text-primary\">Naslovna</a> <a href=\"/about\" class=\"text-gray-800 dark:text-gray-200 hover:text-primary\">O nama</a><p class=\"text-gray-800 dark:text-gray-200 hover:text-primary\">Kontakt: macvanews@gmail.com</p></nav><!-- Copyright Text --><p class=\"text-sm text-gray-800 dark:text-gray-200\">© ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var34 string
-		templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(time.Now().Year()))
+		var templ_7745c5c3_Var36 string
+		templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(time.Now().Year()))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 300, Col: 92}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 301, Col: 92}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 62, " Mačva News Portal. All rights reserved.</p></div></div></footer><style>\n\t\t\t\t/* Custom scrollbar hide for webkit browsers */\n\t\t\t\t.scrollbar-hide::-webkit-scrollbar {\n\t\t\t\t\tdisplay: none;\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t/* Scrollbar hide for Firefox */\n\t\t\t\t.scrollbar-hide {\n\t\t\t\t\t-ms-overflow-style: none;  /* IE and Edge */\n\t\t\t\t\tscrollbar-width: none;  /* Firefox */\n\t\t\t\t}\n\n\t\t\t\t.sticky-ad {\n\t\t\t\t position: relative;\n\t\t\t\t transition: top 0.3s ease-in-out;\n\t\t\t\t}\n  \n\t\t\t\t/* Only apply sticky positioning on large screens */\n\t\t\t\t@media (min-width: 1024px) {\n\t\t\t\t\t.sticky-ad.is-sticky {\n\t\t\t\t\tposition: sticky;\n\t\t\t\t\ttop: 180px;\n\t\t\t\t\t}\n                }\n\t\t\t</style></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 64, " Mačva News Portal. All rights reserved.</p></div></div></footer><style>\n\t\t\t\t/* Custom scrollbar hide for webkit browsers */\n\t\t\t\t.scrollbar-hide::-webkit-scrollbar {\n\t\t\t\t\tdisplay: none;\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t/* Scrollbar hide for Firefox */\n\t\t\t\t.scrollbar-hide {\n\t\t\t\t\t-ms-overflow-style: none;  /* IE and Edge */\n\t\t\t\t\tscrollbar-width: none;  /* Firefox */\n\t\t\t\t}\n\n\t\t\t\t.sticky-ad {\n\t\t\t\t position: relative;\n\t\t\t\t transition: top 0.3s ease-in-out;\n\t\t\t\t}\n  \n\t\t\t\t/* Only apply sticky positioning on large screens */\n\t\t\t\t@media (min-width: 1024px) {\n\t\t\t\t\t.sticky-ad.is-sticky {\n\t\t\t\t\tposition: sticky;\n\t\t\t\t\ttop: 180px;\n\t\t\t\t\t}\n                }\n\t\t\t</style></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
