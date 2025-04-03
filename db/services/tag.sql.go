@@ -94,6 +94,37 @@ func (q *Queries) GetTagsByContent(ctx context.Context, contentID pgtype.UUID) (
 	return items, nil
 }
 
+const getUniqueTagsByCategoryID = `-- name: GetUniqueTagsByCategoryID :many
+SELECT DISTINCT t.tag_id, t.tag_name
+FROM tag t
+JOIN content_tag ct ON t.tag_id = ct.tag_id
+JOIN content c ON ct.content_id = c.content_id
+WHERE c.category_id = $1
+  AND c.status = 'published'
+  AND c.is_deleted = false
+ORDER BY t.tag_name
+`
+
+func (q *Queries) GetUniqueTagsByCategoryID(ctx context.Context, categoryID pgtype.UUID) ([]Tag, error) {
+	rows, err := q.db.Query(ctx, getUniqueTagsByCategoryID, categoryID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Tag
+	for rows.Next() {
+		var i Tag
+		if err := rows.Scan(&i.TagID, &i.TagName); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listTags = `-- name: ListTags :many
 SELECT tag_id, tag_name
 FROM tag

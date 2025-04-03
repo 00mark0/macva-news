@@ -205,6 +205,12 @@ func (server *Server) updateCategory(ctx echo.Context) error {
 
 func (server *Server) listRecentCategoryContent(ctx echo.Context) error {
 	var req ListPublishedLimitReq
+
+	if err := ctx.Bind(&req); err != nil {
+		log.Println("Error binding request in listRecentCategoryContent:", err)
+		return err
+	}
+
 	categoryIDStr := ctx.Param("id")
 
 	categoryIDBytes, err := uuid.Parse(categoryIDStr)
@@ -224,7 +230,7 @@ func (server *Server) listRecentCategoryContent(ctx echo.Context) error {
 		return err
 	}
 
-	nextLimit := req.Limit + 18
+	nextLimit := req.Limit + 9
 
 	arg := db.ListContentByCategoryLimitParams{
 		CategoryID: categoryID,
@@ -276,7 +282,9 @@ func (server *Server) listRecentCategoryContent(ctx echo.Context) error {
 		return err
 	}
 
-	title := "Najnovije"
+	title := "Najnovije iz " + category.CategoryName
 
-	return Render(ctx, http.StatusOK, components.GridCards(categoryContent, globalSettings[0], int(nextLimit), "", "", title))
+	log.Println("len(content):", len(categoryContent))
+
+	return Render(ctx, http.StatusOK, components.RecentCategoryContent(categoryContent, globalSettings[0], int(nextLimit), title))
 }

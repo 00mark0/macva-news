@@ -185,6 +185,7 @@ func (server *Server) setupRouter() {
 	router.GET("/api/content/categories", server.categoriesWithContent)
 	// Categories
 	router.GET("/api/category/content/recent/:id", server.listRecentCategoryContent)
+	router.GET("/api/category/:id/tags/content", server.listContentByTagsUnderCategory)
 
 	server.router = router
 }

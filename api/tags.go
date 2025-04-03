@@ -478,3 +478,79 @@ func (server *Server) listTagsByContent(ctx echo.Context) error {
 
 	return Render(ctx, http.StatusOK, components.TagsInArticleDetes(tags))
 }
+
+// ContentByTagsHandler modified to return HTML instead of JSON
+func (server *Server) listContentByTagsUnderCategory(ctx echo.Context) error {
+	categoryIDStr := ctx.Param("id")
+	categoryIDBytes, err := uuid.Parse(categoryIDStr)
+	if err != nil {
+		log.Println("Invalid category ID format in listContentByTagsUnderCategory:", err)
+		return err
+	}
+	categoryID := pgtype.UUID{
+		Bytes: categoryIDBytes,
+		Valid: true,
+	}
+
+	// Get category info for the header
+	category, err := server.store.GetCategoryByID(ctx.Request().Context(), categoryID)
+	if err != nil {
+		log.Println("Error fetching category in listContentByTagsUnderCategory:", err)
+		return err
+	}
+
+	// Step 1: Get unique tags for the category
+	tags, err := server.store.GetUniqueTagsByCategoryID(ctx.Request().Context(), categoryID)
+	if err != nil {
+		log.Println("Error fetching unique tags for category:", categoryID, err)
+		return err
+	}
+
+	const limit = 6 // Show fewer items initially per tag
+	const offset = 0
+
+	// Step 2: Loop through tags and fetch content
+	var contentByTags components.ContentByTagsList
+
+	for _, tag := range tags {
+		content, err := server.store.ListContentByTag(ctx.Request().Context(), db.ListContentByTagParams{
+			TagName: tag.TagName,
+			Limit:   limit,
+			Offset:  offset,
+		})
+
+		for i := range content {
+			if content[i].Thumbnail.String == "" {
+				content[i].Thumbnail = pgtype.Text{String: ThumbnailURL, Valid: true}
+			}
+		}
+
+		if err != nil {
+			log.Println("Error fetching content for tag:", tag, err)
+			continue // Skip this tag but continue with others
+		}
+
+		// Only add tags that have content
+		if len(content) > 0 {
+			contentByTags = append(contentByTags, components.ContentByTag{
+				TagName: tag.TagName,
+				Content: content,
+			})
+		}
+	}
+
+	// Get global settings for display options
+	globalSettings, err := server.store.GetGlobalSettings(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error fetching global settings:", err)
+		// Use default settings if we can't fetch them
+		globalSettings[0] = db.GlobalSetting{
+			DisableComments: false,
+			DisableLikes:    false,
+			DisableViews:    false,
+		}
+	}
+
+	// Render the templ component
+	return Render(ctx, http.StatusOK, components.ContentByTagsSection(contentByTags, globalSettings[0], category.CategoryName))
+}

@@ -46,6 +46,18 @@ FROM tag
 JOIN content_tag ct ON tag.tag_id = ct.tag_id
 WHERE ct.content_id = $1;
 
+-- name: GetUniqueTagsByCategoryID :many
+SELECT DISTINCT t.tag_id, t.tag_name
+FROM tag t
+JOIN content_tag ct ON t.tag_id = ct.tag_id
+JOIN content c ON ct.content_id = c.content_id
+WHERE c.category_id = $1
+  AND c.status = 'published'
+  AND c.is_deleted = false
+ORDER BY t.tag_name;
+
 -- name: RemoveTagFromContent :exec
 DELETE FROM content_tag
 WHERE content_id = $1 AND tag_id = $2;
+
+

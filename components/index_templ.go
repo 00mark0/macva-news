@@ -786,6 +786,15 @@ func CategoriesWithContent(content []ContentDataSlice, globalSettings db.GlobalS
 	})
 }
 
+// ContentByTag represents a group of content associated with a specific tag
+type ContentByTag struct {
+	TagName string
+	Content []db.ListContentByTagRow
+}
+
+// ContentByTagsList is a slice of ContentByTag
+type ContentByTagsList []ContentByTag
+
 func Index(props ...interface{}) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context

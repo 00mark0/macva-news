@@ -421,6 +421,15 @@ templ CategoriesWithContent(content []ContentDataSlice, globalSettings db.Global
 	}
 }
 
+// ContentByTag represents a group of content associated with a specific tag
+type ContentByTag struct {
+	TagName string
+	Content []db.ListContentByTagRow
+}
+
+// ContentByTagsList is a slice of ContentByTag
+type ContentByTagsList []ContentByTag
+
 templ Index(props ...interface{}) {
 	@Layout(props[0].(db.GetUserByIDRow), props[1].(Meta), props[2].([]db.Ad), props[3].([]db.Category), main())
 }
