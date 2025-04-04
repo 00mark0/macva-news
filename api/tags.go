@@ -533,6 +533,7 @@ func (server *Server) listContentByTagsUnderCategory(ctx echo.Context) error {
 		// Only add tags that have content
 		if len(content) > 0 {
 			contentByTags = append(contentByTags, components.ContentByTag{
+				TagID:   tag.TagID.String(),
 				TagName: tag.TagName,
 				Content: content,
 			})
@@ -553,4 +554,66 @@ func (server *Server) listContentByTagsUnderCategory(ctx echo.Context) error {
 
 	// Render the templ component
 	return Render(ctx, http.StatusOK, components.ContentByTagsSection(contentByTags, globalSettings[0], category.CategoryName))
+}
+
+func (server *Server) listAllContentByTag(ctx echo.Context) error {
+	var req ListTagsReq
+
+	if err := ctx.Bind(&req); err != nil {
+		log.Println("Error binding request in listAllContentByTag:", err)
+		return err
+	}
+
+	tagIDStr := ctx.Param("id")
+
+	// Parse string UUID into proper UUID format
+	tagIDBytes, err := uuid.Parse(tagIDStr)
+	if err != nil {
+		log.Println("Invalid tag ID format in listAllContentByTag:", err)
+		return err
+	}
+
+	tagID := pgtype.UUID{
+		Bytes: tagIDBytes,
+		Valid: true,
+	}
+
+	tag, err := server.store.GetTag(ctx.Request().Context(), tagID)
+	if err != nil {
+		log.Println("Error fetching tag in listAllContentByTag:", err)
+		return err
+	}
+
+	nextLimit := req.Limit + 9
+
+	arg := db.ListContentByTagLimitParams{
+		TagName: tag.TagName,
+		Limit:   nextLimit,
+	}
+
+	content, err := server.store.ListContentByTagLimit(ctx.Request().Context(), arg)
+	if err != nil {
+		log.Println("Error fetching content by tag in listAllContentByTag:", err)
+		return err
+	}
+
+	for i := range content {
+		if content[i].Thumbnail.String == "" {
+			content[i].Thumbnail = pgtype.Text{String: ThumbnailURL, Valid: true}
+		}
+	}
+
+	globalSettings, err := server.store.GetGlobalSettings(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error fetching global settings in listAllContentByTag:", err)
+		// Use default settings if we can't fetch them
+		globalSettings[0] = db.GlobalSetting{
+			DisableComments: false,
+			DisableLikes:    false,
+			DisableDislikes: true,
+			DisableViews:    false,
+		}
+	}
+
+	return Render(ctx, http.StatusOK, components.TagsGrid(tagIDStr, content, int(nextLimit), globalSettings[0]))
 }

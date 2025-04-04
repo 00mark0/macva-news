@@ -171,9 +171,11 @@ func (server *Server) setupRouter() {
 	// Forgotten Password Page
 	router.GET("/zaboravljena-lozinka", server.requestPassResetPage)
 	// User Search
-	router.GET("/search", server.searchResultsPage)
+	router.GET("/pretraga", server.searchResultsPage)
 	// Categories Page
 	router.GET("/kategorije/:category/:id", server.categoriesPage)
+	// Tag Page
+	router.GET("/oznake/:tag/:id", server.tagPage)
 
 	//User API
 	// User Search
@@ -186,6 +188,8 @@ func (server *Server) setupRouter() {
 	// Categories
 	router.GET("/api/category/content/recent/:id", server.listRecentCategoryContent)
 	router.GET("/api/category/:id/tags/content", server.listContentByTagsUnderCategory)
+	// Tags
+	router.GET("/api/tag/content/recent/:id", server.listAllContentByTag)
 
 	server.router = router
 }
