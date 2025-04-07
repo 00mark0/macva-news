@@ -176,6 +176,8 @@ func (server *Server) setupRouter() {
 	router.GET("/kategorije/:category/:id", server.categoriesPage)
 	// Tag Page
 	router.GET("/oznake/:tag/:id", server.tagPage)
+	// Article Page
+	router.GET("/:article/:id", server.articlePage)
 
 	//User API
 	// User Search

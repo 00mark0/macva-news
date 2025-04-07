@@ -1094,3 +1094,87 @@ func (server *Server) tagPage(ctx echo.Context) error {
 
 	return Render(ctx, http.StatusOK, components.TagsPage(userData, meta, activeAds, categories, tag))
 }
+
+func (server *Server) articlePage(ctx echo.Context) error {
+	var userData db.GetUserByIDRow
+
+	articleIDStr := ctx.Param("id")
+
+	articleIDBytes, err := uuid.Parse(articleIDStr)
+	if err != nil {
+		log.Println("Invalid category ID format in categoriesPage:", err)
+		return err
+	}
+
+	articleID := pgtype.UUID{
+		Bytes: articleIDBytes,
+		Valid: true,
+	}
+
+	article, err := server.store.GetContentDetails(ctx.Request().Context(), articleID)
+	if err != nil {
+		log.Println("Error getting category in categoriesPage:", err)
+		return err
+	}
+
+	cookie, err := ctx.Cookie("refresh_token")
+	if err != nil {
+		log.Println("User is not logged in.")
+	} else {
+		payload, err := server.tokenMaker.VerifyToken(cookie.Value)
+
+		userIDBytes, err := uuid.Parse(payload.UserID)
+		if err != nil {
+			log.Println("Error parsing user_id in homePage:", err)
+			return err
+		}
+
+		userID := pgtype.UUID{
+			Bytes: userIDBytes,
+			Valid: true,
+		}
+
+		user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
+		if err != nil {
+			log.Println("Error getting user in homePage:", err)
+			return err
+		}
+
+		userData = user
+	}
+
+	// Prepare meta information dynamically for the search page
+	meta := components.Meta{
+		Title:       utils.GenerateTitleTag(article.Title), // Već promenjeno za stranicu kategorija
+		Description: utils.GenerateMetaDescription(article.ContentDescription),
+		Canonical:   BaseUrl + "/" + utils.Slugify(utils.GenerateTitleTag(article.Title)) + "/" + articleIDStr, // Ažurirano za URL stranice kategorija
+		OpenGraph: components.OpenGraphMeta{
+			Title:       utils.GenerateTitleTag(article.Title),
+			Description: utils.GenerateMetaDescription(article.ContentDescription),
+			URL:         BaseUrl + "/" + utils.Slugify(utils.GenerateTitleTag(article.Title)) + "/" + articleIDStr, // Ažurirano za URL stranice kategorija
+			Type:        "website",
+			Image:       "/static/assets/macva-news-logo-cropped.jpeg", // Koristi istu sliku
+		},
+		Twitter: components.TwitterCardMeta{
+			Card:        "summary_large_image",
+			Title:       utils.GenerateTitleTag(article.Title),
+			Description: utils.GenerateMetaDescription(article.ContentDescription),
+			Image:       "/static/assets/macva-news-logo-cropped.jpeg", // Koristi istu sliku
+			Creator:     "@MacvaNews",                                  // Opcionalno: vaš Twitter nalog
+		},
+	}
+
+	activeAds, err := server.store.ListActiveAds(ctx.Request().Context(), 4)
+	if err != nil {
+		log.Println("Error listing active ads in homePage:", err)
+		return err
+	}
+
+	categories, err := server.store.ListCategories(ctx.Request().Context(), 1000)
+	if err != nil {
+		log.Println("Error listing categories in homePage:", err)
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.ArticlePage(userData, meta, activeAds, categories, article))
+}

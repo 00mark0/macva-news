@@ -1,0 +1,11 @@
+package components
+
+import "github.com/00mark0/macva-news/db/services"
+
+templ Article(content db.GetContentDetailsRow) {
+	<h1>{ content.Title }</h1>
+}
+
+templ ArticlePage(props ...interface{}) {
+	@Layout(props[0].(db.GetUserByIDRow), props[1].(Meta), props[2].([]db.Ad), props[3].([]db.Category), Article(props[4].(db.GetContentDetailsRow)))
+}
