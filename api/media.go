@@ -1,6 +1,8 @@
 package api
 
 import (
+	"bytes"
+	"context"
 	"fmt"
 	"image"
 	"image/jpeg"
@@ -9,8 +11,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/db/services"
@@ -75,27 +79,78 @@ func ConvertToWebPWithResize(inputPath string, maxWidth, maxHeight int, quality 
 	return webpPath, nil
 }
 
+// video
+// Set file size limits based on media type
+const maxImageSize = 20 * 1024 * 1024  // 20MB for images
+const maxVideoSize = 100 * 1024 * 1024 // 100MB for videos
+const maxAudioSize = 50 * 1024 * 1024  // 50MB for audio
+
+// Add this to your server struct initialization or as a package-level variable
+func (server *Server) getUploadSemaphore() chan struct{} {
+	if server.uploadSemaphore == nil {
+		server.uploadSemaphore = make(chan struct{}, 3) // Max 3 concurrent uploads
+	}
+	return server.uploadSemaphore
+}
+
+// OptimizeVideo transcodes videos to a more web-friendly format with reasonable size
+func OptimizeVideo(inputPath string) (string, error) {
+	outputPath := strings.TrimSuffix(inputPath, filepath.Ext(inputPath)) + "_optimized.mp4"
+
+	cmd := exec.Command("ffmpeg",
+		"-i", inputPath,
+		"-vcodec", "libx264",
+		"-crf", "18", // Lower CRF (higher quality), adjust if needed
+		"-preset", "medium", // Use slower presets for better quality
+		"-vf", "scale='if(gt(iw,1280),1280,-1)':'if(gt(ih,720),720,-1)'", // Scale down only if necessary, keep max 1280x720
+		"-movflags", "+faststart", // For better streaming
+		"-b:v", "2M", // Set a bitrate for more predictable quality, you can increase/decrease this based on your needs
+		"-y", outputPath)
+
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		return "", fmt.Errorf("ffmpeg error: %v - %s", err, stderr.String())
+	}
+
+	// Check if the output file was created
+	if _, err := os.Stat(outputPath); os.IsNotExist(err) {
+		return "", fmt.Errorf("output file not created: %v", err)
+	}
+
+	// Remove original file to save space
+	os.Remove(inputPath)
+
+	return outputPath, nil
+}
+
 func (server *Server) addMediaToNewContent(ctx echo.Context) error {
 	contentIDCookie, err := ctx.Cookie("content_id")
 	if err != nil {
 		var emptyMedia []db.Medium
-
 		return Render(ctx, http.StatusOK, components.InsertMedia(emptyMedia, ""))
 	}
-
 	contentIDStr := contentIDCookie.Value
-
 	// Parse string UUID into proper UUID format
 	parsedUUID, err := uuid.Parse(contentIDStr)
 	if err != nil {
 		log.Println("Invalid content ID format from cookie in addMediaToNewContent:", err)
 		return err
 	}
-
 	// Create a pgtype.UUID with the parsed UUID
 	contentID := pgtype.UUID{
 		Bytes: parsedUUID,
 		Valid: true,
+	}
+
+	// Implement basic throttling to prevent concurrent heavy uploads
+	uploadSemaphore := server.getUploadSemaphore()
+	select {
+	case uploadSemaphore <- struct{}{}:
+		defer func() { <-uploadSemaphore }()
+	default:
+		return echo.NewHTTPError(http.StatusTooManyRequests, "Server is processing too many uploads")
 	}
 
 	// Get the file from the form
@@ -103,6 +158,38 @@ func (server *Server) addMediaToNewContent(ctx echo.Context) error {
 	if err != nil {
 		log.Println("Error retrieving uploaded file in addMediaToNewContent:", err)
 		return err
+	}
+
+	// Determine media type based on file extension
+	mediaType := "image" // Default
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+
+	// Validate file type and size
+	switch {
+	case ext == ".mp4" || ext == ".mov" || ext == ".avi":
+		mediaType = "video"
+		// Validate video types
+		allowedVideoTypes := map[string]bool{".mp4": true, ".mov": true, ".avi": true}
+		if !allowedVideoTypes[ext] {
+			return echo.NewHTTPError(http.StatusBadRequest, "Unsupported video format")
+		}
+		if file.Size > maxVideoSize {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Video file too large, maximum size is %d MB", maxVideoSize/1024/1024))
+		}
+	case ext == ".mp3" || ext == ".wav" || ext == ".ogg":
+		mediaType = "audio"
+		if file.Size > maxAudioSize {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Audio file too large, maximum size is %d MB", maxAudioSize/1024/1024))
+		}
+	default:
+		// Image handling
+		allowedImageTypes := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true, ".webp": true}
+		if !allowedImageTypes[ext] {
+			return echo.NewHTTPError(http.StatusBadRequest, "Unsupported image format")
+		}
+		if file.Size > maxImageSize {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Image file too large, maximum size is %d MB", maxImageSize/1024/1024))
+		}
 	}
 
 	uploadsDir := "static/uploads"
@@ -135,28 +222,36 @@ func (server *Server) addMediaToNewContent(ctx echo.Context) error {
 		return err
 	}
 
-	// Determine media type based on file extension
-	mediaType := "image" // Default
-	ext := strings.ToLower(filepath.Ext(file.Filename))
-	if ext == ".mp4" || ext == ".mov" || ext == ".avi" {
-		mediaType = "video"
-	} else if ext == ".mp3" || ext == ".wav" || ext == ".ogg" {
-		mediaType = "audio"
-	}
-
-	// If the file is an image, convert it to WebP
+	// Process files based on media type
 	if mediaType == "image" {
+		// Convert image to WebP with resize
 		convertedPath, err := ConvertToWebPWithResize(filePath, 800, 600, 80)
 		if err != nil {
 			log.Println("Error converting image to WebP:", err)
-			// Optionally, you might want to continue with the original file in case of error
+			// Continue with original file
 		} else {
-			// Update filePath to the new WebP file.
+			// Update filePath to the new WebP file
 			filePath = convertedPath
+		}
+	} else if mediaType == "video" {
+		// For videos, optimize using ffmpeg
+		log.Println("Beginning video optimization for:", filePath)
+		optimizedPath, err := OptimizeVideo(filePath)
+		if err != nil {
+			log.Println("Error optimizing video:", err)
+			// Continue with original if optimization fails
+		} else {
+			filePath = optimizedPath
+			log.Println("Video optimization complete, new path:", filePath)
 		}
 	}
 
-	existingMedia, err := server.store.ListMediaForContent(ctx.Request().Context(), contentID)
+	// Add timeout for database operations
+	dbCtx, cancel := context.WithTimeout(ctx.Request().Context(), 30*time.Second)
+	defer cancel()
+
+	// Get existing media to determine order
+	existingMedia, err := server.store.ListMediaForContent(dbCtx, contentID)
 	if err != nil {
 		log.Println("Error listing existing media in addMediaToNewContent:", err)
 		return err
@@ -176,13 +271,27 @@ func (server *Server) addMediaToNewContent(ctx echo.Context) error {
 		MediaOrder:   nextOrder,
 	}
 
-	_, err = server.store.InsertMedia(ctx.Request().Context(), arg)
+	// Use the context with timeout
+	_, err = server.store.InsertMedia(dbCtx, arg)
 	if err != nil {
 		log.Println("Error inserting media record in addMediaToNewContent:", err)
 		return err
 	}
 
-	updatedMedia, err := server.store.ListMediaForContent(ctx.Request().Context(), contentID)
+	// Add first media as thumbnail if this is the first one
+	if nextOrder == 1 {
+		thumbnailArg := db.AddThumbnailParams{
+			ContentID: contentID,
+			Thumbnail: pgtype.Text{String: "/" + filePath, Valid: true},
+		}
+		_, err := server.store.AddThumbnail(dbCtx, thumbnailArg)
+		if err != nil {
+			log.Println("Error adding thumbnail in addMediaToNewContent:", err)
+			// Continue despite error - not critical
+		}
+	}
+
+	updatedMedia, err := server.store.ListMediaForContent(dbCtx, contentID)
 	if err != nil {
 		log.Println("Error listing updated media in addMediaToNewContent:", err)
 		return err
@@ -193,18 +302,25 @@ func (server *Server) addMediaToNewContent(ctx echo.Context) error {
 
 func (server *Server) addMediaToUpdateContent(ctx echo.Context) error {
 	contentIDStr := ctx.Param("id")
-
 	// Parse string UUID into proper UUID format
 	parsedUUID, err := uuid.Parse(contentIDStr)
 	if err != nil {
 		log.Println("Invalid content ID format in addMediaToUpdateContent:", err)
 		return err
 	}
-
 	// Create a pgtype.UUID with the parsed UUID
 	contentID := pgtype.UUID{
 		Bytes: parsedUUID,
 		Valid: true,
+	}
+
+	// Implement basic throttling to prevent concurrent heavy uploads
+	uploadSemaphore := server.getUploadSemaphore() // This would be a package-level semaphore
+	select {
+	case uploadSemaphore <- struct{}{}:
+		defer func() { <-uploadSemaphore }()
+	default:
+		return echo.NewHTTPError(http.StatusTooManyRequests, "Server is processing too many uploads")
 	}
 
 	// Get the file from the form
@@ -212,6 +328,38 @@ func (server *Server) addMediaToUpdateContent(ctx echo.Context) error {
 	if err != nil {
 		log.Println("Error retrieving uploaded file in addMediaToUpdateContent:", err)
 		return err
+	}
+
+	// Determine media type based on file extension
+	mediaType := "image" // Default
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+
+	// Validate file type and size
+	switch {
+	case ext == ".mp4" || ext == ".mov" || ext == ".avi":
+		mediaType = "video"
+		// Validate video types
+		allowedVideoTypes := map[string]bool{".mp4": true, ".mov": true, ".avi": true}
+		if !allowedVideoTypes[ext] {
+			return echo.NewHTTPError(http.StatusBadRequest, "Unsupported video format")
+		}
+		if file.Size > maxVideoSize {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Video file too large, maximum size is %d MB", maxVideoSize/1024/1024))
+		}
+	case ext == ".mp3" || ext == ".wav" || ext == ".ogg":
+		mediaType = "audio"
+		if file.Size > maxAudioSize {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Audio file too large, maximum size is %d MB", maxAudioSize/1024/1024))
+		}
+	default:
+		// Image handling
+		allowedImageTypes := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true, ".webp": true}
+		if !allowedImageTypes[ext] {
+			return echo.NewHTTPError(http.StatusBadRequest, "Unsupported image format")
+		}
+		if file.Size > maxImageSize {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Image file too large, maximum size is %d MB", maxImageSize/1024/1024))
+		}
 	}
 
 	uploadsDir := "static/uploads"
@@ -244,28 +392,36 @@ func (server *Server) addMediaToUpdateContent(ctx echo.Context) error {
 		return err
 	}
 
-	// Determine media type based on file extension
-	mediaType := "image" // Default
-	ext := strings.ToLower(filepath.Ext(file.Filename))
-	if ext == ".mp4" || ext == ".mov" || ext == ".avi" {
-		mediaType = "video"
-	} else if ext == ".mp3" || ext == ".wav" || ext == ".ogg" {
-		mediaType = "audio"
-	}
-
-	// If the file is an image, convert it to WebP
+	// Process files based on media type
 	if mediaType == "image" {
+		// Convert image to WebP with resize
 		convertedPath, err := ConvertToWebPWithResize(filePath, 800, 600, 80)
 		if err != nil {
 			log.Println("Error converting image to WebP:", err)
-			// Optionally, you might want to continue with the original file in case of error
+			// Continue with original file
 		} else {
-			// Update filePath to the new WebP file.
+			// Update filePath to the new WebP file
 			filePath = convertedPath
+		}
+	} else if mediaType == "video" {
+		// For videos, optimize using ffmpeg
+		log.Println("Beginning video optimization for:", filePath)
+		optimizedPath, err := OptimizeVideo(filePath)
+		if err != nil {
+			log.Println("Error optimizing video:", err)
+			// Continue with original if optimization fails
+		} else {
+			filePath = optimizedPath
+			log.Println("Video optimization complete, new path:", filePath)
 		}
 	}
 
-	existingMedia, err := server.store.ListMediaForContent(ctx.Request().Context(), contentID)
+	// Add timeout for database operations
+	dbCtx, cancel := context.WithTimeout(ctx.Request().Context(), 30*time.Second)
+	defer cancel()
+
+	// Get existing media to determine order
+	existingMedia, err := server.store.ListMediaForContent(dbCtx, contentID)
 	if err != nil {
 		log.Println("Error listing existing media in addMediaToUpdateContent:", err)
 		return err
@@ -285,26 +441,26 @@ func (server *Server) addMediaToUpdateContent(ctx echo.Context) error {
 		MediaOrder:   nextOrder,
 	}
 
-	media, err := server.store.InsertMedia(ctx.Request().Context(), arg)
+	media, err := server.store.InsertMedia(dbCtx, arg)
 	if err != nil {
 		log.Println("Error inserting media record in addMediaToUpdateContent:", err)
 		return err
 	}
 
+	// Set first uploaded media as thumbnail
 	if media.MediaOrder == 1 {
 		arg := db.AddThumbnailParams{
 			ContentID: contentID,
 			Thumbnail: pgtype.Text{String: "/" + filePath, Valid: true},
 		}
-
-		_, err := server.store.AddThumbnail(ctx.Request().Context(), arg)
+		_, err := server.store.AddThumbnail(dbCtx, arg)
 		if err != nil {
 			log.Println("Error adding thumbnail in addMediaToUpdateContent:", err)
 			return err
 		}
 	}
 
-	updatedMedia, err := server.store.ListMediaForContent(ctx.Request().Context(), contentID)
+	updatedMedia, err := server.store.ListMediaForContent(dbCtx, contentID)
 	if err != nil {
 		log.Println("Error listing updated media in addMediaToUpdateContent:", err)
 		return err
@@ -393,3 +549,27 @@ func (server *Server) deleteMedia(ctx echo.Context) error {
 	// Render the updated media list component
 	return Render(ctx, http.StatusOK, components.InsertMediaUpdate(updatedMedia, contentIDStr))
 }
+
+func (server *Server) listMediaForArticlePage(ctx echo.Context) error {
+	articleIDStr := ctx.Param("id")
+
+	articleIDBytes, err := uuid.Parse(articleIDStr)
+	if err != nil {
+		log.Println("Invalid category ID format in categoriesPage:", err)
+		return err
+	}
+
+	articleID := pgtype.UUID{
+		Bytes: articleIDBytes,
+		Valid: true,
+	}
+
+	media, err := server.store.ListMediaForContent(ctx.Request().Context(), articleID)
+	if err != nil {
+		log.Println("Error listing media for article in listMediaForArticlePage:", err)
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.ArticleMediaSlider(media))
+}
+

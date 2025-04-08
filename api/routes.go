@@ -192,6 +192,8 @@ func (server *Server) setupRouter() {
 	router.GET("/api/category/:id/tags/content", server.listContentByTagsUnderCategory)
 	// Tags
 	router.GET("/api/tag/content/recent/:id", server.listAllContentByTag)
+	// Article
+	router.GET("/api/content/media/:id", server.listMediaForArticlePage)
 
 	server.router = router
 }

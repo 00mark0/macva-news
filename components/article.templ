@@ -1,11 +1,433 @@
 package components
 
 import "github.com/00mark0/macva-news/db/services"
+import "fmt"
 
 templ Article(content db.GetContentDetailsRow) {
-	<h1>{ content.Title }</h1>
+	<h1 class="text-3xl font-bold dark:text-white">{ content.Title }</h1>
+	<section id="article-page-media-slider" hx-get={ fmt.Sprintf("/api/content/media/%s", content.ContentID) } hx-trigger="load" hx-target="#article-page-media-slider" hx-swap="innerHTML">
+		@LoadingSpinner()
+	</section>
 }
 
 templ ArticlePage(props ...interface{}) {
 	@Layout(props[0].(db.GetUserByIDRow), props[1].(Meta), props[2].([]db.Ad), props[3].([]db.Category), Article(props[4].(db.GetContentDetailsRow)))
+}
+
+templ ArticleMediaSlider(media []db.Medium) {
+	if len(media) > 0 {
+		<div class="article-media-slider-container mx-auto px-4 h-full mb-8">
+			<div class="slider-wrapper w-full h-full relative overflow-hidden rounded-xl">
+				<div class="slider flex w-full h-full shrink-0 aspect-video scrollbar-hide overflow-x-auto overflow-y-hidden scroll-smooth rounded-lg shadow-xl">
+					for i, medium := range media {
+						<div
+							id={ fmt.Sprintf("media-slide-%d", i) }
+							class="slider-item flex flex-col shrink-0 h-full w-full scroll-snap-align-start"
+						>
+							<div class="relative w-full h-full bg-gray-100 dark:bg-gray-800">
+								if medium.MediaType == "image" {
+									<img
+										src={ medium.MediaUrl }
+										alt={ medium.MediaCaption }
+										class="w-full h-full object-contain cursor-zoom-in"
+										data-fullscreen="true"
+										data-index={ fmt.Sprint(i) }
+										loading="lazy"
+									/>
+									// Expand icon overlay that appears on hover
+									<div class="expand-icon absolute top-4 left-4 bg-black/50 text-white p-2 rounded-full opacity-0 transition-opacity duration-200 cursor-pointer">
+										<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 1v4m0 0h-4m4 0l-5-5"></path>
+										</svg>
+									</div>
+								} else if medium.MediaType == "video" {
+									<video
+										class="w-full h-full object-contain"
+										controls
+										preload="metadata"
+									>
+										<source src={ medium.MediaUrl } type="video/mp4"/>
+										Your browser does not support the video tag.
+									</video>
+								}
+								if medium.MediaCaption != "" {
+									<div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+										<p class="text-white text-sm md:text-base font-medium">{ medium.MediaCaption }</p>
+									</div>
+								}
+							</div>
+						</div>
+					}
+				</div>
+				// Media counter badge (e.g. "2/5")
+				if len(media) > 1 {
+					<div class="media-counter absolute top-4 right-4 bg-black/70 text-white text-xs font-medium px-2 py-1 rounded-full z-10">
+						<span id="current-slide-number">1</span>/<span>{ fmt.Sprint(len(media)) }</span>
+					</div>
+				}
+				// Only show controls if there are multiple media items
+				if len(media) > 1 {
+					// Left arrow
+					<button class="slider-arrow left absolute top-1/2 left-3 bg-black/50 hover:bg-black/70 dark:bg-white/50 dark:hover:bg-white/70 rounded-full p-2 shadow-lg z-10 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white dark:text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
+						</svg>
+					</button>
+					// Right arrow
+					<button class="slider-arrow right absolute top-1/2 right-3 bg-black/50 hover:bg-black/70 dark:bg-white/50 dark:hover:bg-white/70 rounded-full p-2 shadow-lg z-10 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white dark:text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+						</svg>
+					</button>
+					// Media indicator dots with progress bar style
+					<div class="slider-indicators absolute bottom-4 left-1/2 transform -translate-x-1/2 flex justify-center gap-2 px-4 py-2 bg-black/40 dark:bg-white/20 backdrop-blur-sm rounded-full">
+						for i, _ := range media {
+							<button
+								data-slide={ fmt.Sprint(i) }
+								class="slider-indicator cursor-pointer w-2 h-2 bg-gray-300 hover:bg-blue-500 rounded-full transition-all duration-300 ease-in-out"
+							></button>
+						}
+					</div>
+				}
+			</div>
+		</div>
+		<!-- Fullscreen Overlay -->
+		<div id="fullscreen-overlay" class="fixed inset-0 bg-black/90 z-[999] hidden flex-col justify-center items-center">
+			<div class="fullscreen-toolbar absolute top-0 left-0 right-0 flex justify-between items-center p-4 bg-black/70">
+				<div class="text-white font-medium">
+					<span id="fullscreen-counter">1</span>/<span id="fullscreen-total">{ fmt.Sprint(len(media)) }</span>
+				</div>
+				<button id="close-fullscreen" class="text-white hover:text-red-400 transition-colors">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+					</svg>
+				</button>
+			</div>
+			<div class="fullscreen-content-container w-full h-full flex items-center justify-center p-8">
+				<div class="fullscreen-content w-full max-w-6xl h-full flex items-center justify-center relative">
+					for i, medium := range media {
+						if medium.MediaType == "image" {
+							<div class="fullscreen-item h-full w-full hidden flex-col justify-center items-center" data-index={ fmt.Sprint(i) }>
+								<img src={ medium.MediaUrl } alt={ medium.MediaCaption } class="max-h-[80vh] max-w-full object-contain"/>
+								if medium.MediaCaption != "" {
+									<div class="mt-4 text-white text-center">
+										<p class="text-lg">{ medium.MediaCaption }</p>
+									</div>
+								}
+							</div>
+						}
+					}
+				</div>
+			</div>
+			if len(media) > 1 {
+				<button id="fullscreen-prev" class="absolute left-0 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 rounded-full p-3 text-white transition-all duration-200">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
+					</svg>
+				</button>
+				<button id="fullscreen-next" class="absolute right-0 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 rounded-full p-3 text-white transition-all duration-200">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+					</svg>
+				</button>
+			}
+		</div>
+		<script>
+				const slider = document.querySelector('.slider');
+				const slides = document.querySelectorAll('.slider-item');
+				const indicators = document.querySelectorAll('.slider-indicator');
+				const leftArrow = document.querySelector('.slider-arrow.left');
+				const rightArrow = document.querySelector('.slider-arrow.right');
+				const currentSlideNumber = document.getElementById('current-slide-number');
+				
+				let currentSlide = 0;
+				const totalSlides = slides.length;
+				
+				// Function to update active states and counter
+				function updateActiveStates(index) {
+					// Update indicators
+					indicators.forEach((indicator, i) => {
+						if (i === index) {
+							indicator.classList.add('bg-blue-500', 'w-3', 'h-3');
+							indicator.classList.remove('bg-gray-300', 'w-2', 'h-2');
+						} else {
+							indicator.classList.remove('bg-blue-500', 'w-3', 'h-3');
+							indicator.classList.add('bg-gray-300', 'w-2', 'h-2');
+						}
+					});
+					
+					// Update counter
+					if (currentSlideNumber) {
+						currentSlideNumber.textContent = (index + 1).toString();
+					}
+					
+					currentSlide = index;
+				}
+				
+				// Function to navigate to a specific slide
+				function goToSlide(index) {
+					if (index < 0) index = totalSlides - 1;
+					if (index >= totalSlides) index = 0;
+					
+					const targetSlide = slides[index];
+					targetSlide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+					updateActiveStates(index);
+				}
+				
+				// Initial active state
+				updateActiveStates(0);
+				
+				// Indicator event listeners
+				indicators.forEach((indicator, index) => {
+					indicator.addEventListener('click', () => {
+						goToSlide(index);
+					});
+				});
+				
+				// Arrow event listeners
+				if (leftArrow && rightArrow) {
+					leftArrow.addEventListener('click', () => {
+						goToSlide(currentSlide - 1);
+					});
+					
+					rightArrow.addEventListener('click', () => {
+						goToSlide(currentSlide + 1);
+					});
+					
+					// Show arrows on hover over slider container
+					const sliderContainer = document.querySelector('.slider-wrapper');
+					if (sliderContainer) {
+						const arrows = document.querySelectorAll('.slider-arrow');
+						const expandIcons = document.querySelectorAll('.expand-icon'); 
+						
+						arrows.forEach(arrow => {
+							arrow.style.opacity = "0.7";
+						});
+						
+						sliderContainer.addEventListener('mouseenter', () => {
+							arrows.forEach(arrow => {
+								arrow.style.opacity = "1";
+							});
+							expandIcons.forEach(icon => {
+								icon.style.opacity = "1";
+							});
+						});
+						
+						sliderContainer.addEventListener('mouseleave', () => {
+							arrows.forEach(arrow => {
+								arrow.style.opacity = "0.7";
+							});
+							expandIcons.forEach(icon => {
+								icon.style.opacity = "0";
+							});
+						});
+					}
+				}
+				
+				// Keyboard navigation
+				document.addEventListener('keydown', (e) => {
+					if (e.key === 'ArrowLeft') {
+						goToSlide(currentSlide - 1);
+					} else if (e.key === 'ArrowRight') {
+						goToSlide(currentSlide + 1);
+					}
+				});
+				
+				// Touch swipe support
+				let touchStartX = 0;
+				let touchEndX = 0;
+				
+				slider.addEventListener('touchstart', (e) => {
+					touchStartX = e.changedTouches[0].screenX;
+				}, { passive: true });
+				
+				slider.addEventListener('touchend', (e) => {
+					touchEndX = e.changedTouches[0].screenX;
+					handleSwipe();
+				}, { passive: true });
+				
+				function handleSwipe() {
+					const swipeThreshold = 50;
+					if (touchEndX < touchStartX - swipeThreshold) {
+						// Swipe left, go to next slide
+						goToSlide(currentSlide + 1);
+					}
+					if (touchEndX > touchStartX + swipeThreshold) {
+						// Swipe right, go to previous slide
+						goToSlide(currentSlide - 1);
+					}
+				}
+				
+				// Intersection Observer to handle scroll-based active state
+				const observerOptions = {
+					root: slider,
+					threshold: 0.5
+				};
+				
+				const observer = new IntersectionObserver((entries) => {
+					entries.forEach(entry => {
+						if (entry.isIntersecting) {
+							const index = Array.from(slides).indexOf(entry.target);
+							updateActiveStates(index);
+						}
+					});
+				}, observerOptions);
+				
+				slides.forEach(slide => observer.observe(slide));
+				
+				// Fullscreen image viewer functionality
+				const fullscreenOverlay = document.getElementById('fullscreen-overlay');
+				const fullscreenItems = document.querySelectorAll('.fullscreen-item');
+				const closeFullscreen = document.getElementById('close-fullscreen');
+				const fullscreenPrev = document.getElementById('fullscreen-prev');
+				const fullscreenNext = document.getElementById('fullscreen-next');
+				const fullscreenCounter = document.getElementById('fullscreen-counter');
+				const fullscreenTotal = document.getElementById('fullscreen-total');
+				
+				let currentFullscreenIndex = 0;
+				
+				// Open fullscreen when clicking on an image
+				const images = document.querySelectorAll('img[data-fullscreen="true"]');
+				images.forEach(img => {
+					img.addEventListener('click', () => {
+						const index = parseInt(img.getAttribute('data-index'));
+						openFullscreen(index);
+					});
+				});
+				
+				// Expand icons also trigger fullscreen
+				const expandIcons = document.querySelectorAll('.expand-icon');
+				expandIcons.forEach((icon, i) => {
+					icon.addEventListener('click', () => {
+						openFullscreen(i);
+					});
+				});
+				
+				function openFullscreen(index) {
+					currentFullscreenIndex = index;
+					fullscreenOverlay.style.display = 'flex';
+					document.body.style.overflow = 'hidden'; // Prevent scrolling behind overlay
+					showFullscreenImage(index);
+					
+					// Add keyboard navigation for fullscreen
+					document.addEventListener('keydown', handleFullscreenKeyboard);
+				}
+				
+				function closeFullscreenView() {
+					fullscreenOverlay.style.display = 'none';
+					document.body.style.overflow = ''; // Restore scrolling
+					
+					// Remove keyboard event listener
+					document.removeEventListener('keydown', handleFullscreenKeyboard);
+				}
+				
+				function showFullscreenImage(index) {
+					fullscreenItems.forEach((item, i) => {
+						if (i === index) {
+							item.style.display = 'flex';
+						} else {
+							item.style.display = 'none';
+						}
+					});
+					
+					if (fullscreenCounter) {
+						fullscreenCounter.textContent = (index + 1).toString();
+					}
+				}
+				
+				function navigateFullscreen(direction) {
+					let newIndex = currentFullscreenIndex + direction;
+					
+					if (newIndex < 0) {
+						newIndex = fullscreenItems.length - 1;
+					} else if (newIndex >= fullscreenItems.length) {
+						newIndex = 0;
+					}
+					
+					currentFullscreenIndex = newIndex;
+					showFullscreenImage(newIndex);
+				}
+				
+				function handleFullscreenKeyboard(e) {
+					if (e.key === 'Escape') {
+						closeFullscreenView();
+					} else if (e.key === 'ArrowLeft') {
+						navigateFullscreen(-1);
+					} else if (e.key === 'ArrowRight') {
+						navigateFullscreen(1);
+					}
+				}
+				
+				// Close button event listener
+				if (closeFullscreen) {
+					closeFullscreen.addEventListener('click', closeFullscreenView);
+				}
+				
+				// Fullscreen navigation arrows
+				if (fullscreenPrev) {
+					fullscreenPrev.addEventListener('click', () => {
+						navigateFullscreen(-1);
+					});
+				}
+				
+				if (fullscreenNext) {
+					fullscreenNext.addEventListener('click', () => {
+						navigateFullscreen(1);
+					});
+				}
+				
+				// Close when clicking outside the image (on the dark background)
+				fullscreenOverlay.addEventListener('click', (e) => {
+					if (e.target === fullscreenOverlay) {
+						closeFullscreenView();
+					}
+				});
+		</script>
+		<style>
+			.slider-wrapper {
+				box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+			}
+			
+			.slider {
+				scroll-snap-type: x mandatory;
+				scroll-behavior: smooth;
+				-webkit-overflow-scrolling: touch; /* Enable smooth scrolling on iOS */
+			}
+			
+			.slider::-webkit-scrollbar {
+				display: none; /* Safari and Chrome */
+			}
+			
+			/* Ensure each child (slide) aligns with the scroll-snap */
+			.slider > div {
+				scroll-snap-align: start; /* Snap the slides to the start when scrolled */
+			}
+			
+			.slider-arrow {
+				transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+			}
+			
+			.slider-arrow:hover {
+				transform: translateY(-20%) scale(1.1);
+			}
+			
+			.slider-indicator.bg-blue-500 {
+				box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+			}
+			
+			/* Cursor zoom-in indicates the image is clickable */
+			img[data-fullscreen="true"] {
+				cursor: zoom-in;
+			}
+			
+			/* Fullscreen overlay animations */
+			#fullscreen-overlay {
+				transition: opacity 0.3s ease;
+			}
+			
+			.fullscreen-content-container {
+				transition: transform 0.3s ease;
+			}
+		</style>
+	}
 }

@@ -8,7 +8,8 @@ RUN apk add --no-cache \
     gcc \
     g++ \
     make \
-    libwebp-dev
+    libwebp-dev \
+    ffmpeg
 
 # Install dependencies required for both dev and build stages
 RUN apk add --no-cache nodejs npm make

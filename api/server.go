@@ -15,9 +15,10 @@ var BaseUrl = os.Getenv("BASE_URL")
 
 // Server serves HTTP requests
 type Server struct {
-	store      *db.Store
-	tokenMaker token.Maker
-	router     *echo.Echo
+	store           *db.Store
+	tokenMaker      token.Maker
+	router          *echo.Echo
+	uploadSemaphore chan struct{}
 }
 
 // NewServer creates an HTTP server and sets up routing.
