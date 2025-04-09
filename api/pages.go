@@ -1176,5 +1176,11 @@ func (server *Server) articlePage(ctx echo.Context) error {
 		return err
 	}
 
-	return Render(ctx, http.StatusOK, components.ArticlePage(userData, meta, activeAds, categories, article))
+	globalSettings, err := server.store.GetGlobalSettings(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error getting global settings in homePage:", err)
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.ArticlePage(userData, meta, activeAds, categories, article, globalSettings[0]))
 }

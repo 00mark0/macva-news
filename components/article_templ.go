@@ -10,8 +10,9 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/00mark0/macva-news/db/services"
 import "fmt"
+import "github.com/00mark0/macva-news/utils"
 
-func Article(content db.GetContentDetailsRow) templ.Component {
+func Article(content db.GetContentDetailsRow, globalSettings db.GlobalSetting) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -32,33 +33,20 @@ func Article(content db.GetContentDetailsRow) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1 class=\"text-3xl font-bold dark:text-white\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<section id=\"article-page-media-slider\" hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(content.Title)
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/content/media/%s", content.ContentID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 7, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 8, Col: 105}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</h1><section id=\"article-page-media-slider\" hx-get=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/content/media/%s", content.ContentID))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 8, Col: 105}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" hx-trigger=\"load\" hx-target=\"#article-page-media-slider\" hx-swap=\"innerHTML\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" hx-trigger=\"load\" hx-target=\"#article-page-media-slider\" hx-swap=\"innerHTML\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -66,7 +54,71 @@ func Article(content db.GetContentDetailsRow) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</section>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</section><nav class=\"flex mb-6\" aria-label=\"Breadcrumb\"><ol class=\"flex items-center space-x-2\"><li class=\"flex items-center\"><a href=\"/\" class=\"text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300\" aria-label=\"Home\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-5 w-5\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path d=\"M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z\"></path></svg></a></li><li class=\"flex items-center\"><a href=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/kategorije/%s/%s", utils.Slugify(content.CategoryName), content.CategoryID))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var3)))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300\"><svg class=\"h-5 w-5 text-gray-400\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path fill-rule=\"evenodd\" d=\"M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z\" clip-rule=\"evenodd\"></path></svg> <span class=\"ml-2 text-sm font-medium text-gray-700 dark:text-gray-300\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(content.CategoryName)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 25, Col: 99}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</span></a></li><li class=\"flex items-center w-full\"><svg class=\"h-5 w-5 text-gray-400\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path fill-rule=\"evenodd\" d=\"M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z\" clip-rule=\"evenodd\"></path></svg> <span class=\"truncate max-w-[200px] sm:max-w-[400px] ml-2 text-sm font-medium text-gray-700 dark:text-gray-300\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(content.Title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 32, Col: 131}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</span></li></ol></nav><h1 class=\"text-3xl font-bold dark:text-white\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(content.Title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 36, Col: 63}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</h1><section id=\"article-stats\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = ArticleStats(content, globalSettings).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</section><section id=\"article-page-content\" class=\"dark:text-white\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = utils.ParseHTML(content.ContentDescription).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</section>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -90,12 +142,12 @@ func ArticlePage(props ...interface{}) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var4 == nil {
-			templ_7745c5c3_Var4 = templ.NopComponent
+		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var7 == nil {
+			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = Layout(props[0].(db.GetUserByIDRow), props[1].(Meta), props[2].([]db.Ad), props[3].([]db.Category), Article(props[4].(db.GetContentDetailsRow))).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Layout(props[0].(db.GetUserByIDRow), props[1].(Meta), props[2].([]db.Ad), props[3].([]db.Category), Article(props[4].(db.GetContentDetailsRow), props[5].(db.GlobalSetting))).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -119,274 +171,364 @@ func ArticleMediaSlider(media []db.Medium) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var5 == nil {
-			templ_7745c5c3_Var5 = templ.NopComponent
+		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var8 == nil {
+			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		if len(media) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"article-media-slider-container mx-auto px-4 h-full mb-8\"><div class=\"slider-wrapper w-full h-full relative overflow-hidden rounded-xl\"><div class=\"slider flex w-full h-full shrink-0 aspect-video scrollbar-hide overflow-x-auto overflow-y-hidden scroll-smooth rounded-lg shadow-xl\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"article-media-slider-container mx-auto px-4 h-full mb-8\"><div class=\"slider-wrapper w-full h-full relative overflow-hidden rounded-xl\"><div class=\"slider flex w-full h-full shrink-0 aspect-video scrollbar-hide overflow-x-auto overflow-y-hidden scroll-smooth rounded-lg shadow-xl\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for i, medium := range media {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div id=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div id=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var6 string
-				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("media-slide-%d", i))
+				var templ_7745c5c3_Var9 string
+				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("media-slide-%d", i))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 24, Col: 44}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 56, Col: 44}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" class=\"slider-item flex flex-col shrink-0 h-full w-full scroll-snap-align-start\"><div class=\"relative w-full h-full bg-gray-100 dark:bg-gray-800\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" class=\"slider-item flex flex-col shrink-0 h-full w-full scroll-snap-align-start\"><div class=\"relative w-full h-full bg-gray-100 dark:bg-gray-800\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				if medium.MediaType == "image" {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<img src=\"")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					var templ_7745c5c3_Var7 string
-					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(medium.MediaUrl)
-					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 30, Col: 31}
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" alt=\"")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					var templ_7745c5c3_Var8 string
-					templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(medium.MediaCaption)
-					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 31, Col: 35}
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" class=\"w-full h-full object-contain cursor-zoom-in\" data-fullscreen=\"true\" data-index=\"")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					var templ_7745c5c3_Var9 string
-					templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(i))
-					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 34, Col: 36}
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" loading=\"lazy\"> <div class=\"expand-icon absolute top-4 left-4 bg-black/50 text-white p-2 rounded-full opacity-0 transition-opacity duration-200 cursor-pointer\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-5 w-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 1v4m0 0h-4m4 0l-5-5\"></path></svg></div>")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-				} else if medium.MediaType == "video" {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<video class=\"w-full h-full object-contain\" controls preload=\"metadata\"><source src=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<img src=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var10 string
 					templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(medium.MediaUrl)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 49, Col: 39}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 62, Col: 31}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" type=\"video/mp4\"> Your browser does not support the video tag.</video>")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-				}
-				if medium.MediaCaption != "" {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div class=\"absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4\"><p class=\"text-white text-sm md:text-base font-medium\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" alt=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var11 string
 					templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(medium.MediaCaption)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 55, Col: 86}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 63, Col: 35}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</p></div>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" class=\"w-full h-full object-contain cursor-zoom-in\" data-fullscreen=\"true\" data-index=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div></div>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if len(media) > 1 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<div class=\"media-counter absolute top-4 right-4 bg-black/70 text-white text-xs font-medium px-2 py-1 rounded-full z-10\"><span id=\"current-slide-number\">1</span>/<span>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var12 string
-				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(len(media)))
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 65, Col: 77}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</span></div>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			if len(media) > 1 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, " <button class=\"slider-arrow left absolute top-1/2 left-3 bg-black/50 hover:bg-black/70 dark:bg-white/50 dark:hover:bg-white/70 rounded-full p-2 shadow-lg z-10 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-6 w-6 text-white dark:text-gray-800\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2.5\" d=\"M15 19l-7-7 7-7\"></path></svg></button> <button class=\"slider-arrow right absolute top-1/2 right-3 bg-black/50 hover:bg-black/70 dark:bg-white/50 dark:hover:bg-white/70 rounded-full p-2 shadow-lg z-10 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-6 w-6 text-white dark:text-gray-800\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2.5\" d=\"M9 5l7 7-7 7\"></path></svg></button> <div class=\"slider-indicators absolute bottom-4 left-1/2 transform -translate-x-1/2 flex justify-center gap-2 px-4 py-2 bg-black/40 dark:bg-white/20 backdrop-blur-sm rounded-full\">")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				for i, _ := range media {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<button data-slide=\"")
+					var templ_7745c5c3_Var12 string
+					templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(i))
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 66, Col: 36}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" loading=\"lazy\"> <div class=\"expand-icon absolute top-4 left-4 bg-black/50 text-white p-2 rounded-full opacity-0 transition-opacity duration-200 cursor-pointer\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-5 w-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 1v4m0 0h-4m4 0l-5-5\"></path></svg></div>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				} else if medium.MediaType == "video" {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<video class=\"w-full h-full object-contain\" controls preload=\"metadata\"><source src=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var13 string
-					templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(i))
+					templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(medium.MediaUrl)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 86, Col: 34}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 81, Col: 39}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" class=\"slider-indicator cursor-pointer w-2 h-2 bg-gray-300 hover:bg-blue-500 rounded-full transition-all duration-300 ease-in-out\"></button>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" type=\"video/mp4\"> Your browser does not support the video tag.</video>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</div>")
+				if medium.MediaCaption != "" {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div class=\"absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4\"><p class=\"text-white text-sm md:text-base font-medium\">")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var14 string
+					templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(medium.MediaCaption)
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 87, Col: 86}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</p></div>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</div></div><!-- Fullscreen Overlay --> <div id=\"fullscreen-overlay\" class=\"fixed inset-0 bg-black/90 z-[999] hidden flex-col justify-center items-center\"><div class=\"fullscreen-toolbar absolute top-0 left-0 right-0 flex justify-between items-center p-4 bg-black/70\"><div class=\"text-white font-medium\"><span id=\"fullscreen-counter\">1</span>/<span id=\"fullscreen-total\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var14 string
-			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(len(media)))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 98, Col: 96}
+			if len(media) > 1 {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<div class=\"media-counter absolute top-4 right-4 bg-black/70 text-white text-xs font-medium px-2 py-1 rounded-full z-10\"><span id=\"current-slide-number\">1</span>/<span>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var15 string
+				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(len(media)))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 97, Col: 77}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</span></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</span></div><button id=\"close-fullscreen\" class=\"text-white hover:text-red-400 transition-colors\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-8 w-8\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button></div><div class=\"fullscreen-content-container w-full h-full flex items-center justify-center p-8\"><div class=\"fullscreen-content w-full max-w-6xl h-full flex items-center justify-center relative\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			for i, medium := range media {
-				if medium.MediaType == "image" {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<div class=\"fullscreen-item h-full w-full hidden flex-col justify-center items-center\" data-index=\"")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					var templ_7745c5c3_Var15 string
-					templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(i))
-					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 110, Col: 120}
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\"><img src=\"")
+			if len(media) > 1 {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, " <button class=\"slider-arrow left absolute top-1/2 left-3 bg-black/50 hover:bg-black/70 dark:bg-white/50 dark:hover:bg-white/70 rounded-full p-2 shadow-lg z-10 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-6 w-6 text-white dark:text-gray-800\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2.5\" d=\"M15 19l-7-7 7-7\"></path></svg></button> <button class=\"slider-arrow right absolute top-1/2 right-3 bg-black/50 hover:bg-black/70 dark:bg-white/50 dark:hover:bg-white/70 rounded-full p-2 shadow-lg z-10 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-6 w-6 text-white dark:text-gray-800\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2.5\" d=\"M9 5l7 7-7 7\"></path></svg></button> <div class=\"slider-indicators absolute bottom-4 left-1/2 transform -translate-x-1/2 flex justify-center gap-2 px-4 py-2 bg-black/40 dark:bg-white/20 backdrop-blur-sm rounded-full\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				for i, _ := range media {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<button data-slide=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var16 string
-					templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(medium.MediaUrl)
+					templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(i))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 111, Col: 34}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 118, Col: 34}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\" alt=\"")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					var templ_7745c5c3_Var17 string
-					templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(medium.MediaCaption)
-					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 111, Col: 62}
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\" class=\"max-h-[80vh] max-w-full object-contain\"> ")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					if medium.MediaCaption != "" {
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<div class=\"mt-4 text-white text-center\"><p class=\"text-lg\">")
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-						var templ_7745c5c3_Var18 string
-						templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(medium.MediaCaption)
-						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 114, Col: 50}
-						}
-						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "</p></div>")
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "</div>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\" class=\"slider-indicator cursor-pointer w-2 h-2 bg-gray-300 hover:bg-blue-500 rounded-full transition-all duration-300 ease-in-out\"></button>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</div></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if len(media) > 1 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "<button id=\"fullscreen-prev\" class=\"absolute left-0 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 rounded-full p-3 text-white transition-all duration-200\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-8 w-8\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2.5\" d=\"M15 19l-7-7 7-7\"></path></svg></button> <button id=\"fullscreen-next\" class=\"absolute right-0 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 rounded-full p-3 text-white transition-all duration-200\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-8 w-8\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2.5\" d=\"M9 5l7 7-7 7\"></path></svg></button>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "</div><script>\n\t\t\t\tconst slider = document.querySelector('.slider');\n\t\t\t\tconst slides = document.querySelectorAll('.slider-item');\n\t\t\t\tconst indicators = document.querySelectorAll('.slider-indicator');\n\t\t\t\tconst leftArrow = document.querySelector('.slider-arrow.left');\n\t\t\t\tconst rightArrow = document.querySelector('.slider-arrow.right');\n\t\t\t\tconst currentSlideNumber = document.getElementById('current-slide-number');\n\t\t\t\t\n\t\t\t\tlet currentSlide = 0;\n\t\t\t\tconst totalSlides = slides.length;\n\t\t\t\t\n\t\t\t\t// Function to update active states and counter\n\t\t\t\tfunction updateActiveStates(index) {\n\t\t\t\t\t// Update indicators\n\t\t\t\t\tindicators.forEach((indicator, i) => {\n\t\t\t\t\t\tif (i === index) {\n\t\t\t\t\t\t\tindicator.classList.add('bg-blue-500', 'w-3', 'h-3');\n\t\t\t\t\t\t\tindicator.classList.remove('bg-gray-300', 'w-2', 'h-2');\n\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\tindicator.classList.remove('bg-blue-500', 'w-3', 'h-3');\n\t\t\t\t\t\t\tindicator.classList.add('bg-gray-300', 'w-2', 'h-2');\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t\t\n\t\t\t\t\t// Update counter\n\t\t\t\t\tif (currentSlideNumber) {\n\t\t\t\t\t\tcurrentSlideNumber.textContent = (index + 1).toString();\n\t\t\t\t\t}\n\t\t\t\t\t\n\t\t\t\t\tcurrentSlide = index;\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t// Function to navigate to a specific slide\n\t\t\t\tfunction goToSlide(index) {\n\t\t\t\t\tif (index < 0) index = totalSlides - 1;\n\t\t\t\t\tif (index >= totalSlides) index = 0;\n\t\t\t\t\t\n\t\t\t\t\tconst targetSlide = slides[index];\n\t\t\t\t\ttargetSlide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });\n\t\t\t\t\tupdateActiveStates(index);\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t// Initial active state\n\t\t\t\tupdateActiveStates(0);\n\t\t\t\t\n\t\t\t\t// Indicator event listeners\n\t\t\t\tindicators.forEach((indicator, index) => {\n\t\t\t\t\tindicator.addEventListener('click', () => {\n\t\t\t\t\t\tgoToSlide(index);\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\t// Arrow event listeners\n\t\t\t\tif (leftArrow && rightArrow) {\n\t\t\t\t\tleftArrow.addEventListener('click', () => {\n\t\t\t\t\t\tgoToSlide(currentSlide - 1);\n\t\t\t\t\t});\n\t\t\t\t\t\n\t\t\t\t\trightArrow.addEventListener('click', () => {\n\t\t\t\t\t\tgoToSlide(currentSlide + 1);\n\t\t\t\t\t});\n\t\t\t\t\t\n\t\t\t\t\t// Show arrows on hover over slider container\n\t\t\t\t\tconst sliderContainer = document.querySelector('.slider-wrapper');\n\t\t\t\t\tif (sliderContainer) {\n\t\t\t\t\t\tconst arrows = document.querySelectorAll('.slider-arrow');\n\t\t\t\t\t\tconst expandIcons = document.querySelectorAll('.expand-icon'); \n\t\t\t\t\t\t\n\t\t\t\t\t\tarrows.forEach(arrow => {\n\t\t\t\t\t\t\tarrow.style.opacity = \"0.7\";\n\t\t\t\t\t\t});\n\t\t\t\t\t\t\n\t\t\t\t\t\tsliderContainer.addEventListener('mouseenter', () => {\n\t\t\t\t\t\t\tarrows.forEach(arrow => {\n\t\t\t\t\t\t\t\tarrow.style.opacity = \"1\";\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\texpandIcons.forEach(icon => {\n\t\t\t\t\t\t\t\ticon.style.opacity = \"1\";\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t});\n\t\t\t\t\t\t\n\t\t\t\t\t\tsliderContainer.addEventListener('mouseleave', () => {\n\t\t\t\t\t\t\tarrows.forEach(arrow => {\n\t\t\t\t\t\t\t\tarrow.style.opacity = \"0.7\";\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\texpandIcons.forEach(icon => {\n\t\t\t\t\t\t\t\ticon.style.opacity = \"0\";\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t});\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t// Keyboard navigation\n\t\t\t\tdocument.addEventListener('keydown', (e) => {\n\t\t\t\t\tif (e.key === 'ArrowLeft') {\n\t\t\t\t\t\tgoToSlide(currentSlide - 1);\n\t\t\t\t\t} else if (e.key === 'ArrowRight') {\n\t\t\t\t\t\tgoToSlide(currentSlide + 1);\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\t// Touch swipe support\n\t\t\t\tlet touchStartX = 0;\n\t\t\t\tlet touchEndX = 0;\n\t\t\t\t\n\t\t\t\tslider.addEventListener('touchstart', (e) => {\n\t\t\t\t\ttouchStartX = e.changedTouches[0].screenX;\n\t\t\t\t}, { passive: true });\n\t\t\t\t\n\t\t\t\tslider.addEventListener('touchend', (e) => {\n\t\t\t\t\ttouchEndX = e.changedTouches[0].screenX;\n\t\t\t\t\thandleSwipe();\n\t\t\t\t}, { passive: true });\n\t\t\t\t\n\t\t\t\tfunction handleSwipe() {\n\t\t\t\t\tconst swipeThreshold = 50;\n\t\t\t\t\tif (touchEndX < touchStartX - swipeThreshold) {\n\t\t\t\t\t\t// Swipe left, go to next slide\n\t\t\t\t\t\tgoToSlide(currentSlide + 1);\n\t\t\t\t\t}\n\t\t\t\t\tif (touchEndX > touchStartX + swipeThreshold) {\n\t\t\t\t\t\t// Swipe right, go to previous slide\n\t\t\t\t\t\tgoToSlide(currentSlide - 1);\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t// Intersection Observer to handle scroll-based active state\n\t\t\t\tconst observerOptions = {\n\t\t\t\t\troot: slider,\n\t\t\t\t\tthreshold: 0.5\n\t\t\t\t};\n\t\t\t\t\n\t\t\t\tconst observer = new IntersectionObserver((entries) => {\n\t\t\t\t\tentries.forEach(entry => {\n\t\t\t\t\t\tif (entry.isIntersecting) {\n\t\t\t\t\t\t\tconst index = Array.from(slides).indexOf(entry.target);\n\t\t\t\t\t\t\tupdateActiveStates(index);\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t}, observerOptions);\n\t\t\t\t\n\t\t\t\tslides.forEach(slide => observer.observe(slide));\n\t\t\t\t\n\t\t\t\t// Fullscreen image viewer functionality\n\t\t\t\tconst fullscreenOverlay = document.getElementById('fullscreen-overlay');\n\t\t\t\tconst fullscreenItems = document.querySelectorAll('.fullscreen-item');\n\t\t\t\tconst closeFullscreen = document.getElementById('close-fullscreen');\n\t\t\t\tconst fullscreenPrev = document.getElementById('fullscreen-prev');\n\t\t\t\tconst fullscreenNext = document.getElementById('fullscreen-next');\n\t\t\t\tconst fullscreenCounter = document.getElementById('fullscreen-counter');\n\t\t\t\tconst fullscreenTotal = document.getElementById('fullscreen-total');\n\t\t\t\t\n\t\t\t\tlet currentFullscreenIndex = 0;\n\t\t\t\t\n\t\t\t\t// Open fullscreen when clicking on an image\n\t\t\t\tconst images = document.querySelectorAll('img[data-fullscreen=\"true\"]');\n\t\t\t\timages.forEach(img => {\n\t\t\t\t\timg.addEventListener('click', () => {\n\t\t\t\t\t\tconst index = parseInt(img.getAttribute('data-index'));\n\t\t\t\t\t\topenFullscreen(index);\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\t// Expand icons also trigger fullscreen\n\t\t\t\tconst expandIcons = document.querySelectorAll('.expand-icon');\n\t\t\t\texpandIcons.forEach((icon, i) => {\n\t\t\t\t\ticon.addEventListener('click', () => {\n\t\t\t\t\t\topenFullscreen(i);\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\tfunction openFullscreen(index) {\n\t\t\t\t\tcurrentFullscreenIndex = index;\n\t\t\t\t\tfullscreenOverlay.style.display = 'flex';\n\t\t\t\t\tdocument.body.style.overflow = 'hidden'; // Prevent scrolling behind overlay\n\t\t\t\t\tshowFullscreenImage(index);\n\t\t\t\t\t\n\t\t\t\t\t// Add keyboard navigation for fullscreen\n\t\t\t\t\tdocument.addEventListener('keydown', handleFullscreenKeyboard);\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tfunction closeFullscreenView() {\n\t\t\t\t\tfullscreenOverlay.style.display = 'none';\n\t\t\t\t\tdocument.body.style.overflow = ''; // Restore scrolling\n\t\t\t\t\t\n\t\t\t\t\t// Remove keyboard event listener\n\t\t\t\t\tdocument.removeEventListener('keydown', handleFullscreenKeyboard);\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tfunction showFullscreenImage(index) {\n\t\t\t\t\tfullscreenItems.forEach((item, i) => {\n\t\t\t\t\t\tif (i === index) {\n\t\t\t\t\t\t\titem.style.display = 'flex';\n\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\titem.style.display = 'none';\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t\t\n\t\t\t\t\tif (fullscreenCounter) {\n\t\t\t\t\t\tfullscreenCounter.textContent = (index + 1).toString();\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tfunction navigateFullscreen(direction) {\n\t\t\t\t\tlet newIndex = currentFullscreenIndex + direction;\n\t\t\t\t\t\n\t\t\t\t\tif (newIndex < 0) {\n\t\t\t\t\t\tnewIndex = fullscreenItems.length - 1;\n\t\t\t\t\t} else if (newIndex >= fullscreenItems.length) {\n\t\t\t\t\t\tnewIndex = 0;\n\t\t\t\t\t}\n\t\t\t\t\t\n\t\t\t\t\tcurrentFullscreenIndex = newIndex;\n\t\t\t\t\tshowFullscreenImage(newIndex);\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tfunction handleFullscreenKeyboard(e) {\n\t\t\t\t\tif (e.key === 'Escape') {\n\t\t\t\t\t\tcloseFullscreenView();\n\t\t\t\t\t} else if (e.key === 'ArrowLeft') {\n\t\t\t\t\t\tnavigateFullscreen(-1);\n\t\t\t\t\t} else if (e.key === 'ArrowRight') {\n\t\t\t\t\t\tnavigateFullscreen(1);\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t// Close button event listener\n\t\t\t\tif (closeFullscreen) {\n\t\t\t\t\tcloseFullscreen.addEventListener('click', closeFullscreenView);\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t// Fullscreen navigation arrows\n\t\t\t\tif (fullscreenPrev) {\n\t\t\t\t\tfullscreenPrev.addEventListener('click', () => {\n\t\t\t\t\t\tnavigateFullscreen(-1);\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tif (fullscreenNext) {\n\t\t\t\t\tfullscreenNext.addEventListener('click', () => {\n\t\t\t\t\t\tnavigateFullscreen(1);\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t// Close when clicking outside the image (on the dark background)\n\t\t\t\tfullscreenOverlay.addEventListener('click', (e) => {\n\t\t\t\t\tif (e.target === fullscreenOverlay) {\n\t\t\t\t\t\tcloseFullscreenView();\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t</script> <style>\n\t\t\t.slider-wrapper {\n\t\t\t\tbox-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);\n\t\t\t}\n\t\t\t\n\t\t\t.slider {\n\t\t\t\tscroll-snap-type: x mandatory;\n\t\t\t\tscroll-behavior: smooth;\n\t\t\t\t-webkit-overflow-scrolling: touch; /* Enable smooth scrolling on iOS */\n\t\t\t}\n\t\t\t\n\t\t\t.slider::-webkit-scrollbar {\n\t\t\t\tdisplay: none; /* Safari and Chrome */\n\t\t\t}\n\t\t\t\n\t\t\t/* Ensure each child (slide) aligns with the scroll-snap */\n\t\t\t.slider > div {\n\t\t\t\tscroll-snap-align: start; /* Snap the slides to the start when scrolled */\n\t\t\t}\n\t\t\t\n\t\t\t.slider-arrow {\n\t\t\t\ttransition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;\n\t\t\t}\n\t\t\t\n\t\t\t.slider-arrow:hover {\n\t\t\t\ttransform: translateY(-20%) scale(1.1);\n\t\t\t}\n\t\t\t\n\t\t\t.slider-indicator.bg-blue-500 {\n\t\t\t\tbox-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);\n\t\t\t}\n\t\t\t\n\t\t\t/* Cursor zoom-in indicates the image is clickable */\n\t\t\timg[data-fullscreen=\"true\"] {\n\t\t\t\tcursor: zoom-in;\n\t\t\t}\n\t\t\t\n\t\t\t/* Fullscreen overlay animations */\n\t\t\t#fullscreen-overlay {\n\t\t\t\ttransition: opacity 0.3s ease;\n\t\t\t}\n\t\t\t\n\t\t\t.fullscreen-content-container {\n\t\t\t\ttransition: transform 0.3s ease;\n\t\t\t}\n\t\t</style>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "</div></div><!-- Fullscreen Overlay --> <div id=\"fullscreen-overlay\" class=\"fixed inset-0 bg-black/90 z-[999] hidden flex-col justify-center items-center\"><div class=\"fullscreen-toolbar absolute top-0 left-0 right-0 flex justify-between items-center p-4 bg-black/70\"><div class=\"text-white font-medium\"><span id=\"fullscreen-counter\">1</span>/<span id=\"fullscreen-total\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
+			var templ_7745c5c3_Var17 string
+			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(len(media)))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 130, Col: 96}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</span></div><button id=\"close-fullscreen\" class=\"text-white hover:text-red-400 transition-colors\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-8 w-8\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button></div><div class=\"fullscreen-content-container w-full h-full flex items-center justify-center p-8\"><div class=\"fullscreen-content w-full max-w-6xl h-full flex items-center justify-center relative\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			for i, medium := range media {
+				if medium.MediaType == "image" {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<div class=\"fullscreen-item h-full w-full hidden flex-col justify-center items-center\" data-index=\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var18 string
+					templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(i))
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 142, Col: 120}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "\"><img src=\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var19 string
+					templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(medium.MediaUrl)
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 143, Col: 34}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\" alt=\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var20 string
+					templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(medium.MediaCaption)
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 143, Col: 62}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\" class=\"max-h-[80vh] max-w-full object-contain\"> ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					if medium.MediaCaption != "" {
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<div class=\"mt-4 text-white text-center\"><p class=\"text-lg\">")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						var templ_7745c5c3_Var21 string
+						templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(medium.MediaCaption)
+						if templ_7745c5c3_Err != nil {
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 146, Col: 50}
+						}
+						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</p></div>")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "</div>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</div></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if len(media) > 1 {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "<button id=\"fullscreen-prev\" class=\"absolute left-0 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 rounded-full p-3 text-white transition-all duration-200\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-8 w-8\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2.5\" d=\"M15 19l-7-7 7-7\"></path></svg></button> <button id=\"fullscreen-next\" class=\"absolute right-0 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 rounded-full p-3 text-white transition-all duration-200\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-8 w-8\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2.5\" d=\"M9 5l7 7-7 7\"></path></svg></button>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "</div><script>\n\t\t\t\tconst slider = document.querySelector('.slider');\n\t\t\t\tconst slides = document.querySelectorAll('.slider-item');\n\t\t\t\tconst indicators = document.querySelectorAll('.slider-indicator');\n\t\t\t\tconst leftArrow = document.querySelector('.slider-arrow.left');\n\t\t\t\tconst rightArrow = document.querySelector('.slider-arrow.right');\n\t\t\t\tconst currentSlideNumber = document.getElementById('current-slide-number');\n\t\t\t\t\n\t\t\t\tlet currentSlide = 0;\n\t\t\t\tconst totalSlides = slides.length;\n\t\t\t\t\n\t\t\t\t// Function to update active states and counter\n\t\t\t\tfunction updateActiveStates(index) {\n\t\t\t\t\t// Update indicators\n\t\t\t\t\tindicators.forEach((indicator, i) => {\n\t\t\t\t\t\tif (i === index) {\n\t\t\t\t\t\t\tindicator.classList.add('bg-blue-500', 'w-3', 'h-3');\n\t\t\t\t\t\t\tindicator.classList.remove('bg-gray-300', 'w-2', 'h-2');\n\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\tindicator.classList.remove('bg-blue-500', 'w-3', 'h-3');\n\t\t\t\t\t\t\tindicator.classList.add('bg-gray-300', 'w-2', 'h-2');\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t\t\n\t\t\t\t\t// Update counter\n\t\t\t\t\tif (currentSlideNumber) {\n\t\t\t\t\t\tcurrentSlideNumber.textContent = (index + 1).toString();\n\t\t\t\t\t}\n\t\t\t\t\t\n\t\t\t\t\tcurrentSlide = index;\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t// Function to navigate to a specific slide\n\t\t\t\tfunction goToSlide(index) {\n\t\t\t\t\tif (index < 0) index = totalSlides - 1;\n\t\t\t\t\tif (index >= totalSlides) index = 0;\n\t\t\t\t\t\n\t\t\t\t\tconst targetSlide = slides[index];\n\t\t\t\t\ttargetSlide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });\n\t\t\t\t\tupdateActiveStates(index);\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t// Initial active state\n\t\t\t\tupdateActiveStates(0);\n\t\t\t\t\n\t\t\t\t// Indicator event listeners\n\t\t\t\tindicators.forEach((indicator, index) => {\n\t\t\t\t\tindicator.addEventListener('click', () => {\n\t\t\t\t\t\tgoToSlide(index);\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\t// Arrow event listeners\n\t\t\t\tif (leftArrow && rightArrow) {\n\t\t\t\t\tleftArrow.addEventListener('click', () => {\n\t\t\t\t\t\tgoToSlide(currentSlide - 1);\n\t\t\t\t\t});\n\t\t\t\t\t\n\t\t\t\t\trightArrow.addEventListener('click', () => {\n\t\t\t\t\t\tgoToSlide(currentSlide + 1);\n\t\t\t\t\t});\n\t\t\t\t\t\n\t\t\t\t\t// Show arrows on hover over slider container\n\t\t\t\t\tconst sliderContainer = document.querySelector('.slider-wrapper');\n\t\t\t\t\tif (sliderContainer) {\n\t\t\t\t\t\tconst arrows = document.querySelectorAll('.slider-arrow');\n\t\t\t\t\t\tconst expandIcons = document.querySelectorAll('.expand-icon'); \n\t\t\t\t\t\t\n\t\t\t\t\t\tarrows.forEach(arrow => {\n\t\t\t\t\t\t\tarrow.style.opacity = \"0.7\";\n\t\t\t\t\t\t});\n\t\t\t\t\t\t\n\t\t\t\t\t\tsliderContainer.addEventListener('mouseenter', () => {\n\t\t\t\t\t\t\tarrows.forEach(arrow => {\n\t\t\t\t\t\t\t\tarrow.style.opacity = \"1\";\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\texpandIcons.forEach(icon => {\n\t\t\t\t\t\t\t\ticon.style.opacity = \"1\";\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t});\n\t\t\t\t\t\t\n\t\t\t\t\t\tsliderContainer.addEventListener('mouseleave', () => {\n\t\t\t\t\t\t\tarrows.forEach(arrow => {\n\t\t\t\t\t\t\t\tarrow.style.opacity = \"0.7\";\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\texpandIcons.forEach(icon => {\n\t\t\t\t\t\t\t\ticon.style.opacity = \"0\";\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t});\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t// Keyboard navigation\n\t\t\t\tdocument.addEventListener('keydown', (e) => {\n\t\t\t\t\tif (e.key === 'ArrowLeft') {\n\t\t\t\t\t\tgoToSlide(currentSlide - 1);\n\t\t\t\t\t} else if (e.key === 'ArrowRight') {\n\t\t\t\t\t\tgoToSlide(currentSlide + 1);\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\t// Touch swipe support\n\t\t\t\tlet touchStartX = 0;\n\t\t\t\tlet touchEndX = 0;\n\t\t\t\t\n\t\t\t\tslider.addEventListener('touchstart', (e) => {\n\t\t\t\t\ttouchStartX = e.changedTouches[0].screenX;\n\t\t\t\t}, { passive: true });\n\t\t\t\t\n\t\t\t\tslider.addEventListener('touchend', (e) => {\n\t\t\t\t\ttouchEndX = e.changedTouches[0].screenX;\n\t\t\t\t\thandleSwipe();\n\t\t\t\t}, { passive: true });\n\t\t\t\t\n\t\t\t\tfunction handleSwipe() {\n\t\t\t\t\tconst swipeThreshold = 50;\n\t\t\t\t\tif (touchEndX < touchStartX - swipeThreshold) {\n\t\t\t\t\t\t// Swipe left, go to next slide\n\t\t\t\t\t\tgoToSlide(currentSlide + 1);\n\t\t\t\t\t}\n\t\t\t\t\tif (touchEndX > touchStartX + swipeThreshold) {\n\t\t\t\t\t\t// Swipe right, go to previous slide\n\t\t\t\t\t\tgoToSlide(currentSlide - 1);\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t// Intersection Observer to handle scroll-based active state\n\t\t\t\tconst observerOptions = {\n\t\t\t\t\troot: slider,\n\t\t\t\t\tthreshold: 0.5\n\t\t\t\t};\n\t\t\t\t\n\t\t\t\tconst observer = new IntersectionObserver((entries) => {\n\t\t\t\t\tentries.forEach(entry => {\n\t\t\t\t\t\tif (entry.isIntersecting) {\n\t\t\t\t\t\t\tconst index = Array.from(slides).indexOf(entry.target);\n\t\t\t\t\t\t\tupdateActiveStates(index);\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t}, observerOptions);\n\t\t\t\t\n\t\t\t\tslides.forEach(slide => observer.observe(slide));\n\t\t\t\t\n\t\t\t\t// Fullscreen image viewer functionality\n\t\t\t\tconst fullscreenOverlay = document.getElementById('fullscreen-overlay');\n\t\t\t\tconst fullscreenItems = document.querySelectorAll('.fullscreen-item');\n\t\t\t\tconst closeFullscreen = document.getElementById('close-fullscreen');\n\t\t\t\tconst fullscreenPrev = document.getElementById('fullscreen-prev');\n\t\t\t\tconst fullscreenNext = document.getElementById('fullscreen-next');\n\t\t\t\tconst fullscreenCounter = document.getElementById('fullscreen-counter');\n\t\t\t\tconst fullscreenTotal = document.getElementById('fullscreen-total');\n\t\t\t\t\n\t\t\t\tlet currentFullscreenIndex = 0;\n\t\t\t\t\n\t\t\t\t// Open fullscreen when clicking on an image\n\t\t\t\tconst images = document.querySelectorAll('img[data-fullscreen=\"true\"]');\n\t\t\t\timages.forEach(img => {\n\t\t\t\t\timg.addEventListener('click', () => {\n\t\t\t\t\t\tconst index = parseInt(img.getAttribute('data-index'));\n\t\t\t\t\t\topenFullscreen(index);\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\t// Expand icons also trigger fullscreen\n\t\t\t\tconst expandIcons = document.querySelectorAll('.expand-icon');\n\t\t\t\texpandIcons.forEach((icon, i) => {\n\t\t\t\t\ticon.addEventListener('click', () => {\n\t\t\t\t\t\topenFullscreen(i);\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\tfunction openFullscreen(index) {\n\t\t\t\t\tcurrentFullscreenIndex = index;\n\t\t\t\t\tfullscreenOverlay.style.display = 'flex';\n\t\t\t\t\tdocument.body.style.overflow = 'hidden'; // Prevent scrolling behind overlay\n\t\t\t\t\tshowFullscreenImage(index);\n\t\t\t\t\t\n\t\t\t\t\t// Add keyboard navigation for fullscreen\n\t\t\t\t\tdocument.addEventListener('keydown', handleFullscreenKeyboard);\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tfunction closeFullscreenView() {\n\t\t\t\t\tfullscreenOverlay.style.display = 'none';\n\t\t\t\t\tdocument.body.style.overflow = ''; // Restore scrolling\n\t\t\t\t\t\n\t\t\t\t\t// Remove keyboard event listener\n\t\t\t\t\tdocument.removeEventListener('keydown', handleFullscreenKeyboard);\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tfunction showFullscreenImage(index) {\n\t\t\t\t\tfullscreenItems.forEach((item, i) => {\n\t\t\t\t\t\tif (i === index) {\n\t\t\t\t\t\t\titem.style.display = 'flex';\n\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\titem.style.display = 'none';\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t\t\n\t\t\t\t\tif (fullscreenCounter) {\n\t\t\t\t\t\tfullscreenCounter.textContent = (index + 1).toString();\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tfunction navigateFullscreen(direction) {\n\t\t\t\t\tlet newIndex = currentFullscreenIndex + direction;\n\t\t\t\t\t\n\t\t\t\t\tif (newIndex < 0) {\n\t\t\t\t\t\tnewIndex = fullscreenItems.length - 1;\n\t\t\t\t\t} else if (newIndex >= fullscreenItems.length) {\n\t\t\t\t\t\tnewIndex = 0;\n\t\t\t\t\t}\n\t\t\t\t\t\n\t\t\t\t\tcurrentFullscreenIndex = newIndex;\n\t\t\t\t\tshowFullscreenImage(newIndex);\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tfunction handleFullscreenKeyboard(e) {\n\t\t\t\t\tif (e.key === 'Escape') {\n\t\t\t\t\t\tcloseFullscreenView();\n\t\t\t\t\t} else if (e.key === 'ArrowLeft') {\n\t\t\t\t\t\tnavigateFullscreen(-1);\n\t\t\t\t\t} else if (e.key === 'ArrowRight') {\n\t\t\t\t\t\tnavigateFullscreen(1);\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t// Close button event listener\n\t\t\t\tif (closeFullscreen) {\n\t\t\t\t\tcloseFullscreen.addEventListener('click', closeFullscreenView);\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t// Fullscreen navigation arrows\n\t\t\t\tif (fullscreenPrev) {\n\t\t\t\t\tfullscreenPrev.addEventListener('click', () => {\n\t\t\t\t\t\tnavigateFullscreen(-1);\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tif (fullscreenNext) {\n\t\t\t\t\tfullscreenNext.addEventListener('click', () => {\n\t\t\t\t\t\tnavigateFullscreen(1);\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t// Close when clicking outside the image (on the dark background)\n\t\t\t\tfullscreenOverlay.addEventListener('click', (e) => {\n\t\t\t\t\tif (e.target === fullscreenOverlay) {\n\t\t\t\t\t\tcloseFullscreenView();\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t</script> <style>\n\t\t\t.slider-wrapper {\n\t\t\t\tbox-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);\n\t\t\t}\n\t\t\t\n\t\t\t.slider {\n\t\t\t\tscroll-snap-type: x mandatory;\n\t\t\t\tscroll-behavior: smooth;\n\t\t\t\t-webkit-overflow-scrolling: touch; /* Enable smooth scrolling on iOS */\n\t\t\t}\n\t\t\t\n\t\t\t.slider::-webkit-scrollbar {\n\t\t\t\tdisplay: none; /* Safari and Chrome */\n\t\t\t}\n\t\t\t\n\t\t\t/* Ensure each child (slide) aligns with the scroll-snap */\n\t\t\t.slider > div {\n\t\t\t\tscroll-snap-align: start; /* Snap the slides to the start when scrolled */\n\t\t\t}\n\t\t\t\n\t\t\t.slider-arrow {\n\t\t\t\ttransition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;\n\t\t\t}\n\t\t\t\n\t\t\t.slider-arrow:hover {\n\t\t\t\ttransform: translateY(-20%) scale(1.1);\n\t\t\t}\n\t\t\t\n\t\t\t.slider-indicator.bg-blue-500 {\n\t\t\t\tbox-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);\n\t\t\t}\n\t\t\t\n\t\t\t/* Cursor zoom-in indicates the image is clickable */\n\t\t\timg[data-fullscreen=\"true\"] {\n\t\t\t\tcursor: zoom-in;\n\t\t\t}\n\t\t\t\n\t\t\t/* Fullscreen overlay animations */\n\t\t\t#fullscreen-overlay {\n\t\t\t\ttransition: opacity 0.3s ease;\n\t\t\t}\n\t\t\t\n\t\t\t.fullscreen-content-container {\n\t\t\t\ttransition: transform 0.3s ease;\n\t\t\t}\n\t\t</style>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		return nil
+	})
+}
+
+func ArticleStats(v db.GetContentDetailsRow, globalSettings db.GlobalSetting) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var22 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var22 == nil {
+			templ_7745c5c3_Var22 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<div class=\"flex items-center justify-between mt-auto border-t border-gray-100 dark:border-gray-700 py-2\"><div class=\"flex space-x-3 text-xs text-gray-600 dark:text-gray-300\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if v.ViewCountEnabled && !globalSettings.DisableViews {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "<span class=\"flex items-center hover:text-green-600 transition-colors\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-4 w-4 mr-1\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path d=\"M10 12a2 2 0 100-4 2 2 0 000 4z\"></path> <path fill-rule=\"evenodd\" d=\"M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z\" clip-rule=\"evenodd\"></path></svg> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var23 string
+			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(v.ViewCount))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 476, Col: 30}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "</span> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if v.LikeCountEnabled && !globalSettings.DisableLikes {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "<span class=\"flex items-center hover:text-red-600 transition-colors\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-4 w-4 mr-1\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path d=\"M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z\"></path></svg> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var24 string
+			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(v.LikeCount))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 484, Col: 30}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "</span> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if v.CommentsEnabled && !globalSettings.DisableComments {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "<span class=\"flex items-center hover:text-blue-600 transition-colors\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-4 w-4 mr-1\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z\" clip-rule=\"evenodd\"></path></svg> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var25 string
+			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(v.CommentCount))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/article.templ`, Line: 492, Col: 33}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "</span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "</div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
 		}
 		return nil
 	})
