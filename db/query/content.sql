@@ -405,6 +405,15 @@ JOIN "user" u ON cr.user_id = u.user_id
 WHERE cr.content_id = $1
 LIMIT $2;
 
+-- name: FetchUserContentReaction :one
+SELECT
+  cr.*,
+  u.username
+FROM content_reaction cr
+JOIN "user" u ON cr.user_id = u.user_id
+WHERE cr.content_id = $1 AND cr.user_id = $2
+LIMIT 1;
+
 -- name: ListTrendingContent :many
 SELECT 
   c.*,

@@ -180,6 +180,40 @@ func (q *Queries) FetchContentReactions(ctx context.Context, arg FetchContentRea
 	return items, nil
 }
 
+const fetchUserContentReaction = `-- name: FetchUserContentReaction :one
+SELECT
+  cr.content_id, cr.user_id, cr.reaction,
+  u.username
+FROM content_reaction cr
+JOIN "user" u ON cr.user_id = u.user_id
+WHERE cr.content_id = $1 AND cr.user_id = $2
+LIMIT 1
+`
+
+type FetchUserContentReactionParams struct {
+	ContentID pgtype.UUID
+	UserID    pgtype.UUID
+}
+
+type FetchUserContentReactionRow struct {
+	ContentID pgtype.UUID
+	UserID    pgtype.UUID
+	Reaction  string
+	Username  string
+}
+
+func (q *Queries) FetchUserContentReaction(ctx context.Context, arg FetchUserContentReactionParams) (FetchUserContentReactionRow, error) {
+	row := q.db.QueryRow(ctx, fetchUserContentReaction, arg.ContentID, arg.UserID)
+	var i FetchUserContentReactionRow
+	err := row.Scan(
+		&i.ContentID,
+		&i.UserID,
+		&i.Reaction,
+		&i.Username,
+	)
+	return i, err
+}
+
 const getContentByCategoryCount = `-- name: GetContentByCategoryCount :one
 SELECT count(*)
 FROM content

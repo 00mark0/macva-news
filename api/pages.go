@@ -1099,16 +1099,10 @@ func (server *Server) articlePage(ctx echo.Context) error {
 	var userData db.GetUserByIDRow
 
 	articleIDStr := ctx.Param("id")
-
-	articleIDBytes, err := uuid.Parse(articleIDStr)
+	articleID, err := utils.ParseUUID(articleIDStr, "articleID")
 	if err != nil {
-		log.Println("Invalid category ID format in categoriesPage:", err)
+		log.Println("Invalid articleID format in articlePage:", err)
 		return err
-	}
-
-	articleID := pgtype.UUID{
-		Bytes: articleIDBytes,
-		Valid: true,
 	}
 
 	article, err := server.store.GetContentDetails(ctx.Request().Context(), articleID)
@@ -1123,15 +1117,10 @@ func (server *Server) articlePage(ctx echo.Context) error {
 	} else {
 		payload, err := server.tokenMaker.VerifyToken(cookie.Value)
 
-		userIDBytes, err := uuid.Parse(payload.UserID)
+		userID, err := utils.ParseUUID(payload.UserID, "userID")
 		if err != nil {
 			log.Println("Error parsing user_id in homePage:", err)
 			return err
-		}
-
-		userID := pgtype.UUID{
-			Bytes: userIDBytes,
-			Valid: true,
 		}
 
 		user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
@@ -1182,5 +1171,18 @@ func (server *Server) articlePage(ctx echo.Context) error {
 		return err
 	}
 
-	return Render(ctx, http.StatusOK, components.ArticlePage(userData, meta, activeAds, categories, article, globalSettings[0]))
+	userReaction := ""
+	if userData.UserID.Valid {
+		reaction, err := server.store.FetchUserContentReaction(ctx.Request().Context(), db.FetchUserContentReactionParams{
+			ContentID: articleID,
+			UserID:    userData.UserID,
+		})
+		if err != nil {
+			log.Println("No reaction for user in articlePage:", err)
+		} else {
+			userReaction = reaction.Reaction
+		}
+	}
+
+	return Render(ctx, http.StatusOK, components.ArticlePage(userData, meta, activeAds, categories, article, globalSettings[0], userReaction))
 }

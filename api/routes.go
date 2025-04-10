@@ -194,6 +194,8 @@ func (server *Server) setupRouter() {
 	router.GET("/api/tag/content/recent/:id", server.listAllContentByTag)
 	// Article
 	router.GET("/api/content/media/:id", server.listMediaForArticlePage)
+	authRoutes.POST("/api/content/like/:id", server.handleLikeContent)
+	authRoutes.POST("/api/content/dislike/:id", server.handleDislikeContent)
 
 	server.router = router
 }

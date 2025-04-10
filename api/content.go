@@ -14,6 +14,7 @@ import (
 
 	"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/db/services"
+	"github.com/00mark0/macva-news/token"
 	"github.com/00mark0/macva-news/utils"
 )
 
@@ -1362,4 +1363,210 @@ func (server *Server) categoriesWithContent(ctx echo.Context) error {
 
 	// Render the template with all category content
 	return Render(ctx, http.StatusOK, components.CategoriesWithContent(allCategoryContent, globalSettings[0]))
+}
+
+func (server *Server) handleLikeContent(ctx echo.Context) error {
+	contentIDStr := ctx.Param("id")
+	userIDStr := ctx.Get(authorizationPayloadKey).(*token.Payload).UserID
+
+	contentID, err := utils.ParseUUID(contentIDStr, "content ID")
+	if err != nil {
+		log.Println("Invalid content ID format in handleLikeContent:", err)
+		return err
+	}
+
+	userID, err := utils.ParseUUID(userIDStr, "user ID")
+	if err != nil {
+		log.Println("Invalid user ID format in handleLikeContent:", err)
+		return err
+	}
+
+	// Get user for consistency checks
+	user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
+	if err != nil {
+		log.Println("Error getting user in handleLikeContent:", err)
+		return err
+	}
+
+	// Check if the user already has a reaction using the efficient query
+	userReaction, err := server.store.FetchUserContentReaction(ctx.Request().Context(), db.FetchUserContentReactionParams{
+		ContentID: contentID,
+		UserID:    user.UserID,
+	})
+
+	// Handle reaction logic based on whether we found a reaction and what it was
+	if err == nil {
+		// User has an existing reaction
+		if userReaction.Reaction == "like" {
+			// If already liked, remove the reaction
+			_, err = server.store.DeleteContentReaction(ctx.Request().Context(), db.DeleteContentReactionParams{
+				ContentID: contentID,
+				UserID:    userID,
+			})
+			if err != nil {
+				log.Println("Error deleting content reaction from like to remove like:", err)
+				return err
+			}
+		} else if userReaction.Reaction == "dislike" {
+			// If disliked, change to like
+			_, err := server.store.InsertOrUpdateContentReaction(ctx.Request().Context(), db.InsertOrUpdateContentReactionParams{
+				ContentID: contentID,
+				UserID:    userID,
+				Reaction:  "like",
+			})
+			if err != nil {
+				log.Println("Error changing reaction from dislike to like:", err)
+				return err
+			}
+		}
+	} else {
+		// No reaction yet, add a like
+		_, err := server.store.InsertOrUpdateContentReaction(ctx.Request().Context(), db.InsertOrUpdateContentReactionParams{
+			ContentID: contentID,
+			UserID:    userID,
+			Reaction:  "like",
+		})
+		if err != nil {
+			log.Println("Error adding new like reaction:", err)
+			return err
+		}
+	}
+
+	// Update the content's like/dislike counts
+	_, err = server.store.UpdateContentLikeDislikeCount(ctx.Request().Context(), contentID)
+	if err != nil {
+		log.Println("Error updating content like and dislike count:", err)
+		return err
+	}
+
+	// Get the updated user reaction for the response
+	updatedUserReaction, err := server.store.FetchUserContentReaction(ctx.Request().Context(), db.FetchUserContentReactionParams{
+		ContentID: contentID,
+		UserID:    userID,
+	})
+
+	reactionStatus := ""
+	if err == nil {
+		reactionStatus = updatedUserReaction.Reaction
+	}
+
+	// Get global settings for rendering
+	globalSettings, err := server.store.GetGlobalSettings(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error getting global settings:", err)
+		return err
+	}
+
+	// Get updated content details for rendering
+	content, err := server.store.GetContentDetails(ctx.Request().Context(), contentID)
+	if err != nil {
+		log.Println("Error getting content details:", err)
+		return err
+	}
+
+	// Render the updated article stats component
+	return Render(ctx, http.StatusOK, components.ArticleStats(content, globalSettings[0], reactionStatus))
+}
+
+func (server *Server) handleDislikeContent(ctx echo.Context) error {
+	contentIDStr := ctx.Param("id")
+	userIDStr := ctx.Get(authorizationPayloadKey).(*token.Payload).UserID
+
+	contentID, err := utils.ParseUUID(contentIDStr, "content ID")
+	if err != nil {
+		log.Println("Invalid content ID format in handleDislikeContent:", err)
+		return err
+	}
+
+	userID, err := utils.ParseUUID(userIDStr, "user ID")
+	if err != nil {
+		log.Println("Invalid user ID format in handleDislikeContent:", err)
+		return err
+	}
+
+	// Get user for consistency checks
+	user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
+	if err != nil {
+		log.Println("Error getting user in handleDislikeContent:", err)
+		return err
+	}
+
+	// Check if the user already has a reaction using the efficient query
+	userReaction, err := server.store.FetchUserContentReaction(ctx.Request().Context(), db.FetchUserContentReactionParams{
+		ContentID: contentID,
+		UserID:    user.UserID,
+	})
+
+	// Handle reaction logic based on whether we found a reaction and what it was
+	if err == nil {
+		// User has an existing reaction
+		if userReaction.Reaction == "dislike" {
+			// If already disliked, remove the reaction
+			_, err = server.store.DeleteContentReaction(ctx.Request().Context(), db.DeleteContentReactionParams{
+				ContentID: contentID,
+				UserID:    userID,
+			})
+			if err != nil {
+				log.Println("Error deleting content reaction from dislike to remove dislike:", err)
+				return err
+			}
+		} else if userReaction.Reaction == "like" {
+			// If liked, change to dislike
+			_, err := server.store.InsertOrUpdateContentReaction(ctx.Request().Context(), db.InsertOrUpdateContentReactionParams{
+				ContentID: contentID,
+				UserID:    userID,
+				Reaction:  "dislike",
+			})
+			if err != nil {
+				log.Println("Error changing reaction from like to dislike:", err)
+				return err
+			}
+		}
+	} else {
+		// No reaction yet, add a dislike
+		_, err := server.store.InsertOrUpdateContentReaction(ctx.Request().Context(), db.InsertOrUpdateContentReactionParams{
+			ContentID: contentID,
+			UserID:    userID,
+			Reaction:  "dislike",
+		})
+		if err != nil {
+			log.Println("Error adding new dislike reaction:", err)
+			return err
+		}
+	}
+
+	// Update the content's like/dislike counts
+	_, err = server.store.UpdateContentLikeDislikeCount(ctx.Request().Context(), contentID)
+	if err != nil {
+		log.Println("Error updating content like and dislike count:", err)
+		return err
+	}
+
+	// Get the updated user reaction for the response
+	updatedUserReaction, err := server.store.FetchUserContentReaction(ctx.Request().Context(), db.FetchUserContentReactionParams{
+		ContentID: contentID,
+		UserID:    userID,
+	})
+
+	reactionStatus := ""
+	if err == nil {
+		reactionStatus = updatedUserReaction.Reaction
+	}
+
+	// Get global settings for rendering
+	globalSettings, err := server.store.GetGlobalSettings(ctx.Request().Context())
+	if err != nil {
+		log.Println("Error getting global settings:", err)
+		return err
+	}
+
+	// Get updated content details for rendering
+	content, err := server.store.GetContentDetails(ctx.Request().Context(), contentID)
+	if err != nil {
+		log.Println("Error getting content details:", err)
+		return err
+	}
+
+	// Render the updated article stats component
+	return Render(ctx, http.StatusOK, components.ArticleStats(content, globalSettings[0], reactionStatus))
 }
