@@ -30,6 +30,11 @@ type TwitterCardMeta struct {
 	Creator     string
 }
 
+script OpenUserModal() {
+const modal = document.getElementById("user-modal");
+modal.classList.remove("hidden");
+}
+
 templ Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []db.Category, children ...templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en">
@@ -302,6 +307,7 @@ templ Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []
 					</div>
 				</div>
 			</footer>
+			<div id="user-modal" class="hidden fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
 			<style>
 				/* Custom scrollbar hide for webkit browsers */
 				.scrollbar-hide::-webkit-scrollbar {
@@ -329,6 +335,48 @@ templ Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []
 			</style>
 		</body>
 	</html>
+}
+
+templ InfoWarning(message string) {
+	<div
+		class="bg-yellow-100 border-l-4 border-yellow-500 rounded-md shadow-md transform transition-all duration-300 ease-out animate-fadeIn"
+	>
+		<div class="flex flex-col gap-2 sm:gap-0 sm:flex-row justify-center items-center p-3">
+			<div>
+				<svg
+					class="h-5 w-5 text-yellow-500"
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 20 20"
+					fill="currentColor"
+				>
+					<path
+						fill-rule="evenodd"
+						d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z"
+						clip-rule="evenodd"
+					></path>
+				</svg>
+			</div>
+			<div class="ml-3 mr-7">
+				<p class="text-sm text-center font-medium text-yellow-800">{ message }</p>
+			</div>
+			<div class="sm:ml-auto sm:pl-3">
+				<div class="flex space-x-2">
+					<a
+						href="/login"
+						class="inline-flex text-xs bg-yellow-50 hover:bg-yellow-100 text-yellow-700 font-medium py-1 px-2 rounded-md transition-colors duration-150"
+					>
+						Prijava
+					</a>
+					<button
+						onclick="this.parentElement.parentElement.parentElement.parentElement.classList.add('hidden')"
+						class="cursor-pointer inline-flex text-xs bg-yellow-50 hover:bg-yellow-100 text-yellow-700 font-medium py-1 px-2 rounded-md transition-colors duration-150"
+					>
+						Zatvori
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
 }
 
 // Helper function to provide a default value if the input is empty

@@ -1367,7 +1367,12 @@ func (server *Server) categoriesWithContent(ctx echo.Context) error {
 
 func (server *Server) handleLikeContent(ctx echo.Context) error {
 	contentIDStr := ctx.Param("id")
+	_, err := ctx.Cookie("refresh_token")
+	if err != nil {
+
+	}
 	userIDStr := ctx.Get(authorizationPayloadKey).(*token.Payload).UserID
+	log.Println("user ID:", userIDStr)
 
 	contentID, err := utils.ParseUUID(contentIDStr, "content ID")
 	if err != nil {

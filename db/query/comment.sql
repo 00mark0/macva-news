@@ -32,18 +32,22 @@ RETURNING
 -- name: ListContentComments :many
 SELECT
   cm.*,
-  u.username
+  u.username,
+  u.pfp,
+  u.role
 FROM comment cm
 JOIN "user" u ON cm.user_id = u.user_id
 WHERE cm.content_id = $1
   AND cm.is_deleted = false
-ORDER BY cm.created_at ASC
+ORDER BY cm.created_at DESC
 LIMIT $2;
 
 -- name: ListContentCommentsByScore :many
 SELECT
   cm.*,
-  u.username
+  u.username,
+  u.pfp,
+  u.role
 FROM comment cm
 JOIN "user" u ON cm.user_id = u.user_id
 WHERE cm.content_id = $1

@@ -44,3 +44,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+document.body.addEventListener('htmx:beforeSwap', function(evt) {
+    // Check if there's an HX-Retarget header
+    const retargetHeader = evt.detail.xhr.getResponseHeader("HX-Retarget");
+
+    if (retargetHeader) {
+        // Change the target of the swap
+        evt.detail.target = document.querySelector(retargetHeader);
+    }
+});

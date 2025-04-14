@@ -128,12 +128,14 @@ func (q *Queries) InsertOrUpdateCommentReaction(ctx context.Context, arg InsertO
 const listContentComments = `-- name: ListContentComments :many
 SELECT
   cm.comment_id, cm.content_id, cm.user_id, cm.comment_text, cm.score, cm.created_at, cm.updated_at, cm.is_deleted,
-  u.username
+  u.username,
+  u.pfp,
+  u.role
 FROM comment cm
 JOIN "user" u ON cm.user_id = u.user_id
 WHERE cm.content_id = $1
   AND cm.is_deleted = false
-ORDER BY cm.created_at ASC
+ORDER BY cm.created_at DESC
 LIMIT $2
 `
 
@@ -152,6 +154,8 @@ type ListContentCommentsRow struct {
 	UpdatedAt   pgtype.Timestamptz
 	IsDeleted   pgtype.Bool
 	Username    string
+	Pfp         string
+	Role        string
 }
 
 func (q *Queries) ListContentComments(ctx context.Context, arg ListContentCommentsParams) ([]ListContentCommentsRow, error) {
@@ -173,6 +177,8 @@ func (q *Queries) ListContentComments(ctx context.Context, arg ListContentCommen
 			&i.UpdatedAt,
 			&i.IsDeleted,
 			&i.Username,
+			&i.Pfp,
+			&i.Role,
 		); err != nil {
 			return nil, err
 		}
@@ -187,7 +193,9 @@ func (q *Queries) ListContentComments(ctx context.Context, arg ListContentCommen
 const listContentCommentsByScore = `-- name: ListContentCommentsByScore :many
 SELECT
   cm.comment_id, cm.content_id, cm.user_id, cm.comment_text, cm.score, cm.created_at, cm.updated_at, cm.is_deleted,
-  u.username
+  u.username,
+  u.pfp,
+  u.role
 FROM comment cm
 JOIN "user" u ON cm.user_id = u.user_id
 WHERE cm.content_id = $1
@@ -211,6 +219,8 @@ type ListContentCommentsByScoreRow struct {
 	UpdatedAt   pgtype.Timestamptz
 	IsDeleted   pgtype.Bool
 	Username    string
+	Pfp         string
+	Role        string
 }
 
 func (q *Queries) ListContentCommentsByScore(ctx context.Context, arg ListContentCommentsByScoreParams) ([]ListContentCommentsByScoreRow, error) {
@@ -232,6 +242,8 @@ func (q *Queries) ListContentCommentsByScore(ctx context.Context, arg ListConten
 			&i.UpdatedAt,
 			&i.IsDeleted,
 			&i.Username,
+			&i.Pfp,
+			&i.Role,
 		); err != nil {
 			return nil, err
 		}

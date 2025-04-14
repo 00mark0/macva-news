@@ -39,6 +39,17 @@ type TwitterCardMeta struct {
 	Creator     string
 }
 
+func OpenUserModal() templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_OpenUserModal_262a`,
+		Function: `function __templ_OpenUserModal_262a(){const modal = document.getElementById("user-modal");
+modal.classList.remove("hidden");
+}`,
+		Call:       templ.SafeScript(`__templ_OpenUserModal_262a`),
+		CallInline: templ.SafeScriptInline(`__templ_OpenUserModal_262a`),
+	}
+}
+
 func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []db.Category, children ...templ.Component) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -67,7 +78,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(meta.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 40, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 45, Col: 22}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -80,7 +91,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(meta.Description)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 41, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 46, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -98,7 +109,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(meta.Canonical)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 44, Col: 47}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 49, Col: 47}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -116,7 +127,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(DefaultString(meta.OpenGraph.Type, "website"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 47, Col: 83}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 52, Col: 83}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -129,7 +140,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(DefaultString(meta.OpenGraph.Title, meta.Title))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 48, Col: 86}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 53, Col: 86}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -142,7 +153,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(DefaultString(meta.OpenGraph.Description, meta.Description))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 49, Col: 104}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 54, Col: 104}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -155,7 +166,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(meta.OpenGraph.URL)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 50, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 55, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -173,7 +184,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(meta.OpenGraph.Image)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 52, Col: 60}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 57, Col: 60}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -186,7 +197,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(meta.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 53, Col: 60}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 58, Col: 60}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -204,7 +215,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(DefaultString(meta.Twitter.Card, "summary_large_image"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 56, Col: 94}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 61, Col: 94}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -217,7 +228,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(DefaultString(meta.Twitter.Title, meta.Title))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 57, Col: 85}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 62, Col: 85}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -230,7 +241,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(DefaultString(meta.Twitter.Description, meta.Description))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 58, Col: 103}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 63, Col: 103}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -248,7 +259,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(meta.Twitter.Image)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 60, Col: 59}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 65, Col: 59}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -267,7 +278,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(meta.Twitter.Creator)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 63, Col: 63}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 68, Col: 63}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -290,7 +301,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(activeAds[0].ImageUrl.String)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 75, Col: 70}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 80, Col: 70}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
@@ -309,7 +320,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(activeAds[1].ImageUrl.String)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 78, Col: 70}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 83, Col: 70}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -328,7 +339,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(activeAds[2].ImageUrl.String)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 81, Col: 70}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 86, Col: 70}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -347,7 +358,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(activeAds[3].ImageUrl.String)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 84, Col: 70}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 89, Col: 70}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
@@ -370,7 +381,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 			var templ_7745c5c3_Var20 string
 			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(user.Pfp)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 112, Col: 60}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 117, Col: 60}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
@@ -393,7 +404,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 123, Col: 82}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 128, Col: 82}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -406,7 +417,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(user.Email)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 124, Col: 91}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 129, Col: 91}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -443,7 +454,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 			var templ_7745c5c3_Var24 string
 			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(category.CategoryName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 173, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 178, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 			if templ_7745c5c3_Err != nil {
@@ -476,7 +487,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 				var templ_7745c5c3_Var26 string
 				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(ad.ImageUrl.String)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 187, Col: 37}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 192, Col: 37}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 				if templ_7745c5c3_Err != nil {
@@ -489,7 +500,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 				var templ_7745c5c3_Var27 string
 				templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(ad.Description.String)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 187, Col: 67}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 192, Col: 67}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 				if templ_7745c5c3_Err != nil {
@@ -533,7 +544,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 				var templ_7745c5c3_Var29 string
 				templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(ad.ImageUrl.String)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 211, Col: 38}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 216, Col: 38}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 				if templ_7745c5c3_Err != nil {
@@ -546,7 +557,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 				var templ_7745c5c3_Var30 string
 				templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(ad.Description.String)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 211, Col: 68}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 216, Col: 68}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 				if templ_7745c5c3_Err != nil {
@@ -580,7 +591,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 				var templ_7745c5c3_Var32 string
 				templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(ad.ImageUrl.String)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 222, Col: 37}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 227, Col: 37}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 				if templ_7745c5c3_Err != nil {
@@ -593,7 +604,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 				var templ_7745c5c3_Var33 string
 				templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(ad.Description.String)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 222, Col: 67}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 227, Col: 67}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 				if templ_7745c5c3_Err != nil {
@@ -626,7 +637,7 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 			var templ_7745c5c3_Var35 string
 			templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(category.CategoryName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 238, Col: 225}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 243, Col: 225}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 			if templ_7745c5c3_Err != nil {
@@ -644,13 +655,55 @@ func Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []d
 		var templ_7745c5c3_Var36 string
 		templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(time.Now().Year()))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 301, Col: 92}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 306, Col: 92}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 64, " Mačva News Portal. All rights reserved.</p></div></div></footer><style>\n\t\t\t\t/* Custom scrollbar hide for webkit browsers */\n\t\t\t\t.scrollbar-hide::-webkit-scrollbar {\n\t\t\t\t\tdisplay: none;\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t/* Scrollbar hide for Firefox */\n\t\t\t\t.scrollbar-hide {\n\t\t\t\t\t-ms-overflow-style: none;  /* IE and Edge */\n\t\t\t\t\tscrollbar-width: none;  /* Firefox */\n\t\t\t\t}\n\n\t\t\t\t.sticky-ad {\n\t\t\t\t position: relative;\n\t\t\t\t transition: top 0.3s ease-in-out;\n\t\t\t\t}\n  \n\t\t\t\t/* Only apply sticky positioning on large screens */\n\t\t\t\t@media (min-width: 1024px) {\n\t\t\t\t\t.sticky-ad.is-sticky {\n\t\t\t\t\tposition: sticky;\n\t\t\t\t\ttop: 180px;\n\t\t\t\t\t}\n                }\n\t\t\t</style></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 64, " Mačva News Portal. All rights reserved.</p></div></div></footer><div id=\"user-modal\" class=\"hidden fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2\"></div><style>\n\t\t\t\t/* Custom scrollbar hide for webkit browsers */\n\t\t\t\t.scrollbar-hide::-webkit-scrollbar {\n\t\t\t\t\tdisplay: none;\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t/* Scrollbar hide for Firefox */\n\t\t\t\t.scrollbar-hide {\n\t\t\t\t\t-ms-overflow-style: none;  /* IE and Edge */\n\t\t\t\t\tscrollbar-width: none;  /* Firefox */\n\t\t\t\t}\n\n\t\t\t\t.sticky-ad {\n\t\t\t\t position: relative;\n\t\t\t\t transition: top 0.3s ease-in-out;\n\t\t\t\t}\n  \n\t\t\t\t/* Only apply sticky positioning on large screens */\n\t\t\t\t@media (min-width: 1024px) {\n\t\t\t\t\t.sticky-ad.is-sticky {\n\t\t\t\t\tposition: sticky;\n\t\t\t\t\ttop: 180px;\n\t\t\t\t\t}\n                }\n\t\t\t</style></body></html>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func InfoWarning(message string) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var37 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var37 == nil {
+			templ_7745c5c3_Var37 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 65, "<div class=\"bg-yellow-100 border-l-4 border-yellow-500 rounded-md shadow-md transform transition-all duration-300 ease-out animate-fadeIn\"><div class=\"flex flex-col gap-2 sm:gap-0 sm:flex-row justify-center items-center p-3\"><div><svg class=\"h-5 w-5 text-yellow-500\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z\" clip-rule=\"evenodd\"></path></svg></div><div class=\"ml-3 mr-7\"><p class=\"text-sm text-center font-medium text-yellow-800\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var38 string
+		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(message)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 360, Col: 72}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 66, "</p></div><div class=\"sm:ml-auto sm:pl-3\"><div class=\"flex space-x-2\"><a href=\"/login\" class=\"inline-flex text-xs bg-yellow-50 hover:bg-yellow-100 text-yellow-700 font-medium py-1 px-2 rounded-md transition-colors duration-150\">Prijava</a> <button onclick=\"this.parentElement.parentElement.parentElement.parentElement.classList.add(&#39;hidden&#39;)\" class=\"cursor-pointer inline-flex text-xs bg-yellow-50 hover:bg-yellow-100 text-yellow-700 font-medium py-1 px-2 rounded-md transition-colors duration-150\">Zatvori</button></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

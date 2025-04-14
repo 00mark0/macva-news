@@ -196,6 +196,8 @@ func (server *Server) setupRouter() {
 	router.GET("/api/content/media/:id", server.listMediaForArticlePage)
 	authRoutes.POST("/api/content/like/:id", server.handleLikeContent)
 	authRoutes.POST("/api/content/dislike/:id", server.handleDislikeContent)
+	router.GET("/api/content/comments/:id", server.listContentComments)
+	authRoutes.POST("/api/content/comments/:id", server.createComment)
 
 	server.router = router
 }
