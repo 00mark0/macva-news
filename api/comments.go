@@ -1,18 +1,21 @@
 package api
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/db/services"
 	"github.com/00mark0/macva-news/utils"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )
 
 func (server *Server) listContentComments(ctx echo.Context) error {
 	var req ListAdsReq
 	var userData db.GetUserByIDRow
+	var userReactions map[string]string = make(map[string]string)
 
 	if err := ctx.Bind(&req); err != nil {
 		log.Println("Error binding request in listContentComments:", err)
@@ -20,36 +23,57 @@ func (server *Server) listContentComments(ctx echo.Context) error {
 	}
 
 	contentIDStr := ctx.Param("id")
-
 	contentID, err := utils.ParseUUID(contentIDStr, "content ID")
 	if err != nil {
 		log.Println("Invalid content ID format in listContentComments:", err)
 		return err
 	}
 
+	var userID pgtype.UUID
 	cookie, err := ctx.Cookie("refresh_token")
-	if err != nil {
-		log.Println("User is not logged in.")
-	} else {
+	if err == nil {
+		// User is logged in
 		payload, err := server.tokenMaker.VerifyToken(cookie.Value)
+		if err == nil {
+			parsedUserID, err := utils.ParseUUID(payload.UserID, "userID")
+			if err == nil {
+				userID = parsedUserID
 
-		userID, err := utils.ParseUUID(payload.UserID, "userID")
-		if err != nil {
-			log.Println("Error parsing user_id in homePage:", err)
-			return err
+				user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
+				if err == nil {
+					userData = user
+
+					// Fetch user reactions for this content's comments
+					reactionsArg := db.GetUserReactionsForContentCommentsParams{
+						ContentID: contentID,
+						UserID:    userID,
+					}
+
+					reactions, err := server.store.GetUserReactionsForContentComments(ctx.Request().Context(), reactionsArg)
+					if err == nil {
+						// Create a map of comment ID to reaction
+						for _, reaction := range reactions {
+							commentIDStr := reaction.CommentID.String()
+							userReactions[commentIDStr] = reaction.Reaction
+						}
+					} else {
+						log.Println("Error fetching user reactions:", err)
+						// Continue without reactions if there's an error
+					}
+				} else {
+					log.Println("Error getting user in listContentComments:", err)
+				}
+			} else {
+				log.Println("Error parsing user_id in listContentComments:", err)
+			}
+		} else {
+			log.Println("Error verifying token in listContentComments:", err)
 		}
-
-		user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
-		if err != nil {
-			log.Println("Error getting user in homePage:", err)
-			return err
-		}
-
-		userData = user
+	} else {
+		log.Println("User is not logged in.")
 	}
 
 	nextLimit := req.Limit + 10
-
 	arg := db.ListContentCommentsParams{
 		ContentID: contentID,
 		Limit:     nextLimit,
@@ -61,11 +85,13 @@ func (server *Server) listContentComments(ctx echo.Context) error {
 		return err
 	}
 
-	return Render(ctx, http.StatusOK, components.ArticleComments(contentIDStr, comments, userData))
+	url := fmt.Sprintf("/api/content/comments/%s?limit=", contentIDStr)
+
+	return Render(ctx, http.StatusOK, components.ArticleComments(contentIDStr, comments, userData, userReactions, int(nextLimit), url))
 }
 
 type CreateCommentReq struct {
-	CommentText string `form:"comment_text" validate:"required,min=3,max=1000"`
+	CommentText string `form:"comment_text" validate:"required,min=3,max=10000"`
 }
 
 func (server *Server) createComment(ctx echo.Context) error {
@@ -123,4 +149,205 @@ func (server *Server) createComment(ctx echo.Context) error {
 	}
 
 	return server.listContentComments(ctx)
+}
+
+// Handler for upvoting a comment
+func (server *Server) handleUpvoteComment(ctx echo.Context) error {
+	var userData db.GetUserByIDRow
+	commentIDStr := ctx.Param("id")
+
+	cookie, err := ctx.Cookie("refresh_token")
+	if err != nil {
+		log.Println("User is not logged in.")
+	}
+
+	payload, err := server.tokenMaker.VerifyToken(cookie.Value)
+	if err != nil {
+		log.Println("Invalid token:", err)
+		return err
+	}
+
+	userID, err := utils.ParseUUID(payload.UserID, "userID")
+	if err != nil {
+		log.Println("Error parsing user_id in handleDownvoteComment:", err)
+		return err
+	}
+
+	user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
+	if err != nil {
+		log.Println("Error getting user in handleDownvoteComment:", err)
+		return err
+	}
+	userData = user
+
+	commentID, err := utils.ParseUUID(commentIDStr, "comment ID")
+	if err != nil {
+		log.Println("Invalid comment ID format in handleUpvoteComment:", err)
+		return err
+	}
+
+	// Check if the user already has a reaction
+	userReaction, err := server.store.GetUserCommentReaction(ctx.Request().Context(), db.GetUserCommentReactionParams{
+		CommentID: commentID,
+		UserID:    userData.UserID,
+	})
+
+	// Handle reaction logic based on whether we found a reaction and what it was
+	if err == nil {
+		// User has an existing reaction
+		if userReaction.Reaction == "like" {
+			// If already liked, remove the reaction
+			_, err = server.store.DeleteCommentReaction(ctx.Request().Context(), db.DeleteCommentReactionParams{
+				CommentID: commentID,
+				UserID:    userData.UserID,
+			})
+			if err != nil {
+				log.Println("Error deleting comment reaction from like to remove like:", err)
+				return err
+			}
+		} else if userReaction.Reaction == "dislike" {
+			// If disliked, change to like
+			_, err := server.store.InsertOrUpdateCommentReaction(ctx.Request().Context(), db.InsertOrUpdateCommentReactionParams{
+				CommentID: commentID,
+				UserID:    userData.UserID,
+				Reaction:  "like",
+			})
+			if err != nil {
+				log.Println("Error changing reaction from dislike to like:", err)
+				return err
+			}
+		}
+	} else {
+		// No reaction yet, add a like
+		_, err := server.store.InsertOrUpdateCommentReaction(ctx.Request().Context(), db.InsertOrUpdateCommentReactionParams{
+			CommentID: commentID,
+			UserID:    userData.UserID,
+			Reaction:  "like",
+		})
+		if err != nil {
+			log.Println("Error adding new like reaction:", err)
+			return err
+		}
+	}
+
+	// Update the comment's score
+	updatedComment, err := server.store.UpdateCommentScore(ctx.Request().Context(), commentID)
+	if err != nil {
+		log.Println("Error updating comment score:", err)
+		return err
+	}
+
+	// Get the updated user reaction for the response
+	reactionStatus := ""
+	updatedUserReaction, err := server.store.GetUserCommentReaction(ctx.Request().Context(), db.GetUserCommentReactionParams{
+		CommentID: commentID,
+		UserID:    userData.UserID,
+	})
+
+	if err == nil {
+		reactionStatus = updatedUserReaction.Reaction
+	}
+
+	// Render just the comment actions part
+	return Render(ctx, http.StatusOK, components.CommentActions(updatedComment, userData, reactionStatus))
+}
+
+// Handler for downvoting a comment
+func (server *Server) handleDownvoteComment(ctx echo.Context) error {
+	var userData db.GetUserByIDRow
+	commentIDStr := ctx.Param("id")
+
+	cookie, err := ctx.Cookie("refresh_token")
+	if err != nil {
+		log.Println("User is not logged in.")
+	}
+
+	payload, err := server.tokenMaker.VerifyToken(cookie.Value)
+	if err != nil {
+		log.Println("Invalid token:", err)
+		return err
+	}
+
+	userID, err := utils.ParseUUID(payload.UserID, "userID")
+	if err != nil {
+		log.Println("Error parsing user_id in handleDownvoteComment:", err)
+		return err
+	}
+
+	user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
+	if err != nil {
+		log.Println("Error getting user in handleDownvoteComment:", err)
+		return err
+	}
+	userData = user
+
+	commentID, err := utils.ParseUUID(commentIDStr, "comment ID")
+	if err != nil {
+		log.Println("Invalid comment ID format in handleDownvoteComment:", err)
+		return err
+	}
+
+	// Check if the user already has a reaction
+	userReaction, err := server.store.GetUserCommentReaction(ctx.Request().Context(), db.GetUserCommentReactionParams{
+		CommentID: commentID,
+		UserID:    userData.UserID,
+	})
+
+	if err == nil {
+		// User has an existing reaction
+		if userReaction.Reaction == "dislike" {
+			// If already disliked, remove the reaction
+			_, err = server.store.DeleteCommentReaction(ctx.Request().Context(), db.DeleteCommentReactionParams{
+				CommentID: commentID,
+				UserID:    userData.UserID,
+			})
+			if err != nil {
+				log.Println("Error deleting comment reaction from dislike to remove dislike:", err)
+				return err
+			}
+		} else if userReaction.Reaction == "like" {
+			// If liked, change to dislike
+			_, err = server.store.InsertOrUpdateCommentReaction(ctx.Request().Context(), db.InsertOrUpdateCommentReactionParams{
+				CommentID: commentID,
+				UserID:    userData.UserID,
+				Reaction:  "dislike",
+			})
+			if err != nil {
+				log.Println("Error changing reaction from like to dislike:", err)
+				return err
+			}
+		}
+	} else {
+		// No reaction yet, add a dislike
+		_, err = server.store.InsertOrUpdateCommentReaction(ctx.Request().Context(), db.InsertOrUpdateCommentReactionParams{
+			CommentID: commentID,
+			UserID:    userData.UserID,
+			Reaction:  "dislike",
+		})
+		if err != nil {
+			log.Println("Error adding new dislike reaction:", err)
+			return err
+		}
+	}
+
+	// Update the comment's score
+	updatedComment, err := server.store.UpdateCommentScore(ctx.Request().Context(), commentID)
+	if err != nil {
+		log.Println("Error updating comment score:", err)
+		return err
+	}
+
+	// Get the updated user reaction for the response
+	reactionStatus := ""
+	updatedUserReaction, err := server.store.GetUserCommentReaction(ctx.Request().Context(), db.GetUserCommentReactionParams{
+		CommentID: commentID,
+		UserID:    userData.UserID,
+	})
+
+	if err == nil {
+		reactionStatus = updatedUserReaction.Reaction
+	}
+
+	// Render just the comment actions part
+	return Render(ctx, http.StatusOK, components.CommentActions(updatedComment, userData, reactionStatus))
 }

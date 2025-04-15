@@ -307,7 +307,7 @@ templ Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []
 					</div>
 				</div>
 			</footer>
-			<div id="user-modal" class="hidden fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+			<div id="user-modal" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
 			<style>
 				/* Custom scrollbar hide for webkit browsers */
 				.scrollbar-hide::-webkit-scrollbar {
@@ -368,7 +368,7 @@ templ InfoWarning(message string) {
 						Prijava
 					</a>
 					<button
-						onclick="this.parentElement.parentElement.parentElement.parentElement.classList.add('hidden')"
+						onclick="this.parentElement.parentElement.parentElement.parentElement.parentElement.innerHTML = ''"
 						class="cursor-pointer inline-flex text-xs bg-yellow-50 hover:bg-yellow-100 text-yellow-700 font-medium py-1 px-2 rounded-md transition-colors duration-150"
 					>
 						Zatvori

@@ -104,6 +104,93 @@ func (q *Queries) FetchCommentReactions(ctx context.Context, arg FetchCommentRea
 	return items, nil
 }
 
+const getCommentByID = `-- name: GetCommentByID :one
+SELECT comment_id, content_id, user_id, comment_text, score, created_at, updated_at, is_deleted FROM comment
+WHERE comment_id = $1
+`
+
+func (q *Queries) GetCommentByID(ctx context.Context, commentID pgtype.UUID) (Comment, error) {
+	row := q.db.QueryRow(ctx, getCommentByID, commentID)
+	var i Comment
+	err := row.Scan(
+		&i.CommentID,
+		&i.ContentID,
+		&i.UserID,
+		&i.CommentText,
+		&i.Score,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.IsDeleted,
+	)
+	return i, err
+}
+
+const getUserCommentReaction = `-- name: GetUserCommentReaction :one
+SELECT comment_id, user_id, reaction FROM comment_reaction
+WHERE comment_id = $1 AND user_id = $2
+`
+
+type GetUserCommentReactionParams struct {
+	CommentID pgtype.UUID
+	UserID    pgtype.UUID
+}
+
+func (q *Queries) GetUserCommentReaction(ctx context.Context, arg GetUserCommentReactionParams) (CommentReaction, error) {
+	row := q.db.QueryRow(ctx, getUserCommentReaction, arg.CommentID, arg.UserID)
+	var i CommentReaction
+	err := row.Scan(&i.CommentID, &i.UserID, &i.Reaction)
+	return i, err
+}
+
+const getUserReactionsForContentComments = `-- name: GetUserReactionsForContentComments :many
+SELECT
+  cr.comment_id, cr.user_id, cr.reaction,
+  u.username
+FROM comment_reaction cr
+JOIN comment c ON cr.comment_id = c.comment_id
+JOIN "user" u ON cr.user_id = u.user_id
+WHERE c.content_id = $1
+  AND cr.user_id = $2
+  AND c.is_deleted = false
+`
+
+type GetUserReactionsForContentCommentsParams struct {
+	ContentID pgtype.UUID
+	UserID    pgtype.UUID
+}
+
+type GetUserReactionsForContentCommentsRow struct {
+	CommentID pgtype.UUID
+	UserID    pgtype.UUID
+	Reaction  string
+	Username  string
+}
+
+func (q *Queries) GetUserReactionsForContentComments(ctx context.Context, arg GetUserReactionsForContentCommentsParams) ([]GetUserReactionsForContentCommentsRow, error) {
+	rows, err := q.db.Query(ctx, getUserReactionsForContentComments, arg.ContentID, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUserReactionsForContentCommentsRow
+	for rows.Next() {
+		var i GetUserReactionsForContentCommentsRow
+		if err := rows.Scan(
+			&i.CommentID,
+			&i.UserID,
+			&i.Reaction,
+			&i.Username,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const insertOrUpdateCommentReaction = `-- name: InsertOrUpdateCommentReaction :one
 INSERT INTO comment_reaction (comment_id, user_id, reaction)
 VALUES ($1, $2, $3)

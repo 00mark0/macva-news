@@ -94,4 +94,21 @@ JOIN "user" u ON cr.user_id = u.user_id
 WHERE cr.comment_id = $1
 LIMIT $2;
 
+-- name: GetUserCommentReaction :one
+SELECT * FROM comment_reaction
+WHERE comment_id = $1 AND user_id = $2;
 
+-- name: GetCommentByID :one
+SELECT * FROM comment
+WHERE comment_id = $1;
+
+-- name: GetUserReactionsForContentComments :many
+SELECT
+  cr.*,
+  u.username
+FROM comment_reaction cr
+JOIN comment c ON cr.comment_id = c.comment_id
+JOIN "user" u ON cr.user_id = u.user_id
+WHERE c.content_id = $1
+  AND cr.user_id = $2
+  AND c.is_deleted = false;
