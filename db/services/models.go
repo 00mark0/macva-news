@@ -40,14 +40,15 @@ type Category struct {
 }
 
 type Comment struct {
-	CommentID   pgtype.UUID
-	ContentID   pgtype.UUID
-	UserID      pgtype.UUID
-	CommentText string
-	Score       int32
-	CreatedAt   pgtype.Timestamptz
-	UpdatedAt   pgtype.Timestamptz
-	IsDeleted   pgtype.Bool
+	CommentID       pgtype.UUID
+	ContentID       pgtype.UUID
+	UserID          pgtype.UUID
+	CommentText     string
+	Score           int32
+	CreatedAt       pgtype.Timestamptz
+	UpdatedAt       pgtype.Timestamptz
+	IsDeleted       pgtype.Bool
+	ParentCommentID pgtype.UUID
 }
 
 type CommentReaction struct {

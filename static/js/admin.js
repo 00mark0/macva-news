@@ -1,4 +1,5 @@
 // static/js/admin.js
+let lastScrollY = 0;
 
 document.addEventListener('DOMContentLoaded', function() {
     // Profile dropdown toggle
@@ -68,4 +69,12 @@ document.addEventListener('DOMContentLoaded', function() {
             userMenu.classList.add('hidden');
         });
     });
+});
+
+document.body.addEventListener('htmx:beforeSwap', function() {
+    lastScrollY = window.scrollY;
+});
+
+document.body.addEventListener('htmx:afterSwap', function() {
+    window.scrollTo({ top: lastScrollY, behavior: 'instant' });
 });

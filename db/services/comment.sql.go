@@ -14,7 +14,7 @@ import (
 const createComment = `-- name: CreateComment :one
 INSERT INTO comment (content_id, user_id, comment_text)
 VALUES ($1, $2, $3)
-RETURNING comment_id, content_id, user_id, comment_text, score, created_at, updated_at, is_deleted
+RETURNING comment_id, content_id, user_id, comment_text, score, created_at, updated_at, is_deleted, parent_comment_id
 `
 
 type CreateCommentParams struct {
@@ -35,6 +35,42 @@ func (q *Queries) CreateComment(ctx context.Context, arg CreateCommentParams) (C
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.IsDeleted,
+		&i.ParentCommentID,
+	)
+	return i, err
+}
+
+const createReply = `-- name: CreateReply :one
+INSERT INTO comment (content_id, user_id, comment_text, parent_comment_id)
+VALUES ($1, $2, $3, $4)
+RETURNING comment_id, content_id, user_id, comment_text, score, created_at, updated_at, is_deleted, parent_comment_id
+`
+
+type CreateReplyParams struct {
+	ContentID       pgtype.UUID
+	UserID          pgtype.UUID
+	CommentText     string
+	ParentCommentID pgtype.UUID
+}
+
+func (q *Queries) CreateReply(ctx context.Context, arg CreateReplyParams) (Comment, error) {
+	row := q.db.QueryRow(ctx, createReply,
+		arg.ContentID,
+		arg.UserID,
+		arg.CommentText,
+		arg.ParentCommentID,
+	)
+	var i Comment
+	err := row.Scan(
+		&i.CommentID,
+		&i.ContentID,
+		&i.UserID,
+		&i.CommentText,
+		&i.Score,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.IsDeleted,
+		&i.ParentCommentID,
 	)
 	return i, err
 }
@@ -105,7 +141,7 @@ func (q *Queries) FetchCommentReactions(ctx context.Context, arg FetchCommentRea
 }
 
 const getCommentByID = `-- name: GetCommentByID :one
-SELECT comment_id, content_id, user_id, comment_text, score, created_at, updated_at, is_deleted FROM comment
+SELECT comment_id, content_id, user_id, comment_text, score, created_at, updated_at, is_deleted, parent_comment_id FROM comment
 WHERE comment_id = $1
 `
 
@@ -121,8 +157,35 @@ func (q *Queries) GetCommentByID(ctx context.Context, commentID pgtype.UUID) (Co
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.IsDeleted,
+		&i.ParentCommentID,
 	)
 	return i, err
+}
+
+const getCommentCountForContent = `-- name: GetCommentCountForContent :one
+SELECT count(*) FROM comment
+WHERE content_id = $1
+  AND is_deleted = false
+`
+
+func (q *Queries) GetCommentCountForContent(ctx context.Context, contentID pgtype.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, getCommentCountForContent, contentID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const getReplyCount = `-- name: GetReplyCount :one
+SELECT COUNT(*) 
+FROM comment
+WHERE parent_comment_id = $1 AND is_deleted = false
+`
+
+func (q *Queries) GetReplyCount(ctx context.Context, parentCommentID pgtype.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, getReplyCount, parentCommentID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }
 
 const getUserCommentReaction = `-- name: GetUserCommentReaction :one
@@ -212,9 +275,71 @@ func (q *Queries) InsertOrUpdateCommentReaction(ctx context.Context, arg InsertO
 	return comment_id, err
 }
 
+const listCommentReplies = `-- name: ListCommentReplies :many
+SELECT cm.comment_id, cm.content_id, cm.user_id, cm.comment_text, cm.score, cm.created_at, cm.updated_at, cm.is_deleted, cm.parent_comment_id, u.username, u.pfp, u.role 
+FROM comment cm 
+JOIN "user" u ON cm.user_id = u.user_id
+WHERE cm.parent_comment_id = $1 AND cm.is_deleted = false
+ORDER BY cm.created_at DESC
+LIMIT $2
+`
+
+type ListCommentRepliesParams struct {
+	ParentCommentID pgtype.UUID
+	Limit           int32
+}
+
+type ListCommentRepliesRow struct {
+	CommentID       pgtype.UUID
+	ContentID       pgtype.UUID
+	UserID          pgtype.UUID
+	CommentText     string
+	Score           int32
+	CreatedAt       pgtype.Timestamptz
+	UpdatedAt       pgtype.Timestamptz
+	IsDeleted       pgtype.Bool
+	ParentCommentID pgtype.UUID
+	Username        string
+	Pfp             string
+	Role            string
+}
+
+func (q *Queries) ListCommentReplies(ctx context.Context, arg ListCommentRepliesParams) ([]ListCommentRepliesRow, error) {
+	rows, err := q.db.Query(ctx, listCommentReplies, arg.ParentCommentID, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListCommentRepliesRow
+	for rows.Next() {
+		var i ListCommentRepliesRow
+		if err := rows.Scan(
+			&i.CommentID,
+			&i.ContentID,
+			&i.UserID,
+			&i.CommentText,
+			&i.Score,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.IsDeleted,
+			&i.ParentCommentID,
+			&i.Username,
+			&i.Pfp,
+			&i.Role,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listContentComments = `-- name: ListContentComments :many
 SELECT
-  cm.comment_id, cm.content_id, cm.user_id, cm.comment_text, cm.score, cm.created_at, cm.updated_at, cm.is_deleted,
+  cm.comment_id, cm.content_id, cm.user_id, cm.comment_text, cm.score, cm.created_at, cm.updated_at, cm.is_deleted, cm.parent_comment_id,
   u.username,
   u.pfp,
   u.role
@@ -222,6 +347,7 @@ FROM comment cm
 JOIN "user" u ON cm.user_id = u.user_id
 WHERE cm.content_id = $1
   AND cm.is_deleted = false
+  AND cm.parent_comment_id IS NULL
 ORDER BY cm.created_at DESC
 LIMIT $2
 `
@@ -232,17 +358,18 @@ type ListContentCommentsParams struct {
 }
 
 type ListContentCommentsRow struct {
-	CommentID   pgtype.UUID
-	ContentID   pgtype.UUID
-	UserID      pgtype.UUID
-	CommentText string
-	Score       int32
-	CreatedAt   pgtype.Timestamptz
-	UpdatedAt   pgtype.Timestamptz
-	IsDeleted   pgtype.Bool
-	Username    string
-	Pfp         string
-	Role        string
+	CommentID       pgtype.UUID
+	ContentID       pgtype.UUID
+	UserID          pgtype.UUID
+	CommentText     string
+	Score           int32
+	CreatedAt       pgtype.Timestamptz
+	UpdatedAt       pgtype.Timestamptz
+	IsDeleted       pgtype.Bool
+	ParentCommentID pgtype.UUID
+	Username        string
+	Pfp             string
+	Role            string
 }
 
 func (q *Queries) ListContentComments(ctx context.Context, arg ListContentCommentsParams) ([]ListContentCommentsRow, error) {
@@ -263,6 +390,7 @@ func (q *Queries) ListContentComments(ctx context.Context, arg ListContentCommen
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.IsDeleted,
+			&i.ParentCommentID,
 			&i.Username,
 			&i.Pfp,
 			&i.Role,
@@ -279,7 +407,7 @@ func (q *Queries) ListContentComments(ctx context.Context, arg ListContentCommen
 
 const listContentCommentsByScore = `-- name: ListContentCommentsByScore :many
 SELECT
-  cm.comment_id, cm.content_id, cm.user_id, cm.comment_text, cm.score, cm.created_at, cm.updated_at, cm.is_deleted,
+  cm.comment_id, cm.content_id, cm.user_id, cm.comment_text, cm.score, cm.created_at, cm.updated_at, cm.is_deleted, cm.parent_comment_id,
   u.username,
   u.pfp,
   u.role
@@ -287,6 +415,7 @@ FROM comment cm
 JOIN "user" u ON cm.user_id = u.user_id
 WHERE cm.content_id = $1
   AND cm.is_deleted = false
+  AND cm.parent_comment_id IS NULL
 ORDER BY cm.score DESC
 LIMIT $2
 `
@@ -297,17 +426,18 @@ type ListContentCommentsByScoreParams struct {
 }
 
 type ListContentCommentsByScoreRow struct {
-	CommentID   pgtype.UUID
-	ContentID   pgtype.UUID
-	UserID      pgtype.UUID
-	CommentText string
-	Score       int32
-	CreatedAt   pgtype.Timestamptz
-	UpdatedAt   pgtype.Timestamptz
-	IsDeleted   pgtype.Bool
-	Username    string
-	Pfp         string
-	Role        string
+	CommentID       pgtype.UUID
+	ContentID       pgtype.UUID
+	UserID          pgtype.UUID
+	CommentText     string
+	Score           int32
+	CreatedAt       pgtype.Timestamptz
+	UpdatedAt       pgtype.Timestamptz
+	IsDeleted       pgtype.Bool
+	ParentCommentID pgtype.UUID
+	Username        string
+	Pfp             string
+	Role            string
 }
 
 func (q *Queries) ListContentCommentsByScore(ctx context.Context, arg ListContentCommentsByScoreParams) ([]ListContentCommentsByScoreRow, error) {
@@ -328,6 +458,7 @@ func (q *Queries) ListContentCommentsByScore(ctx context.Context, arg ListConten
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.IsDeleted,
+			&i.ParentCommentID,
 			&i.Username,
 			&i.Pfp,
 			&i.Role,
@@ -417,7 +548,7 @@ SET
   ),
   updated_at = now()
 WHERE c.comment_id = $1
-RETURNING comment_id, content_id, user_id, comment_text, score, created_at, updated_at, is_deleted
+RETURNING comment_id, content_id, user_id, comment_text, score, created_at, updated_at, is_deleted, parent_comment_id
 `
 
 func (q *Queries) UpdateCommentScore(ctx context.Context, commentID pgtype.UUID) (Comment, error) {
@@ -432,6 +563,7 @@ func (q *Queries) UpdateCommentScore(ctx context.Context, commentID pgtype.UUID)
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.IsDeleted,
+		&i.ParentCommentID,
 	)
 	return i, err
 }

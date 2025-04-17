@@ -39,6 +39,7 @@ FROM comment cm
 JOIN "user" u ON cm.user_id = u.user_id
 WHERE cm.content_id = $1
   AND cm.is_deleted = false
+  AND cm.parent_comment_id IS NULL
 ORDER BY cm.created_at DESC
 LIMIT $2;
 
@@ -52,6 +53,7 @@ FROM comment cm
 JOIN "user" u ON cm.user_id = u.user_id
 WHERE cm.content_id = $1
   AND cm.is_deleted = false
+  AND cm.parent_comment_id IS NULL
 ORDER BY cm.score DESC
 LIMIT $2;
 
@@ -112,3 +114,26 @@ JOIN "user" u ON cr.user_id = u.user_id
 WHERE c.content_id = $1
   AND cr.user_id = $2
   AND c.is_deleted = false;
+
+-- name: GetCommentCountForContent :one
+SELECT count(*) FROM comment
+WHERE content_id = $1
+  AND is_deleted = false;
+
+-- name: CreateReply :one
+INSERT INTO comment (content_id, user_id, comment_text, parent_comment_id)
+VALUES ($1, $2, $3, $4)
+RETURNING *;
+
+-- name: ListCommentReplies :many
+SELECT cm.*, u.username, u.pfp, u.role 
+FROM comment cm 
+JOIN "user" u ON cm.user_id = u.user_id
+WHERE cm.parent_comment_id = $1 AND cm.is_deleted = false
+ORDER BY cm.created_at DESC
+LIMIT $2;
+
+-- name: GetReplyCount :one
+SELECT COUNT(*) 
+FROM comment
+WHERE parent_comment_id = $1 AND is_deleted = false;

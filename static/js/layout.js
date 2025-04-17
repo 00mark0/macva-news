@@ -1,3 +1,5 @@
+let lastScrollY = 0;
+
 document.addEventListener('DOMContentLoaded', function() {
     // User Dropdown Logic
     const userMenuButton = document.getElementById('user-menu-button');
@@ -53,4 +55,10 @@ document.body.addEventListener('htmx:beforeSwap', function(evt) {
         // Change the target of the swap
         evt.detail.target = document.querySelector(retargetHeader);
     }
+
+    lastScrollY = window.scrollY;
+});
+
+document.body.addEventListener('htmx:afterSwap', function() {
+    window.scrollTo({ top: lastScrollY, behavior: 'instant' });
 });

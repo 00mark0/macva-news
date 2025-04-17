@@ -200,6 +200,8 @@ func (server *Server) setupRouter() {
 	authRoutes.POST("/api/content/comments/:id", server.createComment)
 	authRoutes.POST("/api/comments/:id/upvote", server.handleUpvoteComment)
 	authRoutes.POST("/api/comments/:id/downvote", server.handleDownvoteComment)
+	authRoutes.POST("/api/comments/:id/reply", server.createReply)
+	router.GET("/api/comments/:id/reply-info", server.listRepliesInfo)
 
 	server.router = router
 }

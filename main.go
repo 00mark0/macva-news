@@ -9,6 +9,7 @@ import (
 
 	"context"
 
+	"github.com/00mark0/macva-news/db/redis"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 )
@@ -40,8 +41,19 @@ func main() {
 	}
 	log.Println("Connected to db.")
 
+	// Initialize Redis
+	redis.InitRedis()
+	pong, err := redis.Client.Ping(redis.Ctx).Result()
+	if err != nil {
+		log.Fatalf("Cannot connect to Redis! %v", err)
+	}
+	log.Printf("Connected to Redis: %s", pong)
+
+	// Initialize the store and pass it into the server
 	store := db.NewStore(conn)
-	server, err := api.NewServer(store, symmetricKey)
+
+	// Pass both store and Redis client into the server
+	server, err := api.NewServer(store, symmetricKey, redis.Client)
 	if err != nil {
 		log.Fatal("Cannot create server!:", err)
 	}

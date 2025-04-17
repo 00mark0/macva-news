@@ -46,15 +46,79 @@ templ Article(content db.GetContentDetailsRow, globalSettings db.GlobalSetting, 
 			</section>
 		</header>
 		<!-- Main Content with proper typography -->
-		<section id="article-page-content" class="prose max-w-none dark:prose-invert prose-lg prose-gray dark:text-gray-200">
+		<section id="article-page-content" class="prose max-w-none dark:prose-invert prose-lg prose-gray dark:text-gray-200 mb-32">
 			@utils.ParseHTML(content.ContentDescription)
 		</section>
 		if content.CommentsEnabled && !globalSettings.DisableComments {
-			<section id="article-comments" hx-get={ fmt.Sprintf("/api/content/comments/%s", content.ContentID.String()) } hx-trigger="load" hx-target="#article-comments" hx-swap="innerHTML" class="mt-32">
+			<!-- Comment Form -->
+			<div class="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
+				<h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Dodajte komentar</h3>
+				<form hx-post={ fmt.Sprintf("/api/content/comments/%s", content.ContentID.String()) } hx-target="#article-comments" hx-swap="innerHTML" class="space-y-4">
+					<div class="relative">
+						<textarea
+							name="comment_text"
+							id="comment_text"
+							rows="3"
+							class="w-full px-3 py-2 text-gray-700 dark:text-gray-200 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700"
+							placeholder="Podelite svoje mišljenje..."
+							required
+						></textarea>
+						<button
+							type="button"
+							id="emoji-button"
+							class="absolute right-2 bottom-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none"
+						>
+							😊
+						</button>
+					</div>
+					<div id="emoji-picker" class="hidden"></div>
+					<div class="flex justify-end">
+						<button
+							type="submit"
+							class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-colors"
+						>
+							Objavi komentar
+						</button>
+					</div>
+				</form>
+			</div>
+			<section id="article-comments" hx-get={ fmt.Sprintf("/api/content/comments/%s", content.ContentID.String()) } hx-trigger="load delay:1s" hx-target="#article-comments" hx-swap="innerHTML">
 				@LoadingSpinner()
 			</section>
+			<script type="module">
+			 import { EmojiButton } from "https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.4/+esm";
+
+ 			 function initEmojiPicker() {
+			 const button = document.querySelector('#emoji-button');
+   			 const textarea = document.querySelector('#comment_text');
+   			 if (!button || !textarea) return;
+   			 
+   			 const picker = new EmojiButton({
+   			   theme: 'auto',
+   			   position: 'top-end'
+   			 });
+   			 
+   			 picker.on('emoji', selection => {
+   			   // Extract the emoji character from the selection object
+   			   const emoji = selection.emoji || selection;
+   			   
+   			   const start = textarea.selectionStart;
+   			   const end = textarea.selectionEnd;
+   			   
+   			   // Insert the emoji character, not the whole object
+   			   textarea.value = textarea.value.slice(0, start) + emoji + textarea.value.slice(end);
+   			   textarea.focus();
+   			   textarea.selectionStart = textarea.selectionEnd = start + emoji.length;
+   			 });
+   			 
+   			 button.addEventListener('click', () => picker.togglePicker(button));
+   			 }
+   
+			 // Run on initial load
+  			 document.addEventListener('DOMContentLoaded', initEmojiPicker);
+  			 </script>
 		} else {
-			<div class="text-sm text-gray-500 dark:text-gray-400 mt-10">Komentari su isključeni.</div>
+			<div class="text-sm text-gray-500 dark:text-gray-400">Komentari su isključeni.</div>
 		}
 	</article>
 }
@@ -559,43 +623,19 @@ templ ArticleStats(v db.GetContentDetailsRow, globalSettings db.GlobalSetting, u
 	</div>
 }
 
-templ ArticleComments(contentID string, comments []db.ListContentCommentsRow, userData db.GetUserByIDRow, userReactions map[string]string, nextLimit int, url string) {
+templ ArticleComments(contentID string, comments []db.ListContentCommentsRow, userData db.GetUserByIDRow, userReactions map[string]string, nextLimit int, url string, commentCount int) {
 	<div class="w-full max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-		<!-- Comment Form -->
-		<div class="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
-			<h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Dodajte komentar</h3>
-			<form hx-post={ fmt.Sprintf("/api/content/comments/%s", contentID) } hx-target="#article-comments" hx-swap="innerHTML" class="space-y-4">
-				<div>
-					<textarea
-						name="comment_text"
-						id="comment_text"
-						rows="3"
-						class="w-full px-3 py-2 text-gray-700 dark:text-gray-200 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700"
-						placeholder="Podelite svoje mišljenje..."
-						required
-					></textarea>
-				</div>
-				<div class="flex justify-end">
-					<button
-						type="submit"
-						class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-colors"
-					>
-						Objavi komentar
-					</button>
-				</div>
-			</form>
-		</div>
 		<!-- Sorting Options -->
 		if len(comments) > 0 {
 			<div class="flex justify-between items-center mb-4">
 				<h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">
-					if len(comments) == 1 {
-						{ fmt.Sprint(len(comments)) } Komentar
+					if commentCount == 1 {
+						{ fmt.Sprint(commentCount) } Komentar
 					} else {
-						{ fmt.Sprint(len(comments)) } Komentara 
+						{ fmt.Sprint(commentCount) } Komentara 
 					}
 				</h3>
-				<div class="flex items-center space-x-2">
+				<div class="flex flex-col sm:flex-row items-center space-x-2">
 					<span class="text-sm text-gray-600 dark:text-gray-400">Sortiraj po:</span>
 					<select
 						class="text-sm border border-gray-300 dark:border-gray-700 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200"
@@ -628,12 +668,12 @@ templ ArticleComments(contentID string, comments []db.ListContentCommentsRow, us
 				}
 			</div>
 			if len(comments) == nextLimit {
-				<div class="text-center">
+				<div class="text-center mt-8">
 					<button
-						hx-trigger="click"
 						hx-get={ url + fmt.Sprintf("%d", nextLimit) }
 						hx-target="#article-comments"
-						hx-swap="innerHTML"
+						hx-swap="innerHTML scroll:top"
+						hx-trigger="click"
 						class="cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
 					>
 						Učitaj više
@@ -787,15 +827,46 @@ templ CommentItem(comment db.ListContentCommentsRow, userData db.GetUserByIDRow,
 					</svg>
 				</button>
 				<!-- Reply Button -->
-				<button class="flex items-center space-x-1 hover:text-blue-600 dark:hover:text-blue-400">
+				<button id={ fmt.Sprintf("reply-button-%s", comment.CommentID.String()) } onclick="toggleReplyForm(this)" class="flex items-center space-x-1 hover:text-blue-600 dark:hover:text-blue-400">
 					<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
 					</svg>
 					<span>Odgovori</span>
 				</button>
 			</div>
+			<!-- Reply Form -->
+			<div id={ fmt.Sprintf("reply-form-container-%s", comment.CommentID.String()) } class="hidden mt-3 items-start space-x-3">
+				<img class="w-8 h-8 sm:w-10 sm:h-10 rounded-full" src={ userData.Pfp } alt="user avatar"/>
+				<form hx-post={ fmt.Sprintf("/api/comments/%s/reply", comment.CommentID.String()) } hx-target={ fmt.Sprintf("#comment-replies-%s", comment.CommentID.String()) } hx-swap="beforeend" class="flex-1 space-y-2">
+					<textarea
+						id={ fmt.Sprintf("reply-text-%s", comment.CommentID.String()) }
+						name="reply_text"
+						rows="2"
+						class="w-full resize-none px-3 py-2 text-md text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-900"
+						placeholder="Odgovorite..."
+						required
+					></textarea>
+					<div class="flex space-x-2">
+						<button
+							type="submit"
+							class="px-3 py-1.5 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+						>
+							Odgovori
+						</button>
+						<button
+							type="button"
+							onclick="hideReplyForm(this)"
+							class="px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-md focus:outline-none"
+						>
+							Odustani
+						</button>
+					</div>
+				</form>
+			</div>
 		</div>
 	</div>
+	<div id={ fmt.Sprintf("comment-reply-info-%s", comment.CommentID.String()) } hx-get={ fmt.Sprintf("/api/comments/%s/reply-info", comment.CommentID.String()) } hx-target={ fmt.Sprintf("#comment-reply-info-%s", comment.CommentID.String()) } hx-swap="innerHTML" hx-trigger="load"></div>
+	<div id={ fmt.Sprintf("comment-replies-%s", comment.CommentID.String()) }></div>
 	<script>
 	function toggleCommentDropdown(button) {
 		const buttonId = button.id;
@@ -855,43 +926,202 @@ templ CommentItem(comment db.ListContentCommentsRow, userData db.GetUserByIDRow,
 			? "Prikaži više"
 			: "Prikaži manje";
 	}
+
+	
+	
+	function toggleReplyForm(button) {
+		const buttonId = button.id;
+		const prefix = "reply-button-";
+		const commentId = buttonId.startsWith(prefix)
+			? buttonId.substring(prefix.length)
+			: null;
+	
+		if (!commentId) {
+			console.error("Invalid reply button ID format");
+			return;
+		}
+	
+		const replyFormId = `reply-form-container-${commentId}`;
+		const formEl = document.getElementById(replyFormId);
+	
+		if (formEl) {
+			const textareaId = `reply-text-${commentId}`;
+			const textarea = document.getElementById(textareaId);
+	
+			if (formEl.classList.contains("hidden")) {
+				formEl.classList.remove("hidden");
+				formEl.classList.add("flex");
+			} else {
+				formEl.classList.remove("flex");
+				formEl.classList.add("hidden");
+				if (textarea) textarea.value = "";
+			}
+		}
+	}
+
+
+	
+	function hideReplyForm(button) {
+		const formEl = button.closest("form")?.parentElement;
+	
+		if (formEl) {
+			formEl.classList.add("hidden");
+			formEl.classList.remove("flex");
+	
+			const textarea = formEl.querySelector("textarea");
+			if (textarea) textarea.value = "";
+		}
+	}
+
 </script>
 }
 
 // CommentActions renders just the actions part of a comment (for HTMX updates)
 templ CommentActions(comment db.Comment, userData db.GetUserByIDRow, userReaction string) {
-	<!-- Upvote Button -->
-	<button
-		class={ getUpvoteButtonClass(userReaction) }
-		hx-post={ fmt.Sprintf("/api/comments/%s/upvote", comment.CommentID.String()) }
-		hx-target={ fmt.Sprintf("#comment-actions-%s", comment.CommentID.String()) }
-		hx-swap="innerHTML"
-	>
-		<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-			<path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"></path>
-		</svg>
-	</button>
-	<div id={ fmt.Sprintf("comment-score-%s", comment.CommentID.String()) }>
-		<span>{ fmt.Sprint(comment.Score) }</span>
+	<!-- Comment Actions -->
+	<div class="w-full">
+		<div id={ fmt.Sprintf("comment-actions-%s", comment.CommentID.String()) } class="mt-2 flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+			<!-- Upvote Button -->
+			<button
+				class={ getUpvoteButtonClass(userReaction) }
+				hx-post={ fmt.Sprintf("/api/comments/%s/upvote", comment.CommentID.String()) }
+				hx-target={ fmt.Sprintf("#comment-actions-%s", comment.CommentID.String()) }
+				hx-swap="outerHTML"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+					<path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"></path>
+				</svg>
+			</button>
+			<div id={ fmt.Sprintf("comment-score-%s", comment.CommentID.String()) }>
+				<span>{ fmt.Sprint(comment.Score) }</span>
+			</div>
+			<!-- Downvote Button -->
+			<button
+				class={ getDownvoteButtonClass(userReaction) }
+				hx-post={ fmt.Sprintf("/api/comments/%s/downvote", comment.CommentID.String()) }
+				hx-target={ fmt.Sprintf("#comment-actions-%s", comment.CommentID.String()) }
+				hx-swap="outerHTML"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+					<path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.105-1.79l-.05-.025A4 4 0 0011.055 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z"></path>
+				</svg>
+			</button>
+			<!-- Reply Button -->
+			<button id={ fmt.Sprintf("reply-button-%s", comment.CommentID.String()) } onclick="toggleReplyForm(this)" class="flex items-center space-x-1 hover:text-blue-600 dark:hover:text-blue-400">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+				</svg>
+				<span>Odgovori</span>
+			</button>
+		</div>
+		<!-- Reply Form -->
+		<div id={ fmt.Sprintf("reply-form-container-%s", comment.CommentID.String()) } class="hidden mt-3 items-start space-x-3">
+			<img class="w-8 h-8 sm:w-10 sm:h-10 rounded-full" src={ userData.Pfp } alt="user avatar"/>
+			<form hx-post={ fmt.Sprintf("/api/comments/%s/reply", comment.CommentID.String()) } hx-target={ fmt.Sprintf("#comment-replies-%s", comment.CommentID.String()) } hx-swap="beforeend" class="flex-1 space-y-2">
+				<textarea
+					id={ fmt.Sprintf("reply-text-%s", comment.CommentID.String()) }
+					name="reply_text"
+					rows="2"
+					class="w-full resize-none px-3 py-2 text-md text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-900"
+					placeholder="Odgovorite..."
+					required
+				></textarea>
+				<div class="flex space-x-2">
+					<button
+						type="submit"
+						class="px-3 py-1.5 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+					>
+						Odgovori
+					</button>
+					<button
+						type="button"
+						onclick="hideReplyForm(this)"
+						class="px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-md focus:outline-none"
+					>
+						Odustani
+					</button>
+				</div>
+			</form>
+		</div>
 	</div>
-	<!-- Downvote Button -->
-	<button
-		class={ getDownvoteButtonClass(userReaction) }
-		hx-post={ fmt.Sprintf("/api/comments/%s/downvote", comment.CommentID.String()) }
-		hx-target={ fmt.Sprintf("#comment-actions-%s", comment.CommentID.String()) }
-		hx-swap="innerHTML"
-	>
-		<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-			<path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.105-1.79l-.05-.025A4 4 0 0011.055 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z"></path>
-		</svg>
-	</button>
-	<!-- Reply Button -->
-	<button class="flex items-center space-x-1 hover:text-blue-600 dark:hover:text-blue-400">
-		<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
-		</svg>
-		<span>Odgovori</span>
-	</button>
+	<script>
+	function toggleReplyForm(button) {
+		const buttonId = button.id;
+		const prefix = "reply-button-";
+		const commentId = buttonId.startsWith(prefix)
+			? buttonId.substring(prefix.length)
+			: null;
+	
+		if (!commentId) {
+			console.error("Invalid reply button ID format");
+			return;
+		}
+	
+		const replyFormId = `reply-form-container-${commentId}`;
+		const formEl = document.getElementById(replyFormId);
+	
+		if (formEl) {
+			const textareaId = `reply-text-${commentId}`;
+			const textarea = document.getElementById(textareaId);
+	
+			if (formEl.classList.contains("hidden")) {
+				formEl.classList.remove("hidden");
+				formEl.classList.add("flex");
+			} else {
+				formEl.classList.remove("flex");
+				formEl.classList.add("hidden");
+				if (textarea) textarea.value = "";
+			}
+		}
+	}
+
+
+	
+	function hideReplyForm(button) {
+		const formEl = button.closest("form")?.parentElement;
+	
+		if (formEl) {
+			formEl.classList.add("hidden");
+			formEl.classList.remove("flex");
+	
+			const textarea = formEl.querySelector("textarea");
+			if (textarea) textarea.value = "";
+		}
+	}
+	</script>
+}
+
+templ CommentReplyInfo(replyCount int, adminPfp string) {
+	<div class="ml-12 mt-2 flex items-center space-x-2 text-sm text-blue-600 dark:text-blue-400 cursor-pointer">
+		<button class="flex hover:bg-blue-200 dark:hover:bg-blue-800 space-x-2 rounded-xl p-2" onclick="handleButton(this)">
+			<!-- Down Arrow SVG -->
+			<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+			</svg>
+			<!-- Creator Avatar (optional, shown if one of the replies is by the creator) -->
+			if adminPfp != "" {
+				<img
+					src={ adminPfp }
+					alt="admin avatar"
+					class="w-4 h-4 rounded-full ring-2 ring-blue-600 dark:ring-blue-400"
+				/>
+			}
+			<!-- Reply Count Text -->
+			if replyCount == 1 {
+				<span>{ fmt.Sprint(replyCount) } odgovor</span>
+			} else {
+				<span>{ fmt.Sprint(replyCount) } odgovora</span>
+			}
+		</button>
+	</div>
+	<script>
+	function handleButton(button) {
+		const svg = button.querySelector("svg");
+		if (!svg) return;
+
+		svg.classList.toggle("rotate-180");
+		}
+	</script>
 }
 
 // Helper functions for reaction button styling

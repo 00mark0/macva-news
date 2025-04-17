@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/00mark0/macva-news/components"
+	"github.com/00mark0/macva-news/db/redis"
 	"github.com/00mark0/macva-news/db/services"
 	"github.com/00mark0/macva-news/utils"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -74,20 +75,22 @@ func (server *Server) listContentComments(ctx echo.Context) error {
 	}
 
 	nextLimit := req.Limit + 10
-	arg := db.ListContentCommentsParams{
-		ContentID: contentID,
-		Limit:     nextLimit,
-	}
 
-	comments, err := server.store.ListContentComments(ctx.Request().Context(), arg)
+	comments, err := server.getCommentsWithCache(ctx.Request().Context(), contentID, nextLimit)
 	if err != nil {
-		log.Println("Error listing content comments:", err)
+		log.Println("Error listing comments in listContentComments:", err)
 		return err
 	}
 
 	url := fmt.Sprintf("/api/content/comments/%s?limit=", contentIDStr)
 
-	return Render(ctx, http.StatusOK, components.ArticleComments(contentIDStr, comments, userData, userReactions, int(nextLimit), url))
+	commentCount, err := server.store.GetCommentCountForContent(ctx.Request().Context(), contentID)
+	if err != nil {
+		log.Println("Error getting comment count for content:", err)
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.ArticleComments(contentIDStr, comments, userData, userReactions, int(nextLimit), url, int(commentCount)))
 }
 
 type CreateCommentReq struct {
@@ -146,6 +149,16 @@ func (server *Server) createComment(ctx echo.Context) error {
 	if err != nil {
 		log.Println("Error creating comment:", err)
 		return err
+	}
+
+	// Invalidate cache for this content's comments
+	pattern := redis.GenerateKey("comments", contentID, "*")
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), pattern)
+	if err != nil {
+		log.Printf("Error invalidating comments cache: %v", err)
+		// Continue despite cache invalidation error
+	} else {
+		log.Printf("Invalidated cache for content ID: %s", contentID)
 	}
 
 	return server.listContentComments(ctx)
@@ -248,6 +261,16 @@ func (server *Server) handleUpvoteComment(ctx echo.Context) error {
 		reactionStatus = updatedUserReaction.Reaction
 	}
 
+	// Invalidate cache for this content's comments
+	pattern := redis.GenerateKey("comments", updatedComment.ContentID, "*")
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), pattern)
+	if err != nil {
+		log.Printf("Error invalidating comments cache: %v", err)
+		// Continue despite cache invalidation error
+	} else {
+		log.Printf("Invalidated cache for content ID: %s", updatedComment.ContentID)
+	}
+
 	// Render just the comment actions part
 	return Render(ctx, http.StatusOK, components.CommentActions(updatedComment, userData, reactionStatus))
 }
@@ -348,6 +371,142 @@ func (server *Server) handleDownvoteComment(ctx echo.Context) error {
 		reactionStatus = updatedUserReaction.Reaction
 	}
 
+	// Invalidate cache for this content's comments
+	pattern := redis.GenerateKey("comments", updatedComment.ContentID, "*")
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), pattern)
+	if err != nil {
+		log.Printf("Error invalidating comments cache: %v", err)
+		// Continue despite cache invalidation error
+	} else {
+		log.Printf("Invalidated cache for content ID: %s", updatedComment.ContentID)
+	}
+
 	// Render just the comment actions part
 	return Render(ctx, http.StatusOK, components.CommentActions(updatedComment, userData, reactionStatus))
+}
+
+type CreateReplyReq struct {
+	ReplyText string `form:"reply_text" validate:"required,min=3,max=10000"`
+}
+
+func (server *Server) createReply(ctx echo.Context) error {
+	var req CreateReplyReq
+	var userData db.GetUserByIDRow
+
+	if err := ctx.Bind(&req); err != nil {
+		log.Println("Error binding request in createReply:", err)
+		return err
+	}
+
+	if err := ctx.Validate(req); err != nil {
+		log.Println("Error validating request in createReply:", err)
+		return err
+	}
+
+	cookie, err := ctx.Cookie("refresh_token")
+	if err != nil {
+		log.Println("User is not logged in.")
+	}
+
+	payload, err := server.tokenMaker.VerifyToken(cookie.Value)
+	if err != nil {
+		log.Println("Invalid token:", err)
+		return err
+	}
+
+	userID, err := utils.ParseUUID(payload.UserID, "userID")
+	if err != nil {
+		log.Println("Error parsing user_id in handleDownvoteComment:", err)
+		return err
+	}
+
+	user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
+	if err != nil {
+		log.Println("Error getting user in handleDownvoteComment:", err)
+		return err
+	}
+	userData = user
+
+	parentCommentIDStr := ctx.Param("id")
+	parentCommentID, err := utils.ParseUUID(parentCommentIDStr, "parent comment ID")
+	if err != nil {
+		log.Println("Invalid parent comment ID format in createReply:", err)
+		return err
+	}
+
+	parentComment, err := server.store.GetCommentByID(ctx.Request().Context(), parentCommentID)
+	if err != nil {
+		log.Println("Error getting parent comment in createReply:", err)
+		return err
+	}
+
+	arg := db.CreateReplyParams{
+		ParentCommentID: parentCommentID,
+		UserID:          userData.UserID,
+		ContentID:       parentComment.ContentID,
+		CommentText:     req.ReplyText,
+	}
+
+	comment, err := server.store.CreateReply(ctx.Request().Context(), arg)
+	if err != nil {
+		log.Println("Error creating reply:", err)
+		return err
+	}
+
+	// After creating the reply, invalidate relevant caches
+	replyCountCacheKey := redis.GenerateKey("reply_count", parentCommentID)
+	checkedCacheKey := redis.GenerateKey("checked_admin_replies", parentCommentID)
+	adminPfpCacheKey := redis.GenerateKey("admin_pfp", parentCommentID)
+
+	// Invalidate caches related to the parent comment
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), replyCountCacheKey)
+	if err != nil {
+		log.Printf("Error invalidating caches for ParentCommentID: %s: %v", parentCommentID, err)
+	}
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), checkedCacheKey)
+	if err != nil {
+		log.Printf("Error invalidating caches for ParentCommentID: %s: %v", parentCommentID, err)
+	}
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), adminPfpCacheKey)
+	if err != nil {
+		log.Printf("Error invalidating caches for ParentCommentID: %s: %v", parentCommentID, err)
+	}
+
+	// Log the invalidation
+	log.Printf("Invalidated caches for reply count, admin check, and admin pfp for ParentCommentID: %s", parentCommentID)
+
+	convertedComment := db.ListContentCommentsRow{
+		CommentID:       comment.CommentID,
+		ContentID:       comment.ContentID,
+		UserID:          comment.UserID,
+		CommentText:     comment.CommentText,
+		Score:           comment.Score,
+		CreatedAt:       comment.CreatedAt,
+		UpdatedAt:       comment.UpdatedAt,
+		IsDeleted:       comment.IsDeleted,
+		ParentCommentID: comment.ParentCommentID,
+		Username:        userData.Username,
+		Pfp:             userData.Pfp,
+		Role:            userData.Role,
+	}
+
+	return Render(ctx, http.StatusOK, components.CommentItem(convertedComment, userData, ""))
+}
+
+func (server *Server) listRepliesInfo(ctx echo.Context) error {
+	commentIDStr := ctx.Param("id")
+
+	commentID, err := utils.ParseUUID(commentIDStr, "comment ID")
+	if err != nil {
+		log.Println("Invalid comment ID format in listRepliesInfo:", err)
+		return err
+	}
+
+	replyCount, adminPfp, err := server.getReplyCountAndAdminPfp(ctx.Request().Context(), commentID)
+	if err != nil {
+		log.Println("Error getting reply count and admin pfp:", err)
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.CommentReplyInfo(int(replyCount), adminPfp))
 }
