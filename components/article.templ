@@ -981,7 +981,9 @@ templ CommentItem(comment db.ListContentCommentsRow, userData db.GetUserByIDRow,
 			</div>
 			<!-- Reply Form -->
 			<div id={ fmt.Sprintf("reply-form-container-%s", comment.CommentID.String()) } class="hidden mt-3 items-start space-x-3">
-				<img class="w-8 h-8 sm:w-10 sm:h-10 rounded-full" src={ userData.Pfp } alt="user avatar"/>
+				if userData.Pfp != "" {
+					<img class="w-8 h-8 sm:w-10 sm:h-10 rounded-full" src={ userData.Pfp } alt="user avatar"/>
+				}
 				<form hx-post={ fmt.Sprintf("/api/comments/%s/reply", comment.CommentID.String()) } hx-target={ fmt.Sprintf("#comment-replies-%s", comment.CommentID.String()) } hx-swap="afterbegin" hx-on::after-request="hideReplyForm(this)" class="flex-1 space-y-2">
 					<div class="relative">
 						<textarea
@@ -1168,7 +1170,9 @@ templ CommentReplyItem(comment db.ListContentCommentsRow, userData db.GetUserByI
 			</div>
 			<!-- Reply Form -->
 			<div id={ fmt.Sprintf("reply-form-container-%s", comment.CommentID.String()) } class="hidden mt-3 items-start space-x-1 sm:space-x-3">
-				<img class="w-6 h-6 sm:w-10 sm:h-10 rounded-full" src={ userData.Pfp } alt="user avatar"/>
+				if userData.Pfp != "" {
+					<img class="w-6 h-6 sm:w-10 sm:h-10 rounded-full" src={ userData.Pfp } alt="user avatar"/>
+				}
 				<form hx-post={ fmt.Sprintf("/api/comments/%s/reply", comment.ParentCommentID.String()) } hx-target={ fmt.Sprintf("#comment-replies-%s", comment.ParentCommentID.String()) } hx-swap="afterbegin" hx-on::after-request="hideReplyForm(this)" class="flex-1 space-y-2">
 					<div class="relative">
 						<textarea

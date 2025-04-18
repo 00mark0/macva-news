@@ -11,6 +11,7 @@ import (
 
 	"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/db/services"
+	"github.com/00mark0/macva-news/utils"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -346,16 +347,10 @@ func (server *Server) updateAd(ctx echo.Context) error {
 	}
 
 	adIDStr := ctx.Param("id")
-
-	adIDBytes, err := uuid.Parse(adIDStr)
+	adID, err := utils.ParseUUID(adIDStr, "ad ID")
 	if err != nil {
 		log.Println("Invalid ad ID format in updateAd:", err)
 		return err
-	}
-
-	adID := pgtype.UUID{
-		Bytes: adIDBytes,
-		Valid: true,
 	}
 
 	existingAd, err := server.store.GetAd(ctx.Request().Context(), adID)
@@ -658,18 +653,10 @@ func (server *Server) updateAd(ctx echo.Context) error {
 
 func (server *Server) deleteAd(ctx echo.Context) error {
 	adIDStr := ctx.Param("id")
-
-	// Parse string UUID into proper UUID format
-	adIDBytes, err := uuid.Parse(adIDStr)
+	adID, err := utils.ParseUUID(adIDStr, "ad ID")
 	if err != nil {
 		log.Println("Invalid ad ID format in deleteAd:", err)
 		return err
-	}
-
-	// Create a pgtype.UUID with the parsed UUID
-	adID := pgtype.UUID{
-		Bytes: adIDBytes,
-		Valid: true,
 	}
 
 	ad, err := server.store.GetAd(ctx.Request().Context(), adID)
@@ -694,18 +681,10 @@ func (server *Server) deleteAd(ctx echo.Context) error {
 
 func (server *Server) deactivateAd(ctx echo.Context) error {
 	adIDStr := ctx.Param("id")
-
-	// Parse string UUID into proper UUID format
-	adIDBytes, err := uuid.Parse(adIDStr)
+	adID, err := utils.ParseUUID(adIDStr, "ad ID")
 	if err != nil {
 		log.Println("Invalid ad ID format in deactivateAd:", err)
 		return err
-	}
-
-	// Create a pgtype.UUID with the parsed UUID
-	adID := pgtype.UUID{
-		Bytes: adIDBytes,
-		Valid: true,
 	}
 
 	_, err = server.store.DeactivateAd(ctx.Request().Context(), adID)

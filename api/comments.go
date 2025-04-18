@@ -9,14 +9,11 @@ import (
 	"github.com/00mark0/macva-news/db/redis"
 	"github.com/00mark0/macva-news/db/services"
 	"github.com/00mark0/macva-news/utils"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )
 
 func (server *Server) listContentComments(ctx echo.Context) error {
 	var req ListAdsReq
-	var userData db.GetUserByIDRow
-	var userReactions map[string]string
 
 	if err := ctx.Bind(&req); err != nil {
 		log.Println("Error binding request in listContentComments:", err)
@@ -30,35 +27,15 @@ func (server *Server) listContentComments(ctx echo.Context) error {
 		return err
 	}
 
-	var userID pgtype.UUID
-	cookie, err := ctx.Cookie("refresh_token")
-	if err == nil {
-		payload, err := server.tokenMaker.VerifyToken(cookie.Value)
-		if err == nil {
-			parsedUserID, err := utils.ParseUUID(payload.UserID, "userID")
-			if err == nil {
-				userID = parsedUserID
+	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
+	if err != nil {
+		log.Println("Error getting user in listContentComments:", err)
+	}
 
-				user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
-				if err == nil {
-					userData = user
-
-					userReactions, err = server.getUserReactionsForContentWithCache(ctx.Request().Context(), contentID, userID)
-					if err != nil {
-						log.Println("Error fetching user reactions:", err)
-					}
-				} else {
-					log.Println("Error getting user in listContentComments:", err)
-				}
-			} else {
-				log.Println("Error parsing user_id in listContentComments:", err)
-			}
-		} else {
-			log.Println("Error verifying token in listContentComments:", err)
-		}
-	} else {
-		log.Println("User is not logged in.")
-		userReactions = make(map[string]string) // still need an empty map for rendering
+	userReactions, err := server.getUserReactionsForContentWithCache(ctx.Request().Context(), contentID, userData.UserID)
+	if err != nil {
+		log.Println("Error getting user reactions in listContentComments:", err)
+		return err
 	}
 
 	nextLimit := req.Limit + 10
@@ -105,7 +82,6 @@ func (server *Server) createComment(ctx echo.Context) error {
 		return err
 	}
 
-	var userData db.GetUserByIDRow
 	contentIDStr := ctx.Param("id")
 
 	contentID, err := utils.ParseUUID(contentIDStr, "content ID")
@@ -114,26 +90,9 @@ func (server *Server) createComment(ctx echo.Context) error {
 		return err
 	}
 
-	cookie, err := ctx.Cookie("refresh_token")
+	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
 	if err != nil {
-		log.Println("Login to post a comment.")
-		return err
-	} else {
-		payload, err := server.tokenMaker.VerifyToken(cookie.Value)
-
-		userID, err := utils.ParseUUID(payload.UserID, "userID")
-		if err != nil {
-			log.Println("Error parsing user_id in homePage:", err)
-			return err
-		}
-
-		user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
-		if err != nil {
-			log.Println("Error getting user in homePage:", err)
-			return err
-		}
-
-		userData = user
+		log.Println("Error getting user in createComment:", err)
 	}
 
 	_, err = server.store.CreateComment(ctx.Request().Context(), db.CreateCommentParams{
@@ -168,32 +127,12 @@ func (server *Server) createComment(ctx echo.Context) error {
 
 // Handler for upvoting a comment
 func (server *Server) handleUpvoteComment(ctx echo.Context) error {
-	var userData db.GetUserByIDRow
 	commentIDStr := ctx.Param("id")
 
-	cookie, err := ctx.Cookie("refresh_token")
+	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
 	if err != nil {
-		log.Println("User is not logged in.")
+		log.Println("Error getting user in handleUpvoteComment:", err)
 	}
-
-	payload, err := server.tokenMaker.VerifyToken(cookie.Value)
-	if err != nil {
-		log.Println("Invalid token:", err)
-		return err
-	}
-
-	userID, err := utils.ParseUUID(payload.UserID, "userID")
-	if err != nil {
-		log.Println("Error parsing user_id in handleDownvoteComment:", err)
-		return err
-	}
-
-	user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
-	if err != nil {
-		log.Println("Error getting user in handleDownvoteComment:", err)
-		return err
-	}
-	userData = user
 
 	commentID, err := utils.ParseUUID(commentIDStr, "comment ID")
 	if err != nil {
@@ -299,32 +238,12 @@ func (server *Server) handleUpvoteComment(ctx echo.Context) error {
 
 // Handler for downvoting a comment
 func (server *Server) handleDownvoteComment(ctx echo.Context) error {
-	var userData db.GetUserByIDRow
 	commentIDStr := ctx.Param("id")
 
-	cookie, err := ctx.Cookie("refresh_token")
-	if err != nil {
-		log.Println("User is not logged in.")
-	}
-
-	payload, err := server.tokenMaker.VerifyToken(cookie.Value)
-	if err != nil {
-		log.Println("Invalid token:", err)
-		return err
-	}
-
-	userID, err := utils.ParseUUID(payload.UserID, "userID")
-	if err != nil {
-		log.Println("Error parsing user_id in handleDownvoteComment:", err)
-		return err
-	}
-
-	user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
+	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
 	if err != nil {
 		log.Println("Error getting user in handleDownvoteComment:", err)
-		return err
 	}
-	userData = user
 
 	commentID, err := utils.ParseUUID(commentIDStr, "comment ID")
 	if err != nil {
@@ -433,7 +352,6 @@ type CreateReplyReq struct {
 
 func (server *Server) createReply(ctx echo.Context) error {
 	var req CreateReplyReq
-	var userData db.GetUserByIDRow
 
 	if err := ctx.Bind(&req); err != nil {
 		log.Println("Error binding request in createReply:", err)
@@ -448,7 +366,6 @@ func (server *Server) createReply(ctx echo.Context) error {
 	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
 	if err != nil {
 		log.Println("Error getting user in createReply:", err)
-		return err
 	}
 
 	parentCommentIDStr := ctx.Param("id")
@@ -593,7 +510,6 @@ func (server *Server) listCommentReplies(ctx echo.Context) error {
 	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
 	if err != nil {
 		log.Println("Error getting user in listCommentReplies:", err)
-		return err
 	}
 
 	userReactions, err := server.getUserReactionsForContentWithCache(ctx.Request().Context(), replies[0].ContentID, userData.UserID)

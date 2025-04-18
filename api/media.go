@@ -18,6 +18,7 @@ import (
 
 	"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/db/services"
+	"github.com/00mark0/macva-news/utils"
 	"github.com/chai2010/webp"
 	"github.com/disintegration/imaging"
 	"github.com/google/uuid"
@@ -133,15 +134,10 @@ func (server *Server) addMediaToNewContent(ctx echo.Context) error {
 	}
 	contentIDStr := contentIDCookie.Value
 	// Parse string UUID into proper UUID format
-	parsedUUID, err := uuid.Parse(contentIDStr)
+	contentID, err := utils.ParseUUID(contentIDStr, "content ID")
 	if err != nil {
-		log.Println("Invalid content ID format from cookie in addMediaToNewContent:", err)
+		log.Println("Invalid content ID in addMediaToNewContent:", err)
 		return err
-	}
-	// Create a pgtype.UUID with the parsed UUID
-	contentID := pgtype.UUID{
-		Bytes: parsedUUID,
-		Valid: true,
 	}
 
 	// Implement basic throttling to prevent concurrent heavy uploads
@@ -303,15 +299,10 @@ func (server *Server) addMediaToNewContent(ctx echo.Context) error {
 func (server *Server) addMediaToUpdateContent(ctx echo.Context) error {
 	contentIDStr := ctx.Param("id")
 	// Parse string UUID into proper UUID format
-	parsedUUID, err := uuid.Parse(contentIDStr)
+	contentID, err := utils.ParseUUID(contentIDStr, "content ID")
 	if err != nil {
-		log.Println("Invalid content ID format in addMediaToUpdateContent:", err)
+		log.Println("Invalid content ID in addMediaToUpdateContent:", err)
 		return err
-	}
-	// Create a pgtype.UUID with the parsed UUID
-	contentID := pgtype.UUID{
-		Bytes: parsedUUID,
-		Valid: true,
 	}
 
 	// Implement basic throttling to prevent concurrent heavy uploads
@@ -478,16 +469,11 @@ func (server *Server) listMediaForContent(ctx echo.Context) error {
 	}
 
 	// Parse content ID from cookie
-	contentIDString, err := uuid.Parse(contentIDCookie.Value)
+	contentIDString := contentIDCookie.Value
+	contentID, err := utils.ParseUUID(contentIDString, "content ID")
 	if err != nil {
-		log.Println("Invalid content ID in cookie in listMediaForContent:", err)
+		log.Println("Invalid content ID in listMediaForContent:", err)
 		return err
-	}
-
-	// Create a pgtype.UUID with the parsed UUID
-	contentID := pgtype.UUID{
-		Bytes: contentIDString,
-		Valid: true,
 	}
 
 	media, err := server.store.ListMediaForContent(ctx.Request().Context(), contentID)
@@ -501,17 +487,10 @@ func (server *Server) listMediaForContent(ctx echo.Context) error {
 
 func (server *Server) deleteMedia(ctx echo.Context) error {
 	mediaIDStr := ctx.Param("id")
-
-	// Parse media ID from the URL parameter
-	mediaIDUUID, err := uuid.Parse(mediaIDStr)
+	mediaID, err := utils.ParseUUID(mediaIDStr, "media ID")
 	if err != nil {
-		log.Println("Invalid media ID in deleteMedia:", err)
+		log.Println("Invalid media ID format in deleteMedia:", err)
 		return err
-	}
-
-	mediaID := pgtype.UUID{
-		Bytes: mediaIDUUID,
-		Valid: true,
 	}
 
 	// Get the media record to find the file path before deleting
@@ -552,16 +531,10 @@ func (server *Server) deleteMedia(ctx echo.Context) error {
 
 func (server *Server) listMediaForArticlePage(ctx echo.Context) error {
 	articleIDStr := ctx.Param("id")
-
-	articleIDBytes, err := uuid.Parse(articleIDStr)
+	articleID, err := utils.ParseUUID(articleIDStr, "article ID")
 	if err != nil {
-		log.Println("Invalid category ID format in categoriesPage:", err)
+		log.Println("Invalid article ID in listMediaForArticlePage:", err)
 		return err
-	}
-
-	articleID := pgtype.UUID{
-		Bytes: articleIDBytes,
-		Valid: true,
 	}
 
 	media, err := server.store.ListMediaForContent(ctx.Request().Context(), articleID)
@@ -572,4 +545,3 @@ func (server *Server) listMediaForArticlePage(ctx echo.Context) error {
 
 	return Render(ctx, http.StatusOK, components.ArticleMediaSlider(media))
 }
-

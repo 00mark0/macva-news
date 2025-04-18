@@ -73,7 +73,7 @@ func RequestPassResetForm(requestPassResetErr RequestPassResetErr) templ.Compone
 			return templ_7745c5c3_Err
 		}
 		if string(requestPassResetErr) != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"bg-gray-100 border border-gray-400 mb-4 text-center text-sm text-red-700 px-4 py-2 rounded relative\"><span class=\"block sm:inline\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"bg-gray-100 border border-gray-400 mb-4 text-center text-sm text-gray-700 px-4 py-2 rounded relative\"><span class=\"block sm:inline\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

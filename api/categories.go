@@ -6,8 +6,8 @@ import (
 
 	"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/db/services"
+	"github.com/00mark0/macva-news/utils"
 	"github.com/go-playground/validator/v10"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )
@@ -95,22 +95,14 @@ func (server *Server) createCategory(ctx echo.Context) error {
 }
 
 func (server *Server) deleteCategory(ctx echo.Context) error {
-	categoryID := ctx.Param("id")
-
-	// Parse string UUID into proper UUID format
-	parsedUUID, err := uuid.Parse(categoryID)
+	categoryIDStr := ctx.Param("id")
+	categoryID, err := utils.ParseUUID(categoryIDStr, "category ID")
 	if err != nil {
 		log.Println("Invalid category ID format in deleteCategory:", err)
 		return err
 	}
 
-	// Create a pgtype.UUID with the parsed UUID
-	pgUUID := pgtype.UUID{
-		Bytes: parsedUUID,
-		Valid: true,
-	}
-
-	_, err = server.store.DeleteCategory(ctx.Request().Context(), pgUUID)
+	_, err = server.store.DeleteCategory(ctx.Request().Context(), categoryID)
 	if err != nil {
 		log.Println("Error deleting category in deleteCategory:", err)
 		return err
@@ -124,24 +116,17 @@ type UpdateCatReq struct {
 }
 
 func (server *Server) updateCategory(ctx echo.Context) error {
-	categoryID := ctx.Param("id")
-	var req UpdateCatReq
-	var updateCatErr components.UpdateCategoryErr
-
-	// Parse string UUID into proper UUID format
-	parsedUUID, err := uuid.Parse(categoryID)
+	categoryIDStr := ctx.Param("id")
+	categoryID, err := utils.ParseUUID(categoryIDStr, "category ID")
 	if err != nil {
 		log.Println("Invalid category ID format in updateCategory:", err)
 		return err
 	}
 
-	// Create a pgtype.UUID with the parsed UUID
-	pgUUID := pgtype.UUID{
-		Bytes: parsedUUID,
-		Valid: true,
-	}
+	var req UpdateCatReq
+	var updateCatErr components.UpdateCategoryErr
 
-	category, err := server.store.GetCategoryByID(ctx.Request().Context(), pgUUID)
+	category, err := server.store.GetCategoryByID(ctx.Request().Context(), categoryID)
 	if err != nil {
 		log.Println("Error getting category in updateCategory:", err)
 		return err
@@ -189,7 +174,7 @@ func (server *Server) updateCategory(ctx echo.Context) error {
 	}
 
 	arg := db.UpdateCategoryParams{
-		CategoryID:   pgUUID,
+		CategoryID:   categoryID,
 		CategoryName: req.CategoryName,
 	}
 
@@ -212,16 +197,10 @@ func (server *Server) listRecentCategoryContent(ctx echo.Context) error {
 	}
 
 	categoryIDStr := ctx.Param("id")
-
-	categoryIDBytes, err := uuid.Parse(categoryIDStr)
+	categoryID, err := utils.ParseUUID(categoryIDStr, "category ID")
 	if err != nil {
 		log.Println("Invalid category ID format in listRecentCategoryContent:", err)
 		return err
-	}
-
-	categoryID := pgtype.UUID{
-		Bytes: categoryIDBytes,
-		Valid: true,
 	}
 
 	category, err := server.store.GetCategoryByID(ctx.Request().Context(), categoryID)

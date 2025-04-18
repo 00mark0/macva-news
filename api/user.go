@@ -14,7 +14,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v5"
 
-	//"github.com/00mark0/macva-news/token"
 	"github.com/00mark0/macva-news/utils"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -31,16 +30,6 @@ type userResponse struct {
 	Pfp      string `json:"pfp"`
 	Role     string `json:"role"`
 }
-
-/*func newUserResponse(payload *token.Payload) userResponse {
-	return userResponse{
-		UserID:   payload.UserID,
-		Username: payload.Username,
-		Email:    payload.Email,
-		Pfp:      payload.Pfp,
-		Role:     payload.Role,
-	}
-}*/
 
 type loginUserReq struct {
 	Email      string `json:"email" form:"email" validate:"required,email"`
@@ -238,13 +227,14 @@ func (server *Server) logOut(ctx echo.Context) error {
 		return err
 	}
 
-	sessionID, err := uuid.Parse(sessionCookie.Value)
+	sessionIDStr := sessionCookie.Value
+	sessionID, err := utils.ParseUUID(sessionIDStr, "session ID")
 	if err != nil {
-		log.Println("Error parsing session ID in logOut:", err)
+		log.Println("Invalid session ID format in logOut:", err)
 		return err
 	}
 
-	err = server.store.DeleteSession(ctx.Request().Context(), pgtype.UUID{Bytes: sessionID, Valid: true})
+	err = server.store.DeleteSession(ctx.Request().Context(), sessionID)
 	if err != nil {
 		log.Println("Error deleting session in logOut:", err)
 		return err
@@ -752,16 +742,10 @@ func (server *Server) searchArchivedUsers(ctx echo.Context) error {
 
 func (server *Server) banUser(ctx echo.Context) error {
 	userIDStr := ctx.Param("id")
-
-	userIDBytes, err := uuid.Parse(userIDStr)
+	userID, err := utils.ParseUUID(userIDStr, "user_id")
 	if err != nil {
-		log.Println("Error parsing user_id in banUser:", err)
+		log.Println("Error parsing user id in banUser:", err)
 		return err
-	}
-
-	userID := pgtype.UUID{
-		Bytes: userIDBytes,
-		Valid: true,
 	}
 
 	err = server.store.BanUser(ctx.Request().Context(), userID)
@@ -799,16 +783,10 @@ func (server *Server) banUser(ctx echo.Context) error {
 
 func (server *Server) unbanUser(ctx echo.Context) error {
 	userIDStr := ctx.Param("id")
-
-	userIDBytes, err := uuid.Parse(userIDStr)
+	userID, err := utils.ParseUUID(userIDStr, "user_id")
 	if err != nil {
-		log.Println("Error parsing user_id in unbanUser:", err)
+		log.Println("Error parsing user id in unbanUser:", err)
 		return err
-	}
-
-	userID := pgtype.UUID{
-		Bytes: userIDBytes,
-		Valid: true,
 	}
 
 	err = server.store.UnbanUser(ctx.Request().Context(), userID)
@@ -846,16 +824,10 @@ func (server *Server) unbanUser(ctx echo.Context) error {
 
 func (server *Server) deleteUser(ctx echo.Context) error {
 	userIDStr := ctx.Param("id")
-
-	userIDBytes, err := uuid.Parse(userIDStr)
+	userID, err := utils.ParseUUID(userIDStr, "user_id")
 	if err != nil {
-		log.Println("Error parsing user_id in deleteUser:", err)
+		log.Println("Error parsing user id in deleteUser:", err)
 		return err
-	}
-
-	userID := pgtype.UUID{
-		Bytes: userIDBytes,
-		Valid: true,
 	}
 
 	err = server.store.DeleteUser(ctx.Request().Context(), userID)
@@ -911,16 +883,10 @@ func (server *Server) updateUsername(ctx echo.Context) error {
 	}
 
 	userIDStr := ctx.Param("id")
-
-	userIDBytes, err := uuid.Parse(userIDStr)
+	userID, err := utils.ParseUUID(userIDStr, "user_id")
 	if err != nil {
-		log.Println("Error parsing user_id in updateUsername:", err)
+		log.Println("Error parsing user id in updateUsername:", err)
 		return err
-	}
-
-	userID := pgtype.UUID{
-		Bytes: userIDBytes,
-		Valid: true,
 	}
 
 	user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
@@ -957,15 +923,10 @@ func (server *Server) updatePfp(ctx echo.Context) error {
 	}
 
 	userIDStr := ctx.Param("id")
-	userIDBytes, err := uuid.Parse(userIDStr)
+	userID, err := utils.ParseUUID(userIDStr, "user_id")
 	if err != nil {
-		log.Println("Error parsing user_id in updatePfp:", err)
+		log.Println("Error parsing user id in updatePfp:", err)
 		return err
-	}
-
-	userID := pgtype.UUID{
-		Bytes: userIDBytes,
-		Valid: true,
 	}
 
 	user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
@@ -1065,7 +1026,7 @@ func (server *Server) requestPassReset(ctx echo.Context) error {
 		return err
 	}
 
-	resetLink := fmt.Sprintf("http://localhost:3000/reset-lozinke/%s", token)
+	resetLink := fmt.Sprintf("%s/reset-lozinke/%s", BaseUrl, token)
 
 	err = utils.SendPasswordResetEmail(payload.Email, resetLink)
 	if err != nil {
@@ -1117,7 +1078,7 @@ func (server *Server) requestPassResetFromForm(ctx echo.Context) error {
 		return err
 	}
 
-	resetLink := fmt.Sprintf("http://localhost:3000/reset-lozinke/%s", token)
+	resetLink := fmt.Sprintf("%s/reset-lozinke/%s", BaseUrl, token)
 
 	err = utils.SendPasswordResetEmail(req.Email, resetLink)
 	if err != nil {
@@ -1182,10 +1143,9 @@ func (server *Server) resetPassword(ctx echo.Context) error {
 	}
 
 	// Parse user ID to UUID
-	var userID pgtype.UUID
-	err = userID.Scan(userIDStr)
+	userID, err := utils.ParseUUID(userIDStr, "user_id")
 	if err != nil {
-		log.Println("Error parsing user_id in resetPassword:", err)
+		log.Println("Error parsing user_id to UUID in resetPassword:", err)
 		return Render(ctx, http.StatusOK, components.ResetForm(req.Token, "Link za resetovanje lozinke je nevažeci."))
 	}
 
@@ -1277,7 +1237,7 @@ func (server *Server) register(ctx echo.Context) error {
 		return err
 	}
 
-	verifyEmailLink := fmt.Sprintf("http://localhost:3000/potvrdi-email/%s", token)
+	verifyEmailLink := fmt.Sprintf("%s/potvrdi-email/%s", BaseUrl, token)
 
 	err = utils.SendEmailVerificationEmail(req.Email, verifyEmailLink)
 	if err != nil {

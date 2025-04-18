@@ -4,15 +4,12 @@ import (
 	"log"
 	"net/http"
 
-	//"github.com/google/uuid"
-	//"github.com/jackc/pgx/v5/pgtype"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 
 	"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/db/services"
-	//"github.com/00mark0/macva-news/db/services"
+	"github.com/00mark0/macva-news/utils"
 )
 
 type CreateTagReq struct {
@@ -58,18 +55,10 @@ func (server *Server) createTag(ctx echo.Context) error {
 	}
 
 	contentIDString := contentIDCookie.Value
-
-	// Parse string UUID into proper UUID format
-	parsedContentID, err := uuid.Parse(contentIDString)
+	contentID, err := utils.ParseUUID(contentIDString, "content ID")
 	if err != nil {
-		log.Println("Invalid content ID format in createTag:", err)
+		log.Println("Invalid content ID in createTag:", err)
 		return err
-	}
-
-	// Create a pgtype.UUID with the parsed UUID
-	contentID := pgtype.UUID{
-		Bytes: parsedContentID,
-		Valid: true,
 	}
 
 	contentTags, err := server.store.GetTagsByContent(ctx.Request().Context(), contentID)
@@ -99,18 +88,10 @@ func (server *Server) addTagToContent(ctx echo.Context) error {
 	}
 
 	contentIDString := contentIDCookie.Value
-
-	// Parse string UUID into proper UUID format
-	parsedContentID, err := uuid.Parse(contentIDString)
+	contentID, err := utils.ParseUUID(contentIDString, "content ID")
 	if err != nil {
-		log.Println("Invalid content ID format in addTagToContent:", err)
+		log.Println("Invalid content ID in addTagToContent:", err)
 		return err
-	}
-
-	// Create a pgtype.UUID with the parsed UUID
-	contentID := pgtype.UUID{
-		Bytes: parsedContentID,
-		Valid: true,
 	}
 
 	if err := ctx.Bind(&req); err != nil {
@@ -125,16 +106,10 @@ func (server *Server) addTagToContent(ctx echo.Context) error {
 		return Render(ctx, http.StatusOK, components.ArticleError(message))
 	}
 
-	parsedTagID, err := uuid.Parse(req.TagID)
+	tagID, err := utils.ParseUUID(req.TagID, "tag ID")
 	if err != nil {
-		log.Println("Invalid tag ID format in addTagToContent:", err)
+		log.Println("Invalid tag ID in addTagToContent:", err)
 		return err
-	}
-
-	// Create a pgtype.UUID with the parsed UUID
-	tagID := pgtype.UUID{
-		Bytes: parsedTagID,
-		Valid: true,
 	}
 
 	arg := db.AddTagToContentParams{
@@ -173,18 +148,10 @@ func (server *Server) addTagToContentUpdate(ctx echo.Context) error {
 	var req AddTagReq
 
 	contentIDStr := ctx.Param("id")
-
-	// Parse string UUID into proper UUID format
-	parsedContentID, err := uuid.Parse(contentIDStr)
+	contentID, err := utils.ParseUUID(contentIDStr, "content ID")
 	if err != nil {
-		log.Println("Invalid content ID format in addTagToContentUpdate:", err)
+		log.Println("Invalid content ID in addTagToContentUpdate:", err)
 		return err
-	}
-
-	// Create a pgtype.UUID with the parsed UUID
-	contentID := pgtype.UUID{
-		Bytes: parsedContentID,
-		Valid: true,
 	}
 
 	if err := ctx.Bind(&req); err != nil {
@@ -199,16 +166,10 @@ func (server *Server) addTagToContentUpdate(ctx echo.Context) error {
 		return Render(ctx, http.StatusOK, components.ArticleError(message))
 	}
 
-	parsedTagID, err := uuid.Parse(req.TagID)
+	tagID, err := utils.ParseUUID(req.TagID, "tag ID")
 	if err != nil {
-		log.Println("Invalid tag ID format in addTagToContentUpdate:", err)
+		log.Println("Invalid tag ID in addTagToContentUpdate:", err)
 		return err
-	}
-
-	// Create a pgtype.UUID with the parsed UUID
-	tagID := pgtype.UUID{
-		Bytes: parsedTagID,
-		Valid: true,
 	}
 
 	arg := db.AddTagToContentParams{
@@ -253,33 +214,17 @@ func (server *Server) removeTagFromContent(ctx echo.Context) error {
 	}
 
 	contentIDString := contentIDCookie.Value
-
-	// Parse string UUID into proper UUID format
-	parsedContentID, err := uuid.Parse(contentIDString)
+	contentID, err := utils.ParseUUID(contentIDString, "content ID")
 	if err != nil {
 		log.Println("Invalid content ID format in removeTagFromContent:", err)
 		return err
 	}
 
-	// Create a pgtype.UUID with the parsed UUID
-	contentID := pgtype.UUID{
-		Bytes: parsedContentID,
-		Valid: true,
-	}
-
 	tagIDString := ctx.Param("id")
-
-	// Parse string UUID into proper UUID format
-	parsedTagID, err := uuid.Parse(tagIDString)
+	tagID, err := utils.ParseUUID(tagIDString, "tag ID")
 	if err != nil {
 		log.Println("Invalid tag ID format in removeTagFromContent:", err)
 		return err
-	}
-
-	// Create a pgtype.UUID with the parsed UUID
-	tagID := pgtype.UUID{
-		Bytes: parsedTagID,
-		Valid: true,
 	}
 
 	arg := db.RemoveTagFromContentParams{
@@ -315,33 +260,17 @@ func (server *Server) removeTagFromContent(ctx echo.Context) error {
 
 func (server *Server) removeTagFromContentUpdate(ctx echo.Context) error {
 	contentIDStr := ctx.Param("content_id")
-
-	// Parse string UUID into proper UUID format
-	parsedContentID, err := uuid.Parse(contentIDStr)
+	contentID, err := utils.ParseUUID(contentIDStr, "content ID")
 	if err != nil {
 		log.Println("Invalid content ID format in removeTagFromContent:", err)
 		return err
 	}
 
-	// Create a pgtype.UUID with the parsed UUID
-	contentID := pgtype.UUID{
-		Bytes: parsedContentID,
-		Valid: true,
-	}
-
 	tagIDString := ctx.Param("tag_id")
-
-	// Parse string UUID into proper UUID format
-	parsedTagID, err := uuid.Parse(tagIDString)
+	tagID, err := utils.ParseUUID(tagIDString, "tag ID")
 	if err != nil {
 		log.Println("Invalid tag ID format in removeTagFromContent:", err)
 		return err
-	}
-
-	// Create a pgtype.UUID with the parsed UUID
-	tagID := pgtype.UUID{
-		Bytes: parsedTagID,
-		Valid: true,
 	}
 
 	arg := db.RemoveTagFromContentParams{
@@ -377,18 +306,10 @@ func (server *Server) removeTagFromContentUpdate(ctx echo.Context) error {
 
 func (server *Server) deleteTag(ctx echo.Context) error {
 	tagIDStr := ctx.Param("id")
-
-	// Parse string UUID into proper UUID format
-	parsedTagID, err := uuid.Parse(tagIDStr)
+	tagID, err := utils.ParseUUID(tagIDStr, "tag ID")
 	if err != nil {
 		log.Println("Invalid tag ID format in deleteTag:", err)
 		return err
-	}
-
-	// Create a pgtype.UUID with the parsed UUID
-	tagID := pgtype.UUID{
-		Bytes: parsedTagID,
-		Valid: true,
 	}
 
 	err = server.store.DeleteTag(ctx.Request().Context(), tagID)
@@ -456,18 +377,10 @@ func (server *Server) listSearchTags(ctx echo.Context) error {
 
 func (server *Server) listTagsByContent(ctx echo.Context) error {
 	contentIDStr := ctx.Param("id")
-
-	// Parse string UUID into proper UUID format
-	parsedContentID, err := uuid.Parse(contentIDStr)
+	contentID, err := utils.ParseUUID(contentIDStr, "content ID")
 	if err != nil {
-		log.Println("Invalid content ID format in listTagsByContent:", err)
+		log.Println("Invalid content ID in listTagsByContent:", err)
 		return err
-	}
-
-	// Create a pgtype.UUID with the parsed UUID
-	contentID := pgtype.UUID{
-		Bytes: parsedContentID,
-		Valid: true,
 	}
 
 	tags, err := server.store.GetTagsByContent(ctx.Request().Context(), contentID)
@@ -482,14 +395,10 @@ func (server *Server) listTagsByContent(ctx echo.Context) error {
 // ContentByTagsHandler modified to return HTML instead of JSON
 func (server *Server) listContentByTagsUnderCategory(ctx echo.Context) error {
 	categoryIDStr := ctx.Param("id")
-	categoryIDBytes, err := uuid.Parse(categoryIDStr)
+	categoryID, err := utils.ParseUUID(categoryIDStr, "category ID")
 	if err != nil {
-		log.Println("Invalid category ID format in listContentByTagsUnderCategory:", err)
+		log.Println("Invalid category ID in listContentByTagsUnderCategory:", err)
 		return err
-	}
-	categoryID := pgtype.UUID{
-		Bytes: categoryIDBytes,
-		Valid: true,
 	}
 
 	// Get category info for the header
@@ -565,17 +474,10 @@ func (server *Server) listAllContentByTag(ctx echo.Context) error {
 	}
 
 	tagIDStr := ctx.Param("id")
-
-	// Parse string UUID into proper UUID format
-	tagIDBytes, err := uuid.Parse(tagIDStr)
+	tagID, err := utils.ParseUUID(tagIDStr, "tag ID")
 	if err != nil {
 		log.Println("Invalid tag ID format in listAllContentByTag:", err)
 		return err
-	}
-
-	tagID := pgtype.UUID{
-		Bytes: tagIDBytes,
-		Valid: true,
 	}
 
 	tag, err := server.store.GetTag(ctx.Request().Context(), tagID)

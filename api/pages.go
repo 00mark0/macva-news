@@ -19,7 +19,6 @@ func (server *Server) homePage(ctx echo.Context) error {
 	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
 	if err != nil {
 		log.Println("Error getting user in homePage:", err)
-		return err
 	}
 
 	// Prepare meta information dynamically
@@ -63,7 +62,6 @@ func (server *Server) adminDash(ctx echo.Context) error {
 	user, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
 	if err != nil {
 		log.Println("Error getting user in adminDash:", err)
-		return err
 	}
 
 	return Render(ctx, http.StatusOK, components.DashPage(user))
@@ -244,7 +242,6 @@ func (server *Server) draftContentList(ctx echo.Context) error {
 	}
 
 	var content []components.ListPublishedContentRes
-
 	for _, v := range data {
 		content = append(content, components.ListPublishedContentRes{
 			ContentID:           v.ContentID.String(),
@@ -287,7 +284,6 @@ func (server *Server) deletedContentList(ctx echo.Context) error {
 	}
 
 	var content []components.ListPublishedContentRes
-
 	for _, v := range data {
 		content = append(content, components.ListPublishedContentRes{
 			ContentID:           v.ContentID.String(),
@@ -326,7 +322,6 @@ func (server *Server) adminUsers(ctx echo.Context) error {
 	var req ListUsersLimitReq
 
 	nextLimit := req.Limit + 20
-
 	activeCount, err := server.store.GetActiveUsersCount(ctx.Request().Context())
 	if err != nil {
 		log.Println("Error getting active users count in adminUsers:", err)
@@ -651,7 +646,6 @@ func (server *Server) adminSettings(ctx echo.Context) error {
 	user, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
 	if err != nil {
 		log.Println("Error getting user in homePage:", err)
-		return err
 	}
 
 	// Create props for the AdminSettings component
@@ -781,7 +775,6 @@ func (server *Server) searchResultsPage(ctx echo.Context) error {
 	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
 	if err != nil {
 		log.Println("Error getting user in homePage:", err)
-		return err
 	}
 
 	// Prepare meta information dynamically for the search page
@@ -849,7 +842,6 @@ func (server *Server) categoriesPage(ctx echo.Context) error {
 	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
 	if err != nil {
 		log.Println("Error getting user in homePage:", err)
-		return err
 	}
 
 	// Prepare meta information dynamically for the search page
@@ -911,7 +903,6 @@ func (server *Server) tagPage(ctx echo.Context) error {
 	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
 	if err != nil {
 		log.Println("Error getting user in homePage:", err)
-		return err
 	}
 
 	// Prepare meta information dynamically for the search page
@@ -969,7 +960,6 @@ func (server *Server) articlePage(ctx echo.Context) error {
 	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
 	if err != nil {
 		log.Println("Error getting user in homePage:", err)
-		return err
 	}
 
 	// Prepare meta information dynamically for the search page

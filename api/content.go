@@ -14,7 +14,6 @@ import (
 
 	"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/db/services"
-	"github.com/00mark0/macva-news/token"
 	"github.com/00mark0/macva-news/utils"
 )
 
@@ -37,7 +36,6 @@ func (server *Server) listPubContent(ctx echo.Context) error {
 	}
 
 	var content []components.ListPublishedContentRes
-
 	for _, v := range data {
 		content = append(content, components.ListPublishedContentRes{
 			ContentID:           v.ContentID.String(),
@@ -85,7 +83,6 @@ func (server *Server) listPubContentOldest(ctx echo.Context) error {
 	}
 
 	var content []components.ListPublishedContentRes
-
 	for _, v := range data {
 		content = append(content, components.ListPublishedContentRes{
 			ContentID:           v.ContentID.String(),
@@ -133,7 +130,6 @@ func (server *Server) listPubContentTitle(ctx echo.Context) error {
 	}
 
 	var content []components.ListPublishedContentRes
-
 	for _, v := range data {
 		content = append(content, components.ListPublishedContentRes{
 			ContentID:           v.ContentID.String(),
@@ -181,7 +177,6 @@ func (server *Server) listDraftContent(ctx echo.Context) error {
 	}
 
 	var content []components.ListPublishedContentRes
-
 	for _, v := range data {
 		content = append(content, components.ListPublishedContentRes{
 			ContentID:           v.ContentID.String(),
@@ -229,7 +224,6 @@ func (server *Server) listDraftContentOldest(ctx echo.Context) error {
 	}
 
 	var content []components.ListPublishedContentRes
-
 	for _, v := range data {
 		content = append(content, components.ListPublishedContentRes{
 			ContentID:           v.ContentID.String(),
@@ -277,7 +271,6 @@ func (server *Server) listDraftContentTitle(ctx echo.Context) error {
 	}
 
 	var content []components.ListPublishedContentRes
-
 	for _, v := range data {
 		content = append(content, components.ListPublishedContentRes{
 			ContentID:           v.ContentID.String(),
@@ -325,7 +318,6 @@ func (server *Server) listDelContent(ctx echo.Context) error {
 	}
 
 	var content []components.ListPublishedContentRes
-
 	for _, v := range data {
 		content = append(content, components.ListPublishedContentRes{
 			ContentID:           v.ContentID.String(),
@@ -373,7 +365,6 @@ func (server *Server) listDelContentOldest(ctx echo.Context) error {
 	}
 
 	var content []components.ListPublishedContentRes
-
 	for _, v := range data {
 		content = append(content, components.ListPublishedContentRes{
 			ContentID:           v.ContentID.String(),
@@ -421,7 +412,6 @@ func (server *Server) listDelContentTitle(ctx echo.Context) error {
 	}
 
 	var content []components.ListPublishedContentRes
-
 	for _, v := range data {
 		content = append(content, components.ListPublishedContentRes{
 			ContentID:           v.ContentID.String(),
@@ -484,7 +474,6 @@ func (server *Server) listSearchPubContent(ctx echo.Context) error {
 	}
 
 	var content []components.ListPublishedContentRes
-
 	for _, v := range data {
 		content = append(content, components.ListPublishedContentRes{
 			ContentID:           v.ContentID.String(),
@@ -542,7 +531,6 @@ func (server *Server) listSearchDraftContent(ctx echo.Context) error {
 	}
 
 	var content []components.ListPublishedContentRes
-
 	for _, v := range data {
 		content = append(content, components.ListPublishedContentRes{
 			ContentID:           v.ContentID.String(),
@@ -600,7 +588,6 @@ func (server *Server) listSearchDelContent(ctx echo.Context) error {
 	}
 
 	var content []components.ListPublishedContentRes
-
 	for _, v := range data {
 		content = append(content, components.ListPublishedContentRes{
 			ContentID:           v.ContentID.String(),
@@ -633,18 +620,10 @@ func (server *Server) listSearchDelContent(ctx echo.Context) error {
 
 func (server *Server) archivePubContent(ctx echo.Context) error {
 	id := ctx.Param("id")
-
-	// Parse string UUID into proper UUID format
-	parsedUUID, err := uuid.Parse(id)
+	pgUUID, err := utils.ParseUUID(id, "content ID")
 	if err != nil {
 		log.Println("Invalid content ID format in archivePubContent:", err)
 		return err
-	}
-
-	// Create a pgtype.UUID with the parsed UUID
-	pgUUID := pgtype.UUID{
-		Bytes: parsedUUID,
-		Valid: true,
 	}
 
 	_, err = server.store.SoftDeleteContent(ctx.Request().Context(), pgUUID)
@@ -664,18 +643,10 @@ func (server *Server) archivePubContent(ctx echo.Context) error {
 
 func (server *Server) deleteContent(ctx echo.Context) error {
 	id := ctx.Param("id")
-
-	// Parse string UUID into proper UUID format
-	parsedUUID, err := uuid.Parse(id)
+	pgUUID, err := utils.ParseUUID(id, "content ID")
 	if err != nil {
 		log.Println("Invalid content ID format in deleteContent:", err)
 		return err
-	}
-
-	// Create a pgtype.UUID with the parsed UUID
-	pgUUID := pgtype.UUID{
-		Bytes: parsedUUID,
-		Valid: true,
 	}
 
 	// delete media files associated with content
@@ -714,18 +685,10 @@ func (server *Server) deleteContent(ctx echo.Context) error {
 
 func (server *Server) publishDraftContent(ctx echo.Context) error {
 	id := ctx.Param("id")
-
-	// Parse string UUID into proper UUID format
-	parsedUUID, err := uuid.Parse(id)
+	pgUUID, err := utils.ParseUUID(id, "content ID")
 	if err != nil {
 		log.Println("Invalid content ID format in publishDraftContent:", err)
 		return err
-	}
-
-	// Create a pgtype.UUID with the parsed UUID
-	pgUUID := pgtype.UUID{
-		Bytes: parsedUUID,
-		Valid: true,
 	}
 
 	_, err = server.store.PublishContent(ctx.Request().Context(), pgUUID)
@@ -745,18 +708,10 @@ func (server *Server) publishDraftContent(ctx echo.Context) error {
 
 func (server *Server) unarchiveContent(ctx echo.Context) error {
 	id := ctx.Param("id")
-
-	// Parse string UUID into proper UUID format
-	parsedUUID, err := uuid.Parse(id)
+	pgUUID, err := utils.ParseUUID(id, "content ID")
 	if err != nil {
 		log.Println("Invalid content ID format in unarchiveContent:", err)
 		return err
-	}
-
-	// Create a pgtype.UUID with the parsed UUID
-	pgUUID := pgtype.UUID{
-		Bytes: parsedUUID,
-		Valid: true,
 	}
 
 	_, err = server.store.UnarchiveContent(ctx.Request().Context(), pgUUID)
@@ -787,18 +742,10 @@ type UpdateContentReq struct {
 
 func (server *Server) updateContent(ctx echo.Context) error {
 	contentIDString := ctx.Param("id")
-
-	// Parse string UUID into proper UUID format
-	parsedContentID, err := uuid.Parse(contentIDString)
+	contentID, err := utils.ParseUUID(contentIDString, "content ID")
 	if err != nil {
 		log.Println("Invalid content ID format in updateContent:", err)
 		return err
-	}
-
-	// Create a pgtype.UUID with the parsed UUID
-	contentID := pgtype.UUID{
-		Bytes: parsedContentID,
-		Valid: true,
 	}
 
 	var req UpdateContentReq
@@ -940,45 +887,19 @@ func (server *Server) createContent(ctx echo.Context) error {
 		return Render(ctx, http.StatusOK, components.ArticleError(message))
 	}
 
-	cookie, err := ctx.Cookie("access_token")
+	userData, err := server.getUserFromCacheOrDb(ctx, "access_token")
 	if err != nil {
-		// No cookie found; redirect to login page
-		return ctx.Redirect(http.StatusTemporaryRedirect, "/")
+		log.Println("Error getting user data in createContent:", err)
 	}
 
-	accessToken := cookie.Value
-	payload, err := server.tokenMaker.VerifyToken(accessToken)
-	if err != nil {
-		// Invalid token; redirect to login page
-		return ctx.Redirect(http.StatusTemporaryRedirect, "/")
-	}
-
-	parsedUserID, err := uuid.Parse(payload.UserID)
-	if err != nil {
-		log.Println("Invalid user ID format in createContent:", err)
-		return err
-	}
-
-	// Create a pgtype.UUID with the parsed UUID
-	userID := pgtype.UUID{
-		Bytes: parsedUserID,
-		Valid: true,
-	}
-
-	parsedCategoryID, err := uuid.Parse(req.CategoryID)
+	categoryID, err := utils.ParseUUID(req.CategoryID, "category ID")
 	if err != nil {
 		log.Println("Invalid category ID format in createContent:", err)
 		return err
 	}
 
-	// Create a pgtype.UUID with the parsed UUID
-	categoryID := pgtype.UUID{
-		Bytes: parsedCategoryID,
-		Valid: true,
-	}
-
 	arg := db.CreateContentParams{
-		UserID:              userID,
+		UserID:              userData.UserID,
 		CategoryID:          categoryID,
 		Title:               req.Title,
 		ContentDescription:  req.ContentDescription,
@@ -1034,45 +955,19 @@ func (server *Server) createAndPublishContent(ctx echo.Context) error {
 		return Render(ctx, http.StatusOK, components.ArticleError(message))
 	}
 
-	cookie, err := ctx.Cookie("access_token")
+	userData, err := server.getUserFromCacheOrDb(ctx, "access_token")
 	if err != nil {
-		// No cookie found; redirect to login page
-		return ctx.Redirect(http.StatusTemporaryRedirect, "/")
+		log.Println("Error getting user data in createAndPublishContent:", err)
 	}
 
-	accessToken := cookie.Value
-	payload, err := server.tokenMaker.VerifyToken(accessToken)
-	if err != nil {
-		// Invalid token; redirect to login page
-		return ctx.Redirect(http.StatusTemporaryRedirect, "/")
-	}
-
-	parsedUserID, err := uuid.Parse(payload.UserID)
-	if err != nil {
-		log.Println("Invalid user ID format in createAndPublishContent:", err)
-		return err
-	}
-
-	// Create a pgtype.UUID with the parsed UUID
-	userID := pgtype.UUID{
-		Bytes: parsedUserID,
-		Valid: true,
-	}
-
-	parsedCategoryID, err := uuid.Parse(req.CategoryID)
+	categoryID, err := utils.ParseUUID(req.CategoryID, "category ID")
 	if err != nil {
 		log.Println("Invalid category ID format in createAndPublishContent:", err)
 		return err
 	}
 
-	// Create a pgtype.UUID with the parsed UUID
-	categoryID := pgtype.UUID{
-		Bytes: parsedCategoryID,
-		Valid: true,
-	}
-
 	arg := db.CreateContentParams{
-		UserID:              userID,
+		UserID:              userData.UserID,
 		CategoryID:          categoryID,
 		Title:               req.Title,
 		ContentDescription:  req.ContentDescription,
@@ -1173,7 +1068,6 @@ func (server *Server) listOtherContent(ctx echo.Context) error {
 	}
 
 	var content []components.ListPublishedContentRes
-
 	for _, v := range data {
 		content = append(content, components.ListPublishedContentRes{
 			ContentID:  v.ContentID.String(),
@@ -1367,36 +1261,21 @@ func (server *Server) categoriesWithContent(ctx echo.Context) error {
 
 func (server *Server) handleLikeContent(ctx echo.Context) error {
 	contentIDStr := ctx.Param("id")
-	_, err := ctx.Cookie("refresh_token")
-	if err != nil {
-
-	}
-	userIDStr := ctx.Get(authorizationPayloadKey).(*token.Payload).UserID
-	log.Println("user ID:", userIDStr)
-
 	contentID, err := utils.ParseUUID(contentIDStr, "content ID")
 	if err != nil {
 		log.Println("Invalid content ID format in handleLikeContent:", err)
 		return err
 	}
 
-	userID, err := utils.ParseUUID(userIDStr, "user ID")
+	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
 	if err != nil {
-		log.Println("Invalid user ID format in handleLikeContent:", err)
-		return err
-	}
-
-	// Get user for consistency checks
-	user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
-	if err != nil {
-		log.Println("Error getting user in handleLikeContent:", err)
-		return err
+		log.Println("Error getting user data in handleLikeContent:", err)
 	}
 
 	// Check if the user already has a reaction using the efficient query
 	userReaction, err := server.store.FetchUserContentReaction(ctx.Request().Context(), db.FetchUserContentReactionParams{
 		ContentID: contentID,
-		UserID:    user.UserID,
+		UserID:    userData.UserID,
 	})
 
 	// Handle reaction logic based on whether we found a reaction and what it was
@@ -1406,7 +1285,7 @@ func (server *Server) handleLikeContent(ctx echo.Context) error {
 			// If already liked, remove the reaction
 			_, err = server.store.DeleteContentReaction(ctx.Request().Context(), db.DeleteContentReactionParams{
 				ContentID: contentID,
-				UserID:    userID,
+				UserID:    userData.UserID,
 			})
 			if err != nil {
 				log.Println("Error deleting content reaction from like to remove like:", err)
@@ -1416,7 +1295,7 @@ func (server *Server) handleLikeContent(ctx echo.Context) error {
 			// If disliked, change to like
 			_, err := server.store.InsertOrUpdateContentReaction(ctx.Request().Context(), db.InsertOrUpdateContentReactionParams{
 				ContentID: contentID,
-				UserID:    userID,
+				UserID:    userData.UserID,
 				Reaction:  "like",
 			})
 			if err != nil {
@@ -1428,7 +1307,7 @@ func (server *Server) handleLikeContent(ctx echo.Context) error {
 		// No reaction yet, add a like
 		_, err := server.store.InsertOrUpdateContentReaction(ctx.Request().Context(), db.InsertOrUpdateContentReactionParams{
 			ContentID: contentID,
-			UserID:    userID,
+			UserID:    userData.UserID,
 			Reaction:  "like",
 		})
 		if err != nil {
@@ -1447,7 +1326,7 @@ func (server *Server) handleLikeContent(ctx echo.Context) error {
 	// Get the updated user reaction for the response
 	updatedUserReaction, err := server.store.FetchUserContentReaction(ctx.Request().Context(), db.FetchUserContentReactionParams{
 		ContentID: contentID,
-		UserID:    userID,
+		UserID:    userData.UserID,
 	})
 
 	reactionStatus := ""
@@ -1475,31 +1354,21 @@ func (server *Server) handleLikeContent(ctx echo.Context) error {
 
 func (server *Server) handleDislikeContent(ctx echo.Context) error {
 	contentIDStr := ctx.Param("id")
-	userIDStr := ctx.Get(authorizationPayloadKey).(*token.Payload).UserID
-
 	contentID, err := utils.ParseUUID(contentIDStr, "content ID")
 	if err != nil {
 		log.Println("Invalid content ID format in handleDislikeContent:", err)
 		return err
 	}
 
-	userID, err := utils.ParseUUID(userIDStr, "user ID")
+	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
 	if err != nil {
-		log.Println("Invalid user ID format in handleDislikeContent:", err)
-		return err
-	}
-
-	// Get user for consistency checks
-	user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
-	if err != nil {
-		log.Println("Error getting user in handleDislikeContent:", err)
-		return err
+		log.Println("Error getting user data in handleDislikeContent:", err)
 	}
 
 	// Check if the user already has a reaction using the efficient query
 	userReaction, err := server.store.FetchUserContentReaction(ctx.Request().Context(), db.FetchUserContentReactionParams{
 		ContentID: contentID,
-		UserID:    user.UserID,
+		UserID:    userData.UserID,
 	})
 
 	// Handle reaction logic based on whether we found a reaction and what it was
@@ -1509,7 +1378,7 @@ func (server *Server) handleDislikeContent(ctx echo.Context) error {
 			// If already disliked, remove the reaction
 			_, err = server.store.DeleteContentReaction(ctx.Request().Context(), db.DeleteContentReactionParams{
 				ContentID: contentID,
-				UserID:    userID,
+				UserID:    userData.UserID,
 			})
 			if err != nil {
 				log.Println("Error deleting content reaction from dislike to remove dislike:", err)
@@ -1519,7 +1388,7 @@ func (server *Server) handleDislikeContent(ctx echo.Context) error {
 			// If liked, change to dislike
 			_, err := server.store.InsertOrUpdateContentReaction(ctx.Request().Context(), db.InsertOrUpdateContentReactionParams{
 				ContentID: contentID,
-				UserID:    userID,
+				UserID:    userData.UserID,
 				Reaction:  "dislike",
 			})
 			if err != nil {
@@ -1531,7 +1400,7 @@ func (server *Server) handleDislikeContent(ctx echo.Context) error {
 		// No reaction yet, add a dislike
 		_, err := server.store.InsertOrUpdateContentReaction(ctx.Request().Context(), db.InsertOrUpdateContentReactionParams{
 			ContentID: contentID,
-			UserID:    userID,
+			UserID:    userData.UserID,
 			Reaction:  "dislike",
 		})
 		if err != nil {
@@ -1550,7 +1419,7 @@ func (server *Server) handleDislikeContent(ctx echo.Context) error {
 	// Get the updated user reaction for the response
 	updatedUserReaction, err := server.store.FetchUserContentReaction(ctx.Request().Context(), db.FetchUserContentReactionParams{
 		ContentID: contentID,
-		UserID:    userID,
+		UserID:    userData.UserID,
 	})
 
 	reactionStatus := ""
