@@ -25,14 +25,21 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  
   mn-redis:
     image: redis:latest
     container_name: macva-news-redis
     ports:
       - "6379:6379"
+    command: >
+      redis-server 
+      --maxmemory 100mb 
+      --maxmemory-policy allkeys-lru 
+      --activedefrag yes
     volumes:
       - redis_data:/data
     restart: unless-stopped
+
 
 volumes:
   postgres_data:

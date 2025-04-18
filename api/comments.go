@@ -16,7 +16,7 @@ import (
 func (server *Server) listContentComments(ctx echo.Context) error {
 	var req ListAdsReq
 	var userData db.GetUserByIDRow
-	var userReactions map[string]string = make(map[string]string)
+	var userReactions map[string]string
 
 	if err := ctx.Bind(&req); err != nil {
 		log.Println("Error binding request in listContentComments:", err)
@@ -33,7 +33,6 @@ func (server *Server) listContentComments(ctx echo.Context) error {
 	var userID pgtype.UUID
 	cookie, err := ctx.Cookie("refresh_token")
 	if err == nil {
-		// User is logged in
 		payload, err := server.tokenMaker.VerifyToken(cookie.Value)
 		if err == nil {
 			parsedUserID, err := utils.ParseUUID(payload.UserID, "userID")
@@ -44,22 +43,9 @@ func (server *Server) listContentComments(ctx echo.Context) error {
 				if err == nil {
 					userData = user
 
-					// Fetch user reactions for this content's comments
-					reactionsArg := db.GetUserReactionsForContentCommentsParams{
-						ContentID: contentID,
-						UserID:    userID,
-					}
-
-					reactions, err := server.store.GetUserReactionsForContentComments(ctx.Request().Context(), reactionsArg)
-					if err == nil {
-						// Create a map of comment ID to reaction
-						for _, reaction := range reactions {
-							commentIDStr := reaction.CommentID.String()
-							userReactions[commentIDStr] = reaction.Reaction
-						}
-					} else {
+					userReactions, err = server.getUserReactionsForContentWithCache(ctx.Request().Context(), contentID, userID)
+					if err != nil {
 						log.Println("Error fetching user reactions:", err)
-						// Continue without reactions if there's an error
 					}
 				} else {
 					log.Println("Error getting user in listContentComments:", err)
@@ -72,6 +58,7 @@ func (server *Server) listContentComments(ctx echo.Context) error {
 		}
 	} else {
 		log.Println("User is not logged in.")
+		userReactions = make(map[string]string) // still need an empty map for rendering
 	}
 
 	nextLimit := req.Limit + 10
@@ -84,13 +71,21 @@ func (server *Server) listContentComments(ctx echo.Context) error {
 
 	url := fmt.Sprintf("/api/content/comments/%s?limit=", contentIDStr)
 
-	commentCount, err := server.store.GetCommentCountForContent(ctx.Request().Context(), contentID)
+	commentCount, err := server.getCommentCountWithCache(ctx.Request().Context(), contentID)
 	if err != nil {
-		log.Println("Error getting comment count for content:", err)
+		log.Println("Error getting comment count in listContentComments:", err)
 		return err
 	}
 
-	return Render(ctx, http.StatusOK, components.ArticleComments(contentIDStr, comments, userData, userReactions, int(nextLimit), url, int(commentCount)))
+	return Render(ctx, http.StatusOK, components.ArticleComments(
+		contentIDStr,
+		comments,
+		userData,
+		userReactions,
+		int(nextLimit),
+		url,
+		int(commentCount),
+	))
 }
 
 type CreateCommentReq struct {
@@ -159,6 +154,13 @@ func (server *Server) createComment(ctx echo.Context) error {
 		// Continue despite cache invalidation error
 	} else {
 		log.Printf("Invalidated cache for content ID: %s", contentID)
+	}
+
+	commentCountKey := redis.GenerateKey("comment_count", contentID)
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), commentCountKey)
+	if err != nil {
+		log.Printf("Error invalidating comment count cache: %v", err)
+		// Continue despite cache invalidation error
 	}
 
 	return server.listContentComments(ctx)
@@ -271,6 +273,26 @@ func (server *Server) handleUpvoteComment(ctx echo.Context) error {
 		log.Printf("Invalidated cache for content ID: %s", updatedComment.ContentID)
 	}
 
+	// Invalidate cache for this content's reactions
+	reactionsKey := redis.GenerateKey("user_reactions", updatedComment.ContentID, userData.UserID)
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), reactionsKey)
+	if err != nil {
+		log.Printf("Error invalidating reactions cache: %v", err)
+		// Continue despite cache invalidation error
+	} else {
+		log.Printf("Invalidated cache for content ID: %s", updatedComment.ContentID)
+	}
+
+	// Invalidate cache for fetched replies
+	if updatedComment.ParentCommentID.Valid {
+		repliesKey := redis.GenerateKey("comment_replies", updatedComment.ParentCommentID, "*")
+		err = server.cacheService.DeleteByPattern(ctx.Request().Context(), repliesKey)
+		if err != nil {
+			log.Printf("Error invalidating replies cache: %v", err)
+			// Continue despite cache invalidation error
+		}
+	}
+
 	// Render just the comment actions part
 	return Render(ctx, http.StatusOK, components.CommentActions(updatedComment, userData, reactionStatus))
 }
@@ -381,6 +403,26 @@ func (server *Server) handleDownvoteComment(ctx echo.Context) error {
 		log.Printf("Invalidated cache for content ID: %s", updatedComment.ContentID)
 	}
 
+	// Invalidate cache for this content's reactions
+	reactionsKey := redis.GenerateKey("user_reactions", updatedComment.ContentID, userData.UserID)
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), reactionsKey)
+	if err != nil {
+		log.Printf("Error invalidating reactions cache: %v", err)
+		// Continue despite cache invalidation error
+	} else {
+		log.Printf("Invalidated cache for content ID: %s", updatedComment.ContentID)
+	}
+
+	// Invalidate cache for fetched replies
+	if updatedComment.ParentCommentID.Valid {
+		repliesKey := redis.GenerateKey("comment_replies", updatedComment.ParentCommentID, "*")
+		err = server.cacheService.DeleteByPattern(ctx.Request().Context(), repliesKey)
+		if err != nil {
+			log.Printf("Error invalidating replies cache: %v", err)
+			// Continue despite cache invalidation error
+		}
+	}
+
 	// Render just the comment actions part
 	return Render(ctx, http.StatusOK, components.CommentActions(updatedComment, userData, reactionStatus))
 }
@@ -403,29 +445,11 @@ func (server *Server) createReply(ctx echo.Context) error {
 		return err
 	}
 
-	cookie, err := ctx.Cookie("refresh_token")
+	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
 	if err != nil {
-		log.Println("User is not logged in.")
-	}
-
-	payload, err := server.tokenMaker.VerifyToken(cookie.Value)
-	if err != nil {
-		log.Println("Invalid token:", err)
+		log.Println("Error getting user in createReply:", err)
 		return err
 	}
-
-	userID, err := utils.ParseUUID(payload.UserID, "userID")
-	if err != nil {
-		log.Println("Error parsing user_id in handleDownvoteComment:", err)
-		return err
-	}
-
-	user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
-	if err != nil {
-		log.Println("Error getting user in handleDownvoteComment:", err)
-		return err
-	}
-	userData = user
 
 	parentCommentIDStr := ctx.Param("id")
 	parentCommentID, err := utils.ParseUUID(parentCommentIDStr, "parent comment ID")
@@ -472,6 +496,20 @@ func (server *Server) createReply(ctx echo.Context) error {
 		log.Printf("Error invalidating caches for ParentCommentID: %s: %v", parentCommentID, err)
 	}
 
+	commentCountKey := redis.GenerateKey("comment_count", comment.ContentID)
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), commentCountKey)
+	if err != nil {
+		log.Printf("Error invalidating comment count cache: %v", err)
+		// Continue despite cache invalidation error
+	}
+
+	commentRepliesKey := redis.GenerateKey("comment_replies", parentCommentID, "*")
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), commentRepliesKey)
+	if err != nil {
+		log.Printf("Error invalidating comment replies cache: %v", err)
+		// Continue despite cache invalidation error
+	}
+
 	// Log the invalidation
 	log.Printf("Invalidated caches for reply count, admin check, and admin pfp for ParentCommentID: %s", parentCommentID)
 
@@ -490,7 +528,7 @@ func (server *Server) createReply(ctx echo.Context) error {
 		Role:            userData.Role,
 	}
 
-	return Render(ctx, http.StatusOK, components.CommentItem(convertedComment, userData, ""))
+	return Render(ctx, http.StatusOK, components.CommentReplyItem(convertedComment, userData, ""))
 }
 
 func (server *Server) listRepliesInfo(ctx echo.Context) error {
@@ -508,5 +546,62 @@ func (server *Server) listRepliesInfo(ctx echo.Context) error {
 		return err
 	}
 
-	return Render(ctx, http.StatusOK, components.CommentReplyInfo(int(replyCount), adminPfp))
+	return Render(ctx, http.StatusOK, components.CommentReplyInfo(int(replyCount), adminPfp, commentIDStr))
+}
+
+func (server *Server) listCommentReplies(ctx echo.Context) error {
+	var req ListAdsReq
+
+	parentCommentIDStr := ctx.Param("id")
+	parentCommentID, err := utils.ParseUUID(parentCommentIDStr, "parent comment ID")
+	if err != nil {
+		log.Println("Invalid parent comment ID format in listCommentReplies:", err)
+		return err
+	}
+
+	if err := ctx.Bind(&req); err != nil {
+		log.Println("Error binding request in listCommentReplies:", err)
+		return err
+	}
+
+	nextLimit := req.Limit + 10
+
+	replies, err := server.listCommentRepliesWithCache(ctx.Request().Context(), parentCommentID, nextLimit)
+	if err != nil {
+		log.Println("Error listing comment replies:", err)
+		return err
+	}
+
+	var convertedReplies []db.ListContentCommentsRow
+	for _, reply := range replies {
+		convertedReplies = append(convertedReplies, db.ListContentCommentsRow{
+			CommentID:       reply.CommentID,
+			ContentID:       reply.ContentID,
+			UserID:          reply.UserID,
+			CommentText:     reply.CommentText,
+			Score:           reply.Score,
+			CreatedAt:       reply.CreatedAt,
+			UpdatedAt:       reply.UpdatedAt,
+			IsDeleted:       reply.IsDeleted,
+			ParentCommentID: reply.ParentCommentID,
+			Username:        reply.Username,
+			Pfp:             reply.Pfp,
+			Role:            reply.Role,
+		})
+	}
+
+	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
+	if err != nil {
+		log.Println("Error getting user in listCommentReplies:", err)
+		return err
+	}
+
+	userReactions, err := server.getUserReactionsForContentWithCache(ctx.Request().Context(), replies[0].ContentID, userData.UserID)
+	if err != nil {
+		log.Println("Error fetching user reactions:", err)
+	}
+
+	url := fmt.Sprintf("/api/comments/%s/more-replies?limit=", parentCommentIDStr)
+
+	return Render(ctx, http.StatusOK, components.CommentReplyList(convertedReplies, userData, userReactions, int(nextLimit), url))
 }

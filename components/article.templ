@@ -53,7 +53,7 @@ templ Article(content db.GetContentDetailsRow, globalSettings db.GlobalSetting, 
 			<!-- Comment Form -->
 			<div class="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
 				<h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Dodajte komentar</h3>
-				<form hx-post={ fmt.Sprintf("/api/content/comments/%s", content.ContentID.String()) } hx-target="#article-comments" hx-swap="innerHTML" class="space-y-4">
+				<form hx-post={ fmt.Sprintf("/api/content/comments/%s", content.ContentID.String()) } hx-target="#article-comments" hx-swap="innerHTML" hx-on:after-submit="document.getElementById('comment_text').value = ''" class="space-y-4">
 					<div class="relative">
 						<textarea
 							name="comment_text"
@@ -82,45 +82,177 @@ templ Article(content db.GetContentDetailsRow, globalSettings db.GlobalSetting, 
 					</div>
 				</form>
 			</div>
-			<section id="article-comments" hx-get={ fmt.Sprintf("/api/content/comments/%s", content.ContentID.String()) } hx-trigger="load delay:1s" hx-target="#article-comments" hx-swap="innerHTML">
+			<section id="article-comments" hx-get={ fmt.Sprintf("/api/content/comments/%s", content.ContentID.String()) } hx-trigger="load" hx-target="#article-comments" hx-swap="innerHTML">
 				@LoadingSpinner()
 			</section>
 			<script type="module">
-			 import { EmojiButton } from "https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.4/+esm";
-
- 			 function initEmojiPicker() {
-			 const button = document.querySelector('#emoji-button');
-   			 const textarea = document.querySelector('#comment_text');
-   			 if (!button || !textarea) return;
-   			 
-   			 const picker = new EmojiButton({
-   			   theme: 'auto',
-   			   position: 'top-end'
-   			 });
-   			 
-   			 picker.on('emoji', selection => {
-   			   // Extract the emoji character from the selection object
-   			   const emoji = selection.emoji || selection;
-   			   
-   			   const start = textarea.selectionStart;
-   			   const end = textarea.selectionEnd;
-   			   
-   			   // Insert the emoji character, not the whole object
-   			   textarea.value = textarea.value.slice(0, start) + emoji + textarea.value.slice(end);
-   			   textarea.focus();
-   			   textarea.selectionStart = textarea.selectionEnd = start + emoji.length;
-   			 });
-   			 
-   			 button.addEventListener('click', () => picker.togglePicker(button));
-   			 }
-   
-			 // Run on initial load
-  			 document.addEventListener('DOMContentLoaded', initEmojiPicker);
-  			 </script>
+			  import { EmojiButton } from "https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.4/+esm";
+			  
+			  // Initialize emoji pickers for all buttons on page load and after any HTMX content loads
+			  document.addEventListener('DOMContentLoaded', initAllEmojiPickers);
+			  document.body.addEventListener('htmx:afterSwap', initAllEmojiPickers);
+			  
+			  function initAllEmojiPickers() {
+			    // Find all emoji buttons
+			    const emojiButtons = document.querySelectorAll('button[id="emoji-button"]');
+			    
+			    emojiButtons.forEach(button => {
+			      // Don't initialize the same button twice
+			      if (button.dataset.emojiInitialized === 'true') return;
+			      
+			      // Find the nearest textarea in the same form
+			      const form = button.closest('form');
+			      const textarea = form ? form.querySelector('textarea') : null;
+			      
+			      if (!textarea) return;
+			      
+			      // Create a new emoji picker for this button
+			      const picker = new EmojiButton({
+			        theme: 'auto',
+			        position: 'top-end'
+			      });
+			      
+			      // Handle emoji selection
+			      picker.on('emoji', selection => {
+			        const emoji = selection.emoji || selection;
+			        
+			        // Insert emoji at cursor position
+			        const start = textarea.selectionStart;
+			        const end = textarea.selectionEnd;
+			        
+			        textarea.value = textarea.value.slice(0, start) + emoji + textarea.value.slice(end);
+			        
+			        // Move cursor after emoji
+			        textarea.focus();
+			        textarea.selectionStart = textarea.selectionEnd = start + emoji.length;
+			      });
+			      
+			      // Toggle the picker when button is clicked
+			      button.addEventListener('click', () => picker.togglePicker(button));
+			      
+			      // Mark as initialized to prevent duplicate initialization
+			      button.dataset.emojiInitialized = 'true';
+			    });
+			  }
+			</script>
 		} else {
 			<div class="text-sm text-gray-500 dark:text-gray-400">Komentari su isključeni.</div>
 		}
 	</article>
+	<script>
+		function toggleCommentDropdown(button) {
+			const buttonId = button.id;
+	
+	    		// Define the prefix used before the UUID
+	    		const prefix = "comment-dropdown-button-";
+	
+	    		// Strip the prefix to get the UUID
+			 const commentId = buttonId.startsWith(prefix)
+	    		    ? buttonId.substring(prefix.length)
+	    		    : null;
+	
+	    		if (!commentId) {
+	    		    console.error("Invalid button ID format");
+	    		    return;
+	    		}
+	
+	    		// Build dropdown ID and toggle
+	    		const dropdownId = `comment-dropdown-${commentId}`;
+	    		const dropdown = document.getElementById(dropdownId);
+	
+	    		if (dropdown) {
+	    		    dropdown.classList.toggle('hidden');
+	    		}
+		}
+	
+		
+		function toggleTruncate(button) {
+			const buttonId = button.id;
+		
+			// Prefix before the UUID in the button ID
+			const prefix = "comment-toggle-";
+		
+			// Extract the UUID part
+			const commentId = buttonId.startsWith(prefix)
+				? buttonId.substring(prefix.length)
+				: null;
+		
+			if (!commentId) {
+				console.error("Invalid button ID format");
+				return;
+			}
+		
+			// Get the comment content element
+			const commentTextId = `comment-content-${commentId}`;
+			const textEl = document.getElementById(commentTextId);
+		
+			if (!textEl) {
+				console.error("Comment text element not found");
+				return;
+			}
+		
+			// Toggle truncation and update button text
+			textEl.classList.toggle("line-clamp-3");
+		
+			button.textContent = textEl.classList.contains("line-clamp-3")
+				? "Prikaži više"
+				: "Prikaži manje";
+		}
+	
+		
+		
+		function toggleReplyForm(button) {
+			const buttonId = button.id;
+			const prefix = "reply-button-";
+			const commentId = buttonId.startsWith(prefix)
+				? buttonId.substring(prefix.length)
+				: null;
+		
+			if (!commentId) {
+				console.error("Invalid reply button ID format");
+				return;
+			}
+		
+			const replyFormId = `reply-form-container-${commentId}`;
+			const formEl = document.getElementById(replyFormId);
+		
+			if (formEl) {
+				const textareaId = `reply-text-${commentId}`;
+				const textarea = document.getElementById(textareaId);
+		
+				if (formEl.classList.contains("hidden")) {
+					formEl.classList.remove("hidden");
+					formEl.classList.add("flex");
+				} else {
+					formEl.classList.remove("flex");
+					formEl.classList.add("hidden");
+					if (textarea) textarea.value = "";
+				}
+			}
+		}
+	
+	
+		
+		function hideReplyForm(button) {
+			const formEl = button.closest("form")?.parentElement;
+		
+			if (formEl) {
+				formEl.classList.add("hidden");
+				formEl.classList.remove("flex");
+		
+				const textarea = formEl.querySelector("textarea");
+				if (textarea) textarea.value = "";
+			}
+		}
+
+		document.addEventListener("input", function (event) {
+			if (event.target.tagName.toLowerCase() !== "textarea") return;
+
+			const textarea = event.target;
+			textarea.style.height = "auto"; // reset
+			textarea.style.height = textarea.scrollHeight + "px";
+		});
+	</script>
 }
 
 templ ArticlePage(props ...interface{}) {
@@ -145,7 +277,6 @@ templ ArticleMediaSlider(media []db.Medium) {
 										class="w-full h-full object-contain cursor-zoom-in"
 										data-fullscreen="true"
 										data-index={ fmt.Sprint(i) }
-										loading="lazy"
 									/>
 									// Expand icon overlay that appears on hover
 									<div class="expand-icon absolute top-4 left-4 bg-black/50 text-white p-2 rounded-full opacity-0 transition-opacity duration-200 cursor-pointer">
@@ -627,14 +758,28 @@ templ ArticleComments(contentID string, comments []db.ListContentCommentsRow, us
 	<div class="w-full max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
 		<!-- Sorting Options -->
 		if len(comments) > 0 {
-			<div class="flex justify-between items-center mb-4">
-				<h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">
-					if commentCount == 1 {
-						{ fmt.Sprint(commentCount) } Komentar
-					} else {
-						{ fmt.Sprint(commentCount) } Komentara 
-					}
-				</h3>
+			<div class="flex flex-col sm:flex-row sm:justify-between items-center mb-4">
+				<div class="flex items-center">
+					<h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 mr-2">
+						if commentCount == 1 {
+							{ fmt.Sprint(commentCount) } Komentar
+						} else {
+							{ fmt.Sprint(commentCount) } Komentara 
+						}
+					</h3>
+					<!-- Refresh Button -->
+					<button
+						hx-get={ fmt.Sprintf("/api/content/comments/%s", contentID) }
+						hx-target="#article-comments"
+						hx-swap="innerHTML"
+						class="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 focus:outline-none transition duration-150 ease-in-out"
+						title="Osveži komentare"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+						</svg>
+					</button>
+				</div>
 				<div class="flex flex-col sm:flex-row items-center space-x-2">
 					<span class="text-sm text-gray-600 dark:text-gray-400">Sortiraj po:</span>
 					<select
@@ -837,143 +982,231 @@ templ CommentItem(comment db.ListContentCommentsRow, userData db.GetUserByIDRow,
 			<!-- Reply Form -->
 			<div id={ fmt.Sprintf("reply-form-container-%s", comment.CommentID.String()) } class="hidden mt-3 items-start space-x-3">
 				<img class="w-8 h-8 sm:w-10 sm:h-10 rounded-full" src={ userData.Pfp } alt="user avatar"/>
-				<form hx-post={ fmt.Sprintf("/api/comments/%s/reply", comment.CommentID.String()) } hx-target={ fmt.Sprintf("#comment-replies-%s", comment.CommentID.String()) } hx-swap="beforeend" class="flex-1 space-y-2">
-					<textarea
-						id={ fmt.Sprintf("reply-text-%s", comment.CommentID.String()) }
-						name="reply_text"
-						rows="2"
-						class="w-full resize-none px-3 py-2 text-md text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-900"
-						placeholder="Odgovorite..."
-						required
-					></textarea>
-					<div class="flex space-x-2">
-						<button
-							type="submit"
-							class="px-3 py-1.5 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-						>
-							Odgovori
-						</button>
+				<form hx-post={ fmt.Sprintf("/api/comments/%s/reply", comment.CommentID.String()) } hx-target={ fmt.Sprintf("#comment-replies-%s", comment.CommentID.String()) } hx-swap="afterbegin" hx-on::after-request="hideReplyForm(this)" class="flex-1 space-y-2">
+					<div class="relative">
+						<textarea
+							id={ fmt.Sprintf("reply-text-%s", comment.CommentID.String()) }
+							name="reply_text"
+							rows="2"
+							class="w-full resize-none px-3 py-2 text-md text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-900"
+							placeholder="Odgovorite..."
+							required
+						></textarea>
 						<button
 							type="button"
-							onclick="hideReplyForm(this)"
-							class="px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-md focus:outline-none"
+							id="emoji-button"
+							class="absolute top-9 right-2 text-lg text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none"
 						>
-							Odustani
+							😊
 						</button>
+						<div class="flex space-x-2">
+							<button
+								type="submit"
+								class="px-3 py-1.5 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+							>
+								Odgovori
+							</button>
+							<button
+								type="button"
+								onclick="hideReplyForm(this)"
+								class="px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-md focus:outline-none"
+							>
+								Odustani
+							</button>
+						</div>
 					</div>
 				</form>
 			</div>
 		</div>
 	</div>
 	<div id={ fmt.Sprintf("comment-reply-info-%s", comment.CommentID.String()) } hx-get={ fmt.Sprintf("/api/comments/%s/reply-info", comment.CommentID.String()) } hx-target={ fmt.Sprintf("#comment-reply-info-%s", comment.CommentID.String()) } hx-swap="innerHTML" hx-trigger="load"></div>
-	<div id={ fmt.Sprintf("comment-replies-%s", comment.CommentID.String()) }></div>
-	<script>
-	function toggleCommentDropdown(button) {
-		const buttonId = button.id;
+	<div id={ fmt.Sprintf("comment-replies-%s", comment.CommentID.String()) } class="pl-6 sm:pl-12 mt-2 space-y-3 border-l-2 border-gray-200 dark:border-gray-700">
+		<!-- Replies will be inserted here -->
+	</div>
+}
 
-    	// Define the prefix used before the UUID
-    	const prefix = "comment-dropdown-button-";
-
-    	// Strip the prefix to get the UUID
-    	const commentId = buttonId.startsWith(prefix)
-    	    ? buttonId.substring(prefix.length)
-    	    : null;
-
-    	if (!commentId) {
-    	    console.error("Invalid button ID format");
-    	    return;
-    	}
-
-    	// Build dropdown ID and toggle
-    	const dropdownId = `comment-dropdown-${commentId}`;
-    	const dropdown = document.getElementById(dropdownId);
-
-    	if (dropdown) {
-    	    dropdown.classList.toggle('hidden');
-    	}
-	}
-
-	
-	function toggleTruncate(button) {
-		const buttonId = button.id;
-	
-		// Prefix before the UUID in the button ID
-		const prefix = "comment-toggle-";
-	
-		// Extract the UUID part
-		const commentId = buttonId.startsWith(prefix)
-			? buttonId.substring(prefix.length)
-			: null;
-	
-		if (!commentId) {
-			console.error("Invalid button ID format");
-			return;
-		}
-	
-		// Get the comment content element
-		const commentTextId = `comment-content-${commentId}`;
-		const textEl = document.getElementById(commentTextId);
-	
-		if (!textEl) {
-			console.error("Comment text element not found");
-			return;
-		}
-	
-		// Toggle truncation and update button text
-		textEl.classList.toggle("line-clamp-3");
-	
-		button.textContent = textEl.classList.contains("line-clamp-3")
-			? "Prikaži više"
-			: "Prikaži manje";
-	}
-
-	
-	
-	function toggleReplyForm(button) {
-		const buttonId = button.id;
-		const prefix = "reply-button-";
-		const commentId = buttonId.startsWith(prefix)
-			? buttonId.substring(prefix.length)
-			: null;
-	
-		if (!commentId) {
-			console.error("Invalid reply button ID format");
-			return;
-		}
-	
-		const replyFormId = `reply-form-container-${commentId}`;
-		const formEl = document.getElementById(replyFormId);
-	
-		if (formEl) {
-			const textareaId = `reply-text-${commentId}`;
-			const textarea = document.getElementById(textareaId);
-	
-			if (formEl.classList.contains("hidden")) {
-				formEl.classList.remove("hidden");
-				formEl.classList.add("flex");
-			} else {
-				formEl.classList.remove("flex");
-				formEl.classList.add("hidden");
-				if (textarea) textarea.value = "";
+templ CommentReplyItem(comment db.ListContentCommentsRow, userData db.GetUserByIDRow, userReaction string) {
+	<div id={ fmt.Sprintf("comment-%s", comment.CommentID.String()) } class="flex space-x-3 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+		<!-- User Avatar -->
+		<div class="flex-shrink-0">
+			<img class="w-8 h-8 sm:w-10 sm:h-10 rounded-full" src={ comment.Pfp } alt="user avatar"/>
+		</div>
+		<!-- Comment Content -->
+		<div class="flex-1 min-w-0">
+			<div class="flex items-center justify-between mb-1">
+				<div class="flex items-center">
+					<h4 class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100">
+						{ comment.Username }
+					</h4>
+					<span class="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full inline-block mx-1"></span>
+					<span class="text-xs text-gray-500 dark:text-gray-400">
+						{ utils.TimeAgo(comment.CreatedAt.Time) }
+					</span>
+				</div>
+				<!-- Options Menu (Three Dots) -->
+				<div class="relative">
+					<button
+						id={ fmt.Sprintf("comment-dropdown-button-%s", comment.CommentID.String()) }
+						onclick="toggleCommentDropdown(this)"
+						class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+							<path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
+						</svg>
+					</button>
+					<!-- Dropdown Menu -->
+					<div
+						id={ fmt.Sprintf("comment-dropdown-%s", comment.CommentID.String()) }
+						class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
+					>
+						<div class="py-1" role="menu" aria-orientation="vertical">
+							if comment.UserID == userData.UserID {
+								<button
+									hx-get={ fmt.Sprintf("/api/comments/%s/edit", comment.CommentID.String()) }
+									hx-target={ fmt.Sprintf("#comment-%s", comment.CommentID.String()) }
+									hx-swap="innerHTML"
+									class="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+									role="menuitem"
+								>
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+									</svg>
+									Uredi
+								</button>
+							}
+							if comment.UserID == userData.UserID {
+								<button
+									hx-delete={ fmt.Sprintf("/api/comments/%s", comment.CommentID.String()) }
+									hx-confirm="Are you sure you want to delete this comment?"
+									hx-target={ fmt.Sprintf("#comment-%s", comment.CommentID.String()) }
+									hx-swap="innerHTML"
+									class="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+									role="menuitem"
+								>
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+									</svg>
+									Obriši
+								</button>
+							}
+							<button
+								hx-post={ fmt.Sprintf("/api/comments/%s/report", comment.CommentID.String()) }
+								hx-confirm="Are you sure you want to report this comment?"
+								class="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+								role="menuitem"
+							>
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path>
+								</svg>
+								Prijavi
+							</button>
+							if userData.Role == "admin" {
+								<button
+									hx-delete={ fmt.Sprintf("/api/comments/%s", comment.CommentID.String()) }
+									hx-confirm="Are you sure you want to delete this comment?"
+									hx-target={ fmt.Sprintf("#comment-%s", comment.CommentID.String()) }
+									hx-swap="outerHTML"
+									class="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+									role="menuitem"
+								>
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+									</svg>
+									Obriši (Admin)
+								</button>
+							}
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id={ fmt.Sprintf("comment-content-%s", comment.CommentID.String()) } class="line-clamp-3 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+				{ comment.CommentText }
+			</div>
+			if IsLongComment(comment.CommentText) {
+				<button
+					id={ fmt.Sprintf("comment-toggle-%s", comment.CommentID.String()) }
+					onclick="toggleTruncate(this)"
+					class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-xs font-medium mt-1"
+				>
+					Prikaži više
+				</button>
 			}
-		}
-	}
-
-
-	
-	function hideReplyForm(button) {
-		const formEl = button.closest("form")?.parentElement;
-	
-		if (formEl) {
-			formEl.classList.add("hidden");
-			formEl.classList.remove("flex");
-	
-			const textarea = formEl.querySelector("textarea");
-			if (textarea) textarea.value = "";
-		}
-	}
-
-</script>
+			<!-- Comment Actions -->
+			<div id={ fmt.Sprintf("comment-actions-%s", comment.CommentID.String()) } class="mt-2 flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+				<!-- Upvote Button -->
+				<button
+					class={ getUpvoteButtonClass(userReaction) }
+					hx-post={ fmt.Sprintf("/api/comments/%s/upvote", comment.CommentID.String()) }
+					hx-target={ fmt.Sprintf("#comment-actions-%s", comment.CommentID.String()) }
+					hx-swap="innerHTML"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+						<path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"></path>
+					</svg>
+				</button>
+				<div id={ fmt.Sprintf("comment-score-%s", comment.CommentID.String()) }>
+					<span>{ fmt.Sprint(comment.Score) }</span>
+				</div>
+				<!-- Downvote Button -->
+				<button
+					class={ getDownvoteButtonClass(userReaction) }
+					hx-post={ fmt.Sprintf("/api/comments/%s/downvote", comment.CommentID.String()) }
+					hx-target={ fmt.Sprintf("#comment-actions-%s", comment.CommentID.String()) }
+					hx-swap="innerHTML"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+						<path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.105-1.79l-.05-.025A4 4 0 0011.055 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z"></path>
+					</svg>
+				</button>
+				<!-- Reply Button -->
+				<button id={ fmt.Sprintf("reply-button-%s", comment.CommentID.String()) } onclick="toggleReplyForm(this)" class="flex items-center space-x-1 hover:text-blue-600 dark:hover:text-blue-400">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+					</svg>
+					<span>Odgovori</span>
+				</button>
+			</div>
+			<!-- Reply Form -->
+			<div id={ fmt.Sprintf("reply-form-container-%s", comment.CommentID.String()) } class="hidden mt-3 items-start space-x-1 sm:space-x-3">
+				<img class="w-6 h-6 sm:w-10 sm:h-10 rounded-full" src={ userData.Pfp } alt="user avatar"/>
+				<form hx-post={ fmt.Sprintf("/api/comments/%s/reply", comment.ParentCommentID.String()) } hx-target={ fmt.Sprintf("#comment-replies-%s", comment.ParentCommentID.String()) } hx-swap="afterbegin" hx-on::after-request="hideReplyForm(this)" class="flex-1 space-y-2">
+					<div class="relative">
+						<textarea
+							id={ fmt.Sprintf("reply-text-%s", comment.CommentID.String()) }
+							name="reply_text"
+							rows="2"
+							class="w-full resize-none px-3 py-2 text-md text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-900"
+							placeholder="Odgovorite..."
+							required
+						></textarea>
+						<button
+							type="button"
+							id="emoji-button"
+							class="absolute top-9 right-2 text-lg text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none"
+						>
+							😊
+						</button>
+						<div class="flex space-x-2">
+							<button
+								type="submit"
+								class="px-3 py-1.5 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+								hx-on:after-request="hideReplyForm(this)"
+							>
+								Odgovori
+							</button>
+							<button
+								type="button"
+								onclick="hideReplyForm(this)"
+								class="px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-md focus:outline-none"
+							>
+								Odustani
+							</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
 }
 
 // CommentActions renders just the actions part of a comment (for HTMX updates)
@@ -1014,114 +1247,91 @@ templ CommentActions(comment db.Comment, userData db.GetUserByIDRow, userReactio
 				<span>Odgovori</span>
 			</button>
 		</div>
-		<!-- Reply Form -->
-		<div id={ fmt.Sprintf("reply-form-container-%s", comment.CommentID.String()) } class="hidden mt-3 items-start space-x-3">
-			<img class="w-8 h-8 sm:w-10 sm:h-10 rounded-full" src={ userData.Pfp } alt="user avatar"/>
-			<form hx-post={ fmt.Sprintf("/api/comments/%s/reply", comment.CommentID.String()) } hx-target={ fmt.Sprintf("#comment-replies-%s", comment.CommentID.String()) } hx-swap="beforeend" class="flex-1 space-y-2">
-				<textarea
-					id={ fmt.Sprintf("reply-text-%s", comment.CommentID.String()) }
-					name="reply_text"
-					rows="2"
-					class="w-full resize-none px-3 py-2 text-md text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-900"
-					placeholder="Odgovorite..."
-					required
-				></textarea>
-				<div class="flex space-x-2">
-					<button
-						type="submit"
-						class="px-3 py-1.5 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-					>
-						Odgovori
-					</button>
-					<button
-						type="button"
-						onclick="hideReplyForm(this)"
-						class="px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-md focus:outline-none"
-					>
-						Odustani
-					</button>
-				</div>
-			</form>
-		</div>
 	</div>
-	<script>
-	function toggleReplyForm(button) {
-		const buttonId = button.id;
-		const prefix = "reply-button-";
-		const commentId = buttonId.startsWith(prefix)
-			? buttonId.substring(prefix.length)
-			: null;
-	
-		if (!commentId) {
-			console.error("Invalid reply button ID format");
-			return;
-		}
-	
-		const replyFormId = `reply-form-container-${commentId}`;
-		const formEl = document.getElementById(replyFormId);
-	
-		if (formEl) {
-			const textareaId = `reply-text-${commentId}`;
-			const textarea = document.getElementById(textareaId);
-	
-			if (formEl.classList.contains("hidden")) {
-				formEl.classList.remove("hidden");
-				formEl.classList.add("flex");
-			} else {
-				formEl.classList.remove("flex");
-				formEl.classList.add("hidden");
-				if (textarea) textarea.value = "";
-			}
-		}
-	}
-
-
-	
-	function hideReplyForm(button) {
-		const formEl = button.closest("form")?.parentElement;
-	
-		if (formEl) {
-			formEl.classList.add("hidden");
-			formEl.classList.remove("flex");
-	
-			const textarea = formEl.querySelector("textarea");
-			if (textarea) textarea.value = "";
-		}
-	}
-	</script>
 }
 
-templ CommentReplyInfo(replyCount int, adminPfp string) {
-	<div class="ml-12 mt-2 flex items-center space-x-2 text-sm text-blue-600 dark:text-blue-400 cursor-pointer">
-		<button class="flex hover:bg-blue-200 dark:hover:bg-blue-800 space-x-2 rounded-xl p-2" onclick="handleButton(this)">
-			<!-- Down Arrow SVG -->
-			<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-			</svg>
-			<!-- Creator Avatar (optional, shown if one of the replies is by the creator) -->
-			if adminPfp != "" {
-				<img
-					src={ adminPfp }
-					alt="admin avatar"
-					class="w-4 h-4 rounded-full ring-2 ring-blue-600 dark:ring-blue-400"
-				/>
-			}
-			<!-- Reply Count Text -->
-			if replyCount == 1 {
-				<span>{ fmt.Sprint(replyCount) } odgovor</span>
-			} else {
-				<span>{ fmt.Sprint(replyCount) } odgovora</span>
-			}
-		</button>
-	</div>
+templ CommentReplyInfo(replyCount int, adminPfp string, commentID string) {
+	if replyCount > 0 {
+		<div class="ml-12 mt-2 flex items-center text-sm text-blue-600 dark:text-blue-400 cursor-pointer">
+			<button
+				id={ fmt.Sprintf("more-replies-button-%s", commentID) }
+				class="flex hover:bg-blue-200 dark:hover:bg-blue-800 space-x-2 rounded-xl p-2"
+				onclick="toggleCommentReplies(this)"
+				data-comment-id={ commentID }
+				data-loaded="false"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+				</svg>
+				if adminPfp != "" {
+					<div class="flex space-x-2 items-center">
+						<img
+							src={ adminPfp }
+							alt="admin avatar"
+							class="w-4 h-4 rounded-full ring-2 ring-blue-600 dark:ring-blue-400"
+						/>
+						<span class="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full inline-block"></span>
+					</div>
+				}
+				if replyCount == 1 {
+					<span>{ fmt.Sprint(replyCount) } odgovor</span>
+				} else {
+					<span>{ fmt.Sprint(replyCount) } odgovora</span>
+				}
+			</button>
+		</div>
+	}
 	<script>
-	function handleButton(button) {
-		const svg = button.querySelector("svg");
-		if (!svg) return;
+        function toggleCommentReplies(button) {
+            const commentId = button.dataset.commentId;
+            const repliesContainerId = `comment-replies-${commentId}`;
+            const repliesContainer = document.getElementById(repliesContainerId);
+            const svg = button.querySelector("svg");
+            
+            if (!repliesContainer || !svg) return;
+            
+            // Toggle arrow rotation
+            svg.classList.toggle("rotate-180");
+            
+            // Track loaded state with data attribute instead of checking innerHTML
+            const isLoaded = button.dataset.loaded === "true";
+            
+            if (!isLoaded) {
+                // First time - load replies
+                htmx.ajax('GET', `/api/comments/${commentId}/more-replies`, {
+                    target: `#${repliesContainerId}`,
+                    swap: 'innerHTML'
+                });
+                button.dataset.loaded = "true";
+            } else {
+                // Already loaded - clear content
+                repliesContainer.innerHTML = "";
+                button.dataset.loaded = "false";
+            }
+        }
+    </script>
+}
 
-		svg.classList.toggle("rotate-180");
-		}
-	</script>
+templ CommentReplyList(replies []db.ListContentCommentsRow, userData db.GetUserByIDRow, userReactions map[string]string, nextLimit int, url string) {
+	for _, reply := range replies {
+		@CommentReplyItem(reply, userData, userReactions[reply.CommentID.String()])
+	}
+	if len(replies) >= nextLimit {
+		<div id={ fmt.Sprintf("show-more-replies-%s", replies[0].ParentCommentID.String()) } class="pl-6 sm:pl-12 mt-2">
+			<button
+				hx-get={ fmt.Sprintf("/api/comments/%s/more-replies?limit=%d", replies[0].ParentCommentID.String(), nextLimit) }
+				hx-target={ fmt.Sprintf("#comment-replies-%s", replies[0].ParentCommentID.String()) }
+				hx-swap="innerHTML"
+				hx-trigger="click"
+				class="flex items-center text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium py-2"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+				</svg>
+				<span>Prikaži više odgovora</span>
+			</button>
+		</div>
+	}
 }
 
 // Helper functions for reaction button styling

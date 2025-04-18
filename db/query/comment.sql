@@ -130,7 +130,7 @@ SELECT cm.*, u.username, u.pfp, u.role
 FROM comment cm 
 JOIN "user" u ON cm.user_id = u.user_id
 WHERE cm.parent_comment_id = $1 AND cm.is_deleted = false
-ORDER BY cm.created_at DESC
+ORDER BY cm.created_at ASC
 LIMIT $2;
 
 -- name: GetReplyCount :one

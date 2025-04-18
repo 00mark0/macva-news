@@ -280,7 +280,7 @@ SELECT cm.comment_id, cm.content_id, cm.user_id, cm.comment_text, cm.score, cm.c
 FROM comment cm 
 JOIN "user" u ON cm.user_id = u.user_id
 WHERE cm.parent_comment_id = $1 AND cm.is_deleted = false
-ORDER BY cm.created_at DESC
+ORDER BY cm.created_at ASC
 LIMIT $2
 `
 

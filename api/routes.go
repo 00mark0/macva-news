@@ -196,12 +196,14 @@ func (server *Server) setupRouter() {
 	router.GET("/api/content/media/:id", server.listMediaForArticlePage)
 	authRoutes.POST("/api/content/like/:id", server.handleLikeContent)
 	authRoutes.POST("/api/content/dislike/:id", server.handleDislikeContent)
+	// Article Comments
 	router.GET("/api/content/comments/:id", server.listContentComments)
 	authRoutes.POST("/api/content/comments/:id", server.createComment)
 	authRoutes.POST("/api/comments/:id/upvote", server.handleUpvoteComment)
 	authRoutes.POST("/api/comments/:id/downvote", server.handleDownvoteComment)
 	authRoutes.POST("/api/comments/:id/reply", server.createReply)
 	router.GET("/api/comments/:id/reply-info", server.listRepliesInfo)
+	router.GET("/api/comments/:id/more-replies", server.listCommentReplies)
 
 	server.router = router
 }

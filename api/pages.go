@@ -7,7 +7,6 @@ import (
 
 	"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/db/services"
-	"github.com/00mark0/macva-news/token"
 	"github.com/00mark0/macva-news/utils"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -17,31 +16,10 @@ import (
 var Loc, _ = time.LoadLocation("Europe/Belgrade")
 
 func (server *Server) homePage(ctx echo.Context) error {
-	var userData db.GetUserByIDRow
-	cookie, err := ctx.Cookie("refresh_token")
+	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
 	if err != nil {
-		log.Println("User is not logged in.")
-	} else {
-		payload, err := server.tokenMaker.VerifyToken(cookie.Value)
-
-		userIDBytes, err := uuid.Parse(payload.UserID)
-		if err != nil {
-			log.Println("Error parsing user_id in homePage:", err)
-			return err
-		}
-
-		userID := pgtype.UUID{
-			Bytes: userIDBytes,
-			Valid: true,
-		}
-
-		user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
-		if err != nil {
-			log.Println("Error getting user in homePage:", err)
-			return err
-		}
-
-		userData = user
+		log.Println("Error getting user in homePage:", err)
+		return err
 	}
 
 	// Prepare meta information dynamically
@@ -82,22 +60,7 @@ func (server *Server) homePage(ctx echo.Context) error {
 
 // full page to be served
 func (server *Server) adminDash(ctx echo.Context) error {
-	payload := ctx.Get(authorizationPayloadKey).(*token.Payload)
-
-	userIDStr := payload.UserID
-
-	userIDBytes, err := uuid.Parse(userIDStr)
-	if err != nil {
-		log.Println("Error parsing user_id in adminDash:", err)
-		return err
-	}
-
-	userID := pgtype.UUID{
-		Bytes: userIDBytes,
-		Valid: true,
-	}
-
-	user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
+	user, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
 	if err != nil {
 		log.Println("Error getting user in adminDash:", err)
 		return err
@@ -137,22 +100,15 @@ func (server *Server) createCategoryForm(ctx echo.Context) error {
 }
 
 func (server *Server) deleteCategoryModal(ctx echo.Context) error {
-	categoryID := ctx.Param("id")
+	categoryIDStr := ctx.Param("id")
 
-	// Parse string UUID into proper UUID format
-	parsedUUID, err := uuid.Parse(categoryID)
+	categoryID, err := utils.ParseUUID(categoryIDStr, "category ID")
 	if err != nil {
 		log.Println("Invalid category ID format in deleteCategoryModal:", err)
 		return err
 	}
 
-	// Create a pgtype.UUID with the parsed UUID
-	pgUUID := pgtype.UUID{
-		Bytes: parsedUUID,
-		Valid: true,
-	}
-
-	category, err := server.store.GetCategoryByID(ctx.Request().Context(), pgUUID)
+	category, err := server.store.GetCategoryByID(ctx.Request().Context(), categoryID)
 	if err != nil {
 		log.Println("Error getting category in deleteCategoryModal:", err)
 		return err
@@ -162,24 +118,16 @@ func (server *Server) deleteCategoryModal(ctx echo.Context) error {
 }
 
 func (server *Server) updateCategoryForm(ctx echo.Context) error {
-	categoryID := ctx.Param("id")
-
+	categoryIDStr := ctx.Param("id")
 	var updateCategoryErr components.UpdateCategoryErr
 
-	// Parse string UUID into proper UUID format
-	parsedUUID, err := uuid.Parse(categoryID)
+	categoryID, err := utils.ParseUUID(categoryIDStr, "category ID")
 	if err != nil {
 		log.Println("Invalid category ID format in updateCategoryForm:", err)
 		return err
 	}
 
-	// Create a pgtype.UUID with the parsed UUID
-	pgUUID := pgtype.UUID{
-		Bytes: parsedUUID,
-		Valid: true,
-	}
-
-	category, err := server.store.GetCategoryByID(ctx.Request().Context(), pgUUID)
+	category, err := server.store.GetCategoryByID(ctx.Request().Context(), categoryID)
 	if err != nil {
 		log.Println("Error getting category in updateCategoryForm:", err)
 		return err
@@ -601,15 +549,10 @@ func (server *Server) createAdModal(ctx echo.Context) error {
 func (server *Server) updateAdModal(ctx echo.Context) error {
 	adIDStr := ctx.Param("id")
 
-	adIDBytes, err := uuid.Parse(adIDStr)
+	adID, err := utils.ParseUUID(adIDStr, "ad ID")
 	if err != nil {
 		log.Println("Invalid ad ID format in updateAdModal:", err)
 		return err
-	}
-
-	adID := pgtype.UUID{
-		Bytes: adIDBytes,
-		Valid: true,
 	}
 
 	ad, err := server.store.GetAd(ctx.Request().Context(), adID)
@@ -646,20 +589,13 @@ func (server *Server) createArticlePage(ctx echo.Context) error {
 func (server *Server) updateArticlePage(ctx echo.Context) error {
 	contentIDStr := ctx.Param("id")
 
-	// Parse string UUID into proper UUID format
-	parsedUUID, err := uuid.Parse(contentIDStr)
+	contentID, err := utils.ParseUUID(contentIDStr, "content ID")
 	if err != nil {
 		log.Println("Invalid content ID format in updateArticlePage:", err)
 		return err
 	}
 
-	// Create a pgtype.UUID with the parsed UUID
-	pgUUID := pgtype.UUID{
-		Bytes: parsedUUID,
-		Valid: true,
-	}
-
-	content, err := server.store.GetContentDetails(ctx.Request().Context(), pgUUID)
+	content, err := server.store.GetContentDetails(ctx.Request().Context(), contentID)
 	if err != nil {
 		log.Println("Failed to get content for update article page in updateArticlePage:", err)
 		return err
@@ -671,7 +607,7 @@ func (server *Server) updateArticlePage(ctx echo.Context) error {
 		return err
 	}
 
-	media, err := server.store.ListMediaForContent(ctx.Request().Context(), pgUUID)
+	media, err := server.store.ListMediaForContent(ctx.Request().Context(), contentID)
 	if err != nil {
 		log.Println("Failed to get media for update article page in updateArticlePage:", err)
 		return err
@@ -683,7 +619,7 @@ func (server *Server) updateArticlePage(ctx echo.Context) error {
 		return err
 	}
 
-	contentTags, err := server.store.GetTagsByContent(ctx.Request().Context(), pgUUID)
+	contentTags, err := server.store.GetTagsByContent(ctx.Request().Context(), contentID)
 	if err != nil {
 		log.Println("Failed to get tags for update article page in updateArticlePage:", err)
 		return err
@@ -700,9 +636,6 @@ func (server *Server) updateArticlePage(ctx echo.Context) error {
 }
 
 func (server *Server) adminSettings(ctx echo.Context) error {
-	// Get user data from auth payload
-	payload := ctx.Get(authorizationPayloadKey).(*token.Payload)
-
 	// Get global settings or create if they don't exist
 	globalSettings, err := server.store.GetGlobalSettings(ctx.Request().Context())
 	if err != nil || len(globalSettings) == 0 {
@@ -715,22 +648,9 @@ func (server *Server) adminSettings(ctx echo.Context) error {
 		globalSettings = []db.GlobalSetting{newSettings}
 	}
 
-	userIDStr := payload.UserID
-
-	userIDBytes, err := uuid.Parse(userIDStr)
+	user, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
 	if err != nil {
-		log.Println("Error parsing user_id in adminSettings:", err)
-		return err
-	}
-
-	userID := pgtype.UUID{
-		Bytes: userIDBytes,
-		Valid: true,
-	}
-
-	user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
-	if err != nil {
-		log.Println("Error getting user in adminSettings:", err)
+		log.Println("Error getting user in homePage:", err)
 		return err
 	}
 
@@ -821,7 +741,6 @@ func (server *Server) requestPassResetPage(ctx echo.Context) error {
 
 func (server *Server) searchResultsPage(ctx echo.Context) error {
 	var req SearchContentReq
-	var userData db.GetUserByIDRow
 
 	if err := ctx.Bind(&req); err != nil {
 		log.Println("Error binding request in searchResultsPage:", err)
@@ -859,30 +778,10 @@ func (server *Server) searchResultsPage(ctx echo.Context) error {
 		return err
 	}
 
-	cookie, err := ctx.Cookie("refresh_token")
+	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
 	if err != nil {
-		log.Println("User is not logged in.")
-	} else {
-		payload, err := server.tokenMaker.VerifyToken(cookie.Value)
-
-		userIDBytes, err := uuid.Parse(payload.UserID)
-		if err != nil {
-			log.Println("Error parsing user_id in homePage:", err)
-			return err
-		}
-
-		userID := pgtype.UUID{
-			Bytes: userIDBytes,
-			Valid: true,
-		}
-
-		user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
-		if err != nil {
-			log.Println("Error getting user in homePage:", err)
-			return err
-		}
-
-		userData = user
+		log.Println("Error getting user in homePage:", err)
+		return err
 	}
 
 	// Prepare meta information dynamically for the search page
@@ -928,8 +827,6 @@ func (server *Server) searchResultsPage(ctx echo.Context) error {
 }
 
 func (server *Server) categoriesPage(ctx echo.Context) error {
-	var userData db.GetUserByIDRow
-
 	categoryIDStr := ctx.Param("id")
 
 	categoryIDBytes, err := uuid.Parse(categoryIDStr)
@@ -949,30 +846,10 @@ func (server *Server) categoriesPage(ctx echo.Context) error {
 		return err
 	}
 
-	cookie, err := ctx.Cookie("refresh_token")
+	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
 	if err != nil {
-		log.Println("User is not logged in.")
-	} else {
-		payload, err := server.tokenMaker.VerifyToken(cookie.Value)
-
-		userIDBytes, err := uuid.Parse(payload.UserID)
-		if err != nil {
-			log.Println("Error parsing user_id in homePage:", err)
-			return err
-		}
-
-		userID := pgtype.UUID{
-			Bytes: userIDBytes,
-			Valid: true,
-		}
-
-		user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
-		if err != nil {
-			log.Println("Error getting user in homePage:", err)
-			return err
-		}
-
-		userData = user
+		log.Println("Error getting user in homePage:", err)
+		return err
 	}
 
 	// Prepare meta information dynamically for the search page
@@ -1012,8 +889,6 @@ func (server *Server) categoriesPage(ctx echo.Context) error {
 }
 
 func (server *Server) tagPage(ctx echo.Context) error {
-	var userData db.GetUserByIDRow
-
 	tagIDStr := ctx.Param("id")
 
 	tagIDBytes, err := uuid.Parse(tagIDStr)
@@ -1033,30 +908,10 @@ func (server *Server) tagPage(ctx echo.Context) error {
 		return err
 	}
 
-	cookie, err := ctx.Cookie("refresh_token")
+	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
 	if err != nil {
-		log.Println("User is not logged in.")
-	} else {
-		payload, err := server.tokenMaker.VerifyToken(cookie.Value)
-
-		userIDBytes, err := uuid.Parse(payload.UserID)
-		if err != nil {
-			log.Println("Error parsing user_id in homePage:", err)
-			return err
-		}
-
-		userID := pgtype.UUID{
-			Bytes: userIDBytes,
-			Valid: true,
-		}
-
-		user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
-		if err != nil {
-			log.Println("Error getting user in homePage:", err)
-			return err
-		}
-
-		userData = user
+		log.Println("Error getting user in homePage:", err)
+		return err
 	}
 
 	// Prepare meta information dynamically for the search page
@@ -1096,13 +951,13 @@ func (server *Server) tagPage(ctx echo.Context) error {
 }
 
 func (server *Server) articlePage(ctx echo.Context) error {
-	var userData db.GetUserByIDRow
-
 	articleIDStr := ctx.Param("id")
 	articleID, err := utils.ParseUUID(articleIDStr, "articleID")
 	if err != nil {
-		log.Println("Invalid articleID format in articlePage:", err)
+		log.Println("Invalid articleID format in articlePage, and also this is bs:", err)
 		return err
+	} else {
+		log.Println("Valid articleID format in articlePage:", articleID)
 	}
 
 	article, err := server.store.GetContentDetails(ctx.Request().Context(), articleID)
@@ -1111,25 +966,10 @@ func (server *Server) articlePage(ctx echo.Context) error {
 		return err
 	}
 
-	cookie, err := ctx.Cookie("refresh_token")
+	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
 	if err != nil {
-		log.Println("User is not logged in.")
-	} else {
-		payload, err := server.tokenMaker.VerifyToken(cookie.Value)
-
-		userID, err := utils.ParseUUID(payload.UserID, "userID")
-		if err != nil {
-			log.Println("Error parsing user_id in homePage:", err)
-			return err
-		}
-
-		user, err := server.store.GetUserByID(ctx.Request().Context(), userID)
-		if err != nil {
-			log.Println("Error getting user in homePage:", err)
-			return err
-		}
-
-		userData = user
+		log.Println("Error getting user in homePage:", err)
+		return err
 	}
 
 	// Prepare meta information dynamically for the search page

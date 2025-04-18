@@ -1,13 +1,16 @@
 services:
   mn-app:
     build:
-      target: prod  # use the production stage
+      target: prod
     container_name: macva-news
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     env_file:
       - .env
     restart: always
+    depends_on:
+      - mn-db
+      - mn-redis
 
   mn-db:
     image: ${DB_DRIVER}:latest
@@ -22,8 +25,23 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  mn-redis:
+    image: redis:latest
+    container_name: macva-news-redis
+    ports:
+      - "6379:6379"
+    command: >
+      redis-server 
+      --maxmemory 100mb 
+      --maxmemory-policy allkeys-lru 
+      --activedefrag yes
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
 volumes:
   postgres_data:
+  redis_data:
 
 # docker compose -f docker-compose-prod.yml up --build -d
 

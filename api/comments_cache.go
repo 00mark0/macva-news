@@ -24,7 +24,6 @@ func (server *Server) getCommentsWithCache(ctx context.Context, contentID pgtype
 
 	if cacheHit {
 		// Cache hit, return cached comments
-		log.Printf("Cache hit for comments: %s", cacheKey)
 		return comments, nil
 	}
 
@@ -75,9 +74,6 @@ func (server *Server) getReplyCountAndAdminPfp(ctx context.Context, parentCommen
 		if err != nil {
 			log.Printf("Error caching reply count for ParentCommentID: %s: %v", parentCommentID, err)
 		}
-		log.Printf("Cached reply count %d for ParentCommentID: %s", replyCount, parentCommentID)
-	} else {
-		log.Printf("Cache hit for reply count for ParentCommentID: %s: %d", parentCommentID, replyCount)
 	}
 
 	// Check if we've already checked this parent comment for admin replies
@@ -91,7 +87,6 @@ func (server *Server) getReplyCountAndAdminPfp(ctx context.Context, parentCommen
 
 	if adminCheckCacheHit {
 		// We already know if this comment has admin replies
-		log.Printf("Cache hit for checked_admin_replies for ParentCommentID: %s", parentCommentID)
 		if hasAdminReply {
 			// Only try to get the cached pfp if we know there's an admin reply
 			pfpCacheHit, err := server.cacheService.Get(ctx, adminPfpCacheKey, &adminPfp)
@@ -101,15 +96,11 @@ func (server *Server) getReplyCountAndAdminPfp(ctx context.Context, parentCommen
 
 			if pfpCacheHit && adminPfp != "" {
 				// Cache hit: use cached admin pfp
-				log.Printf("Cache hit for admin pfp for ParentCommentID: %s", parentCommentID)
 			} else {
 				// Cache miss: admin pfp needs to be rescanned
 				log.Printf("Admin pfp cache miss for ParentCommentID: %s, rescanning replies", parentCommentID)
 				adminPfp = scanForAdminPfp(ctx, server, parentCommentID)
 			}
-		} else {
-			// No admin reply found, skip rescan
-			log.Printf("No admin reply in cache for ParentCommentID: %s, skipping rescan", parentCommentID)
 		}
 	} else {
 		// If no cache hit, need to scan replies for admin replies
@@ -122,16 +113,7 @@ func (server *Server) getReplyCountAndAdminPfp(ctx context.Context, parentCommen
 		if err != nil {
 			log.Printf("Error caching admin reply status for ParentCommentID: %s: %v", parentCommentID, err)
 		}
-
-		if hasAdminReply {
-			log.Printf("Admin reply found, set checked status for ParentCommentID: %s", parentCommentID)
-		} else {
-			log.Printf("No admin reply found, set checked status for ParentCommentID: %s", parentCommentID)
-		}
 	}
-
-	// Final log statement before returning
-	log.Printf("Returning reply count %d and admin pfp for ParentCommentID: %s", replyCount, parentCommentID)
 
 	return replyCount, adminPfp, nil
 }
@@ -158,12 +140,100 @@ func scanForAdminPfp(ctx context.Context, server *Server, parentCommentID pgtype
 			err := server.cacheService.Set(ctx, adminPfpCacheKey, adminPfp, 10*time.Minute)
 			if err != nil {
 				log.Printf("Error caching admin pfp for ParentCommentID: %s: %v", parentCommentID, err)
-			} else {
-				log.Printf("Found admin reply, cached admin pfp for ParentCommentID: %s", parentCommentID)
 			}
 			return adminPfp
 		}
 	}
 
 	return ""
+}
+
+func (server *Server) getUserReactionsForContentWithCache(ctx context.Context, contentID, userID pgtype.UUID) (map[string]string, error) {
+	cacheKey := redis.GenerateKey("user_reactions", contentID, userID)
+
+	var userReactions map[string]string
+	cacheHit, err := server.cacheService.Get(ctx, cacheKey, &userReactions)
+	if err != nil {
+		log.Printf("Error fetching user reactions from cache: %v", err)
+	}
+	if cacheHit {
+		return userReactions, nil
+	}
+
+	log.Printf("Cache miss for user reactions: %s", cacheKey)
+	arg := db.GetUserReactionsForContentCommentsParams{
+		ContentID: contentID,
+		UserID:    userID,
+	}
+	reactions, err := server.store.GetUserReactionsForContentComments(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+
+	userReactions = make(map[string]string)
+	for _, reaction := range reactions {
+		userReactions[reaction.CommentID.String()] = reaction.Reaction
+	}
+
+	err = server.cacheService.Set(ctx, cacheKey, userReactions, 10*time.Minute)
+	if err != nil {
+		log.Printf("Error caching user reactions: %v", err)
+	}
+
+	return userReactions, nil
+}
+
+func (server *Server) getCommentCountWithCache(ctx context.Context, contentID pgtype.UUID) (int64, error) {
+	cacheKey := redis.GenerateKey("comment_count", contentID)
+
+	var commentCount int64
+	cacheHit, err := server.cacheService.Get(ctx, cacheKey, &commentCount)
+	if err != nil {
+		log.Printf("Error fetching comment count from cache: %v", err)
+	}
+	if cacheHit {
+		return commentCount, nil
+	}
+
+	log.Printf("Cache miss for comment count: %s", cacheKey)
+	count, err := server.store.GetCommentCountForContent(ctx, contentID)
+	if err != nil {
+		return 0, err
+	}
+
+	err = server.cacheService.Set(ctx, cacheKey, count, 10*time.Minute)
+	if err != nil {
+		log.Printf("Error caching comment count: %v", err)
+	}
+
+	return count, nil
+}
+
+func (server *Server) listCommentRepliesWithCache(ctx context.Context, parentCommentID pgtype.UUID, limit int32) ([]db.ListCommentRepliesRow, error) {
+	cacheKey := redis.GenerateKey("comment_replies", parentCommentID, limit)
+
+	var replies []db.ListCommentRepliesRow
+	cacheHit, err := server.cacheService.Get(ctx, cacheKey, &replies)
+	if err != nil {
+		log.Printf("Error fetching comment replies from cache: %v", err)
+	}
+	if cacheHit {
+		return replies, nil
+	}
+
+	log.Printf("Cache miss for listing comment replies: %s", cacheKey)
+	replies, err = server.store.ListCommentReplies(ctx, db.ListCommentRepliesParams{
+		ParentCommentID: parentCommentID,
+		Limit:           limit,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	err = server.cacheService.Set(ctx, cacheKey, replies, 10*time.Minute)
+	if err != nil {
+		log.Printf("Error caching comment replies: %v", err)
+	}
+
+	return replies, nil
 }
