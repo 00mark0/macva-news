@@ -53,7 +53,7 @@ templ Article(content db.GetContentDetailsRow, globalSettings db.GlobalSetting, 
 			<!-- Comment Form -->
 			<div class="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
 				<h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Dodajte komentar</h3>
-				<form hx-post={ fmt.Sprintf("/api/content/comments/%s", content.ContentID.String()) } hx-target="#article-comments" hx-swap="innerHTML" hx-on:after-submit="document.getElementById('comment_text').value = ''" class="space-y-4">
+				<form hx-post={ fmt.Sprintf("/api/content/comments/%s", content.ContentID.String()) } hx-target="#article-comments" hx-swap="innerHTML" hx-on::after-request="if(event.detail.successful) this.reset()" class="space-y-4">
 					<div class="relative">
 						<textarea
 							name="comment_text"
@@ -932,7 +932,7 @@ templ CommentItem(comment db.ListContentCommentsRow, userData db.GetUserByIDRow,
 					</div>
 				</div>
 			</div>
-			<div id={ fmt.Sprintf("comment-content-%s", comment.CommentID.String()) } class="line-clamp-3 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+			<div id={ fmt.Sprintf("comment-content-%s", comment.CommentID.String()) } class="line-clamp-3 break-all text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
 				{ comment.CommentText }
 			</div>
 			if IsLongComment(comment.CommentText) {
@@ -1121,8 +1121,17 @@ templ CommentReplyItem(comment db.ListContentCommentsRow, userData db.GetUserByI
 					</div>
 				</div>
 			</div>
-			<div id={ fmt.Sprintf("comment-content-%s", comment.CommentID.String()) } class="line-clamp-3 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-				{ comment.CommentText }
+			<div id={ fmt.Sprintf("comment-content-%s", comment.CommentID.String()) } class="line-clamp-3 break-all text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+				if strings.HasPrefix(comment.CommentText, "@") {
+					if idx := strings.Index(comment.CommentText, " "); idx > 0 {
+						<span class="text-blue-500">{ comment.CommentText[:idx] }</span>
+						{ comment.CommentText[idx:] }
+					} else {
+						{ comment.CommentText }
+					}
+				} else {
+					{ comment.CommentText }
+				}
 			</div>
 			if IsLongComment(comment.CommentText) {
 				<button
@@ -1175,6 +1184,7 @@ templ CommentReplyItem(comment db.ListContentCommentsRow, userData db.GetUserByI
 				}
 				<form hx-post={ fmt.Sprintf("/api/comments/%s/reply", comment.ParentCommentID.String()) } hx-target={ fmt.Sprintf("#comment-replies-%s", comment.ParentCommentID.String()) } hx-swap="afterbegin" hx-on::after-request="hideReplyForm(this)" class="flex-1 space-y-2">
 					<div class="relative">
+						<input type="hidden" name="reply_to_reply" value={ comment.CommentID.String() }/>
 						<textarea
 							id={ fmt.Sprintf("reply-text-%s", comment.CommentID.String()) }
 							name="reply_text"
@@ -1369,17 +1379,23 @@ func getReactionButtonClasses(userReaction string, buttonType string) string {
 
 // In your utils package
 func IsLongComment(text string) bool {
-	// Option 1: Count newlines
-	newlineCount := strings.Count(text, "\n")
-	if newlineCount > 2 {
+	const maxRunes = 300      // total character limit (safe for unicode)
+	const maxNewlines = 3     // more than 3 line breaks = long
+	const maxLineLength = 150 // any single line longer than this is probably unbreakable
+
+	if len([]rune(text)) > maxRunes {
 		return true
 	}
 
-	// Option 2: Estimate based on character count
-	// Assuming approximately 70-80 characters per line for your text size and container width
-	const charsPerLine = 75
-	if len(text) > 3*charsPerLine {
+	if strings.Count(text, "\n") > maxNewlines {
 		return true
+	}
+
+	lines := strings.Split(text, "\n")
+	for _, line := range lines {
+		if len([]rune(line)) > maxLineLength {
+			return true
+		}
 	}
 
 	return false

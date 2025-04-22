@@ -388,6 +388,35 @@ func (server *Server) createReply(ctx echo.Context) error {
 		CommentText:     req.ReplyText,
 	}
 
+	replyToReplyIDStr := ctx.FormValue("reply_to_reply")
+
+	if replyToReplyIDStr != "" {
+		replyToReplyID, err := utils.ParseUUID(replyToReplyIDStr, "reply to reply ID")
+		if err != nil {
+			log.Println("Invalid reply to reply ID format in createReply:", err)
+			return err
+		}
+
+		replyToReplyComment, err := server.store.GetCommentByID(ctx.Request().Context(), replyToReplyID)
+		if err != nil {
+			log.Println("Error getting reply to reply comment in createReply:", err)
+			return err
+		}
+
+		replyToReplyCommentUser, err := server.store.GetUserByID(ctx.Request().Context(), replyToReplyComment.UserID)
+		if err != nil {
+			log.Println("Error getting user in createReply:", err)
+			return err
+		}
+
+		arg = db.CreateReplyParams{
+			ParentCommentID: parentCommentID,
+			UserID:          userData.UserID,
+			ContentID:       parentComment.ContentID,
+			CommentText:     fmt.Sprintf("@%s %s", replyToReplyCommentUser.Username, req.ReplyText),
+		}
+	}
+
 	comment, err := server.store.CreateReply(ctx.Request().Context(), arg)
 	if err != nil {
 		log.Println("Error creating reply:", err)

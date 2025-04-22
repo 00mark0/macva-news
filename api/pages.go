@@ -8,7 +8,6 @@ import (
 	"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/db/services"
 	"github.com/00mark0/macva-news/utils"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )
@@ -822,15 +821,10 @@ func (server *Server) searchResultsPage(ctx echo.Context) error {
 func (server *Server) categoriesPage(ctx echo.Context) error {
 	categoryIDStr := ctx.Param("id")
 
-	categoryIDBytes, err := uuid.Parse(categoryIDStr)
+	categoryID, err := utils.ParseUUID(categoryIDStr, "category ID")
 	if err != nil {
 		log.Println("Invalid category ID format in categoriesPage:", err)
 		return err
-	}
-
-	categoryID := pgtype.UUID{
-		Bytes: categoryIDBytes,
-		Valid: true,
 	}
 
 	category, err := server.store.GetCategoryByID(ctx.Request().Context(), categoryID)
@@ -883,15 +877,10 @@ func (server *Server) categoriesPage(ctx echo.Context) error {
 func (server *Server) tagPage(ctx echo.Context) error {
 	tagIDStr := ctx.Param("id")
 
-	tagIDBytes, err := uuid.Parse(tagIDStr)
+	tagID, err := utils.ParseUUID(tagIDStr, "tag ID")
 	if err != nil {
-		log.Println("Invalid category ID format in categoriesPage:", err)
+		log.Println("Invalid tag ID format in categoriesPage:", err)
 		return err
-	}
-
-	tagID := pgtype.UUID{
-		Bytes: tagIDBytes,
-		Valid: true,
 	}
 
 	tag, err := server.store.GetTag(ctx.Request().Context(), tagID)
