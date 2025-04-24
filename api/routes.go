@@ -198,6 +198,7 @@ func (server *Server) setupRouter() {
 	authRoutes.POST("/api/content/dislike/:id", server.handleDislikeContent)
 	// Article Comments
 	router.GET("/api/content/comments/:id", server.listContentComments)
+	router.GET("/api/content/comments/:id/score", server.listContentCommentsScore)
 	authRoutes.POST("/api/content/comments/:id", server.createComment)
 	authRoutes.POST("/api/comments/:id/upvote", server.handleUpvoteComment)
 	authRoutes.POST("/api/comments/:id/downvote", server.handleDownvoteComment)

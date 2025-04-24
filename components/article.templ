@@ -5,6 +5,18 @@ import "fmt"
 import "github.com/00mark0/macva-news/utils"
 import "strings"
 
+script handleCommentSort() {
+const select = document.getElementById('comment-sort-select');
+const selectedOption = select.options[select.selectedIndex];
+const url = selectedOption.getAttribute('data-url');
+
+if(url) {
+htmx.ajax('GET', url, { target: '#article-comments', swap: 'innerHTML' });
+} else {
+console.warn('No URL set for this sort option.');
+}
+}
+
 templ Article(content db.GetContentDetailsRow, globalSettings db.GlobalSetting, userReaction string) {
 	<article class="max-w-4xl mx-auto px-4 sm:px-6 py-8">
 		<!-- Media Slider with shadow and rounded corners -->
@@ -769,7 +781,11 @@ templ ArticleComments(contentID string, comments []db.ListContentCommentsRow, us
 					</h3>
 					<!-- Refresh Button -->
 					<button
-						hx-get={ fmt.Sprintf("/api/content/comments/%s", contentID) }
+						if !strings.Contains(url, "/score") {
+							hx-get={ fmt.Sprintf("/api/content/comments/%s", contentID) }
+						} else {
+							hx-get={ fmt.Sprintf("/api/content/comments/%s/score", contentID) }
+						}
 						hx-target="#article-comments"
 						hx-swap="innerHTML"
 						class="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 focus:outline-none transition duration-150 ease-in-out"
@@ -784,17 +800,25 @@ templ ArticleComments(contentID string, comments []db.ListContentCommentsRow, us
 					<span class="text-sm text-gray-600 dark:text-gray-400">Sortiraj po:</span>
 					<select
 						class="text-sm border border-gray-300 dark:border-gray-700 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200"
-						hx-get={ fmt.Sprintf("/api/content/comments/%s", contentID) }
-						hx-target="#article-comments"
-						hx-swap="innerHTML"
-						hx-include="[name='page']"
+						id="comment-sort-select"
+						onChange={ handleCommentSort() }
 						name="sort_by"
 					>
 						// make a func that will decide which is selected base on url passed
-						<option value="newest">Najnovije</option>
-						<option value="oldest">Najstarije</option>
-						<option value="most_liked">Najviše lajkova</option>
-						<option value="most_discussed">Najviše komentara</option>
+						<option
+							data-url={ fmt.Sprintf("/api/content/comments/%s?limit=%d", contentID, nextLimit) }
+							if !strings.Contains(url, "/score") {
+								selected="selected"
+							}
+						>
+							Najnoviji
+						</option>
+						<option
+							data-url={ fmt.Sprintf("/api/content/comments/%s/score?limit=%d", contentID, nextLimit) }
+							if strings.Contains(url, "/score") {
+								selected="selected"
+							}
+						>Najbolji</option>
 					</select>
 				</div>
 			</div>

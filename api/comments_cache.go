@@ -47,6 +47,42 @@ func (server *Server) getCommentsWithCache(ctx context.Context, contentID pgtype
 	return comments, nil
 }
 
+func (server *Server) getCommentsByScoreWithCache(ctx context.Context, contentID pgtype.UUID, limit int32) ([]db.ListContentCommentsByScoreRow, error) {
+	// Generate the cache key
+	cacheKey := redis.GenerateKey("comments_by_score", contentID, limit)
+
+	// Try to get comments from cache
+	var comments []db.ListContentCommentsByScoreRow
+	cacheHit, err := server.cacheService.Get(ctx, cacheKey, &comments)
+	if err != nil {
+		log.Printf("Error fetching comments from cache: %v", err)
+	}
+
+	if cacheHit {
+		// Cache hit, return cached comments
+		return comments, nil
+	}
+
+	// Cache miss, fetch from database
+	log.Printf("Cache miss for comments: %s", cacheKey)
+	arg := db.ListContentCommentsByScoreParams{
+		ContentID: contentID,
+		Limit:     limit,
+	}
+	comments, err = server.store.ListContentCommentsByScore(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+
+	// Store in cache for future use
+	err = server.cacheService.Set(ctx, cacheKey, comments, 10*time.Minute)
+	if err != nil {
+		log.Printf("Error caching comments: %v", err)
+	}
+
+	return comments, nil
+}
+
 func (server *Server) getReplyCountAndAdminPfp(ctx context.Context, parentCommentID pgtype.UUID) (int64, string, error) {
 	// Generate cache keys
 	checkedCacheKey := redis.GenerateKey("checked_admin_replies", parentCommentID)

@@ -65,6 +65,77 @@ func (server *Server) listContentComments(ctx echo.Context) error {
 	))
 }
 
+func (server *Server) listContentCommentsScore(ctx echo.Context) error {
+	var req ListAdsReq
+
+	if err := ctx.Bind(&req); err != nil {
+		log.Println("Error binding request in listContentCommentsScore:", err)
+		return err
+	}
+
+	contentIDStr := ctx.Param("id")
+	contentID, err := utils.ParseUUID(contentIDStr, "content ID")
+	if err != nil {
+		log.Println("Invalid content ID format in listContentCommentsScore:", err)
+		return err
+	}
+
+	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
+	if err != nil {
+		log.Println("Error getting user in listContentCommentsScore:", err)
+	}
+
+	userReactions, err := server.getUserReactionsForContentWithCache(ctx.Request().Context(), contentID, userData.UserID)
+	if err != nil {
+		log.Println("Error getting user reactions in listContentCommentsScore:", err)
+		return err
+	}
+
+	nextLimit := req.Limit + 10
+
+	comments, err := server.getCommentsByScoreWithCache(ctx.Request().Context(), contentID, nextLimit)
+	if err != nil {
+		log.Println("Error listing comments in listContentCommentsScore:", err)
+		return err
+	}
+
+	url := fmt.Sprintf("/api/content/comments/%s/score?limit=", contentIDStr)
+
+	commentCount, err := server.getCommentCountWithCache(ctx.Request().Context(), contentID)
+	if err != nil {
+		log.Println("Error getting comment count in listContentCommentsScore:", err)
+		return err
+	}
+
+	var convertedComments []db.ListContentCommentsRow
+	for _, comment := range comments {
+		convertedComments = append(convertedComments, db.ListContentCommentsRow{
+			CommentID:       comment.CommentID,
+			ContentID:       comment.ContentID,
+			UserID:          comment.UserID,
+			CommentText:     comment.CommentText,
+			Score:           comment.Score,
+			CreatedAt:       comment.CreatedAt,
+			UpdatedAt:       comment.UpdatedAt,
+			IsDeleted:       comment.IsDeleted,
+			ParentCommentID: comment.ParentCommentID,
+			Username:        comment.Username,
+			Pfp:             comment.Pfp,
+			Role:            comment.Role,
+		})
+	}
+
+	return Render(ctx, http.StatusOK, components.ArticleComments(
+		contentIDStr,
+		convertedComments,
+		userData,
+		userReactions,
+		int(nextLimit),
+		url,
+		int(commentCount),
+	))
+}
+
 type CreateCommentReq struct {
 	CommentText string `form:"comment_text" validate:"required,min=3,max=10000"`
 }
