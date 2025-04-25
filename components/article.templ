@@ -242,8 +242,6 @@ templ Article(content db.GetContentDetailsRow, globalSettings db.GlobalSetting, 
 				}
 			}
 		}
-	
-	
 		
 		function hideReplyForm(button) {
 			const formEl = button.closest("form")?.parentElement;
@@ -255,6 +253,88 @@ templ Article(content db.GetContentDetailsRow, globalSettings db.GlobalSetting, 
 				const textarea = formEl.querySelector("textarea");
 				if (textarea) textarea.value = "";
 			}
+		}
+
+		function toggleEditForm(button) {
+			const buttonId = button.id;
+			const prefix = "edit-button-";
+			const commentId = buttonId.startsWith(prefix)
+				? buttonId.substring(prefix.length)
+				: null;
+			
+			if (!commentId) {
+				console.error("Invalid edit button ID format");
+				return;
+			}
+		
+			const replyFormId = `edit-form-container-${commentId}`;
+			const formEl = document.getElementById(replyFormId);
+			const commentDropdownContainerId = `comment-dropdown-${commentId}`;
+            const commentDropdownContainer = document.getElementById(commentDropdownContainerId);
+			const commentContentContainerId = `comment-content-${commentId}`;
+            const commentContentContainer = document.getElementById(commentContentContainerId);
+		
+			if (formEl) {
+				if (formEl.classList.contains("hidden")) {
+					formEl.classList.remove("hidden");
+					formEl.classList.add("flex");
+					commentDropdownContainer.classList.add("hidden");
+                    commentContentContainer.classList.add("hidden");
+				} else {
+					formEl.classList.remove("flex");
+					formEl.classList.add("hidden");
+                    commentDropdownContainer.classList.remove("hidden");
+                    commentContentContainer.classList.remove("hidden");
+				}
+			}
+		}
+
+		function hideEditForm(button) {
+			const formEl = button.closest("form")?.parentElement;
+
+            if (!formEl) {
+                console.error("Form element not found");
+                return;
+            }
+
+			const buttonId = button.id;
+			const prefix = "cancel-edit-";
+			const commentId = buttonId.startsWith(prefix)
+				? buttonId.substring(prefix.length)
+				: null;
+
+			if (!commentId) {
+                console.error("Invalid cancel button ID format");
+                return;
+            }
+
+			const commentContentContainerId = `comment-content-${commentId}`;
+            const commentContentContainer = document.getElementById(commentContentContainerId);
+
+			if (!commentContentContainer) {
+                console.error("Comment content container not found");
+                return;
+			}
+		
+			if (formEl) {
+				formEl.classList.add("hidden");
+				formEl.classList.remove("flex");
+                commentContentContainer.classList.remove("hidden");
+			}
+		}
+
+		function showCommentContentContainer(button) {
+            const buttonId = button.id;
+            const prefix = "save-edit-";
+            const commentId = buttonId.startsWith(prefix)
+                ? buttonId.substring(prefix.length)
+                : null;
+            const commentContentContainerId = `comment-content-${commentId}`;
+            const commentContentContainer = document.getElementById(commentContentContainerId);
+        
+            if (commentContentContainer) {
+                commentContentContainer.classList.remove("hidden");
+            }
 		}
 
 		document.addEventListener("input", function (event) {
@@ -806,7 +886,7 @@ templ ArticleComments(contentID string, comments []db.ListContentCommentsRow, us
 					>
 						// make a func that will decide which is selected base on url passed
 						<option
-							data-url={ fmt.Sprintf("/api/content/comments/%s?limit=%d", contentID, nextLimit) }
+							data-url={ fmt.Sprintf("/api/content/comments/%s?limit=%d", contentID, nextLimit-10) }
 							if !strings.Contains(url, "/score") {
 								selected="selected"
 							}
@@ -814,7 +894,7 @@ templ ArticleComments(contentID string, comments []db.ListContentCommentsRow, us
 							Najnoviji
 						</option>
 						<option
-							data-url={ fmt.Sprintf("/api/content/comments/%s/score?limit=%d", contentID, nextLimit) }
+							data-url={ fmt.Sprintf("/api/content/comments/%s/score?limit=%d", contentID, nextLimit-10) }
 							if strings.Contains(url, "/score") {
 								selected="selected"
 							}
@@ -877,7 +957,11 @@ templ CommentItem(comment db.ListContentCommentsRow, userData db.GetUserByIDRow,
 					</h4>
 					<span class="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full inline-block mx-1"></span>
 					<span class="text-xs text-gray-500 dark:text-gray-400">
-						{ utils.TimeAgo(comment.CreatedAt.Time) }
+						if comment.UpdatedAt.Valid {
+							{ utils.TimeAgo(comment.UpdatedAt.Time) } (izmenjeno)
+						} else {
+							{ utils.TimeAgo(comment.CreatedAt.Time) }
+						}
 					</span>
 				</div>
 				<!-- Options Menu (Three Dots) -->
@@ -899,9 +983,8 @@ templ CommentItem(comment db.ListContentCommentsRow, userData db.GetUserByIDRow,
 						<div class="py-1" role="menu" aria-orientation="vertical">
 							if comment.UserID == userData.UserID {
 								<button
-									hx-get={ fmt.Sprintf("/api/comments/%s/edit", comment.CommentID.String()) }
-									hx-target={ fmt.Sprintf("#comment-%s", comment.CommentID.String()) }
-									hx-swap="innerHTML"
+									id={ fmt.Sprintf("edit-button-%s", comment.CommentID.String()) }
+									onclick="toggleEditForm(this)"
 									class="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
 									role="menuitem"
 								>
@@ -968,6 +1051,46 @@ templ CommentItem(comment db.ListContentCommentsRow, userData db.GetUserByIDRow,
 					Prikaži više
 				</button>
 			}
+			<!-- Edit form -->
+			<div id={ fmt.Sprintf("edit-form-container-%s", comment.CommentID.String()) } class="hidden mt-3 mb-3 items-start space-x-3">
+				<form hx-put={ fmt.Sprintf("/api/comments/%s/edit", comment.CommentID.String()) } hx-target={ fmt.Sprintf("#comment-content-%s", comment.CommentID.String()) } hx-swap="outerHTML" hx-on::after-request="if(event.detail.successful) this.classList.add('hidden')" class="flex-1 space-y-2">
+					<div class="relative">
+						<textarea
+							id={ fmt.Sprintf("edit-text-%s", comment.CommentID.String()) }
+							name="edit_text"
+							rows="2"
+							class="w-full resize-none px-3 py-2 text-md text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-900"
+							placeholder="Uredite..."
+							required
+						>{ comment.CommentText }</textarea>
+						<button
+							type="button"
+							id="emoji-button"
+							class="absolute top-9 right-2 text-lg text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none"
+						>
+							😊
+						</button>
+						<div class="flex space-x-2">
+							<button
+								id={ fmt.Sprintf("save-edit-%s", comment.CommentID.String()) }
+								onclick="showCommentContentContainer(this)"
+								type="submit"
+								class="px-3 py-1.5 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+							>
+								Uredi
+							</button>
+							<button
+								id={ fmt.Sprintf("cancel-edit-%s", comment.CommentID.String()) }
+								type="button"
+								onclick="hideEditForm(this)"
+								class="px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-md focus:outline-none"
+							>
+								Odustani
+							</button>
+						</div>
+					</div>
+				</form>
+			</div>
 			<!-- Comment Actions -->
 			<div id={ fmt.Sprintf("comment-actions-%s", comment.CommentID.String()) } class="mt-2 flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
 				<!-- Upvote Button -->
@@ -1066,7 +1189,11 @@ templ CommentReplyItem(comment db.ListContentCommentsRow, userData db.GetUserByI
 					</h4>
 					<span class="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full inline-block mx-1"></span>
 					<span class="text-xs text-gray-500 dark:text-gray-400">
-						{ utils.TimeAgo(comment.CreatedAt.Time) }
+						if comment.UpdatedAt.Valid {
+							{ utils.TimeAgo(comment.UpdatedAt.Time) } (izmenjeno)
+						} else {
+							{ utils.TimeAgo(comment.CreatedAt.Time) }
+						}
 					</span>
 				</div>
 				<!-- Options Menu (Three Dots) -->
@@ -1088,9 +1215,8 @@ templ CommentReplyItem(comment db.ListContentCommentsRow, userData db.GetUserByI
 						<div class="py-1" role="menu" aria-orientation="vertical">
 							if comment.UserID == userData.UserID {
 								<button
-									hx-get={ fmt.Sprintf("/api/comments/%s/edit", comment.CommentID.String()) }
-									hx-target={ fmt.Sprintf("#comment-%s", comment.CommentID.String()) }
-									hx-swap="innerHTML"
+									id={ fmt.Sprintf("edit-button-%s", comment.CommentID.String()) }
+									onclick="toggleEditForm(this)"
 									class="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
 									role="menuitem"
 								>
@@ -1166,6 +1292,46 @@ templ CommentReplyItem(comment db.ListContentCommentsRow, userData db.GetUserByI
 					Prikaži više
 				</button>
 			}
+			<!-- Edit form -->
+			<div id={ fmt.Sprintf("edit-form-container-%s", comment.CommentID.String()) } class="hidden mt-3 mb-3 items-start space-x-3">
+				<form hx-put={ fmt.Sprintf("/api/comments/%s/edit", comment.CommentID.String()) } hx-target={ fmt.Sprintf("#comment-content-%s", comment.CommentID.String()) } hx-swap="outerHTML" hx-on::after-request="if(event.detail.successful) this.classList.add('hidden')" class="flex-1 space-y-2">
+					<div class="relative">
+						<textarea
+							id={ fmt.Sprintf("edit-text-%s", comment.CommentID.String()) }
+							name="edit_text"
+							rows="2"
+							class="w-full resize-none px-3 py-2 text-md text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-900"
+							placeholder="Uredite..."
+							required
+						>{ comment.CommentText }</textarea>
+						<button
+							type="button"
+							id="emoji-button"
+							class="absolute top-9 right-2 text-lg text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none"
+						>
+							😊
+						</button>
+						<div class="flex space-x-2">
+							<button
+								id={ fmt.Sprintf("save-edit-%s", comment.CommentID.String()) }
+								onclick="showCommentContentContainer(this)"
+								type="submit"
+								class="px-3 py-1.5 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+							>
+								Uredi
+							</button>
+							<button
+								id={ fmt.Sprintf("cancel-edit-%s", comment.CommentID.String()) }
+								type="button"
+								onclick="hideEditForm(this)"
+								class="px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-md focus:outline-none"
+							>
+								Odustani
+							</button>
+						</div>
+					</div>
+				</form>
+			</div>
 			<!-- Comment Actions -->
 			<div id={ fmt.Sprintf("comment-actions-%s", comment.CommentID.String()) } class="mt-2 flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
 				<!-- Upvote Button -->
@@ -1370,6 +1536,21 @@ templ CommentReplyList(replies []db.ListContentCommentsRow, userData db.GetUserB
 			</button>
 		</div>
 	}
+}
+
+templ EditCommentResponse(comment db.UpdateCommentRow) {
+	<div id={ fmt.Sprintf("comment-content-%s", comment.CommentID.String()) } class="line-clamp-3 break-all text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+		if strings.HasPrefix(comment.CommentText, "@") {
+			if idx := strings.Index(comment.CommentText, " "); idx > 0 {
+				<span class="text-blue-500">{ comment.CommentText[:idx] }</span>
+				{ comment.CommentText[idx:] }
+			} else {
+				{ comment.CommentText }
+			}
+		} else {
+			{ comment.CommentText }
+		}
+	</div>
 }
 
 // Helper functions for reaction button styling

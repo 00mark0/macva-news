@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/00mark0/macva-news/components"
-	"github.com/00mark0/macva-news/db/redis"
 	"github.com/00mark0/macva-news/db/services"
 	"github.com/00mark0/macva-news/utils"
 	"github.com/labstack/echo/v4"
@@ -137,7 +136,7 @@ func (server *Server) listContentCommentsScore(ctx echo.Context) error {
 }
 
 type CreateCommentReq struct {
-	CommentText string `form:"comment_text" validate:"required,min=3,max=10000"`
+	CommentText string `form:"comment_text" validate:"required,min=1,max=10000"`
 }
 
 func (server *Server) createComment(ctx echo.Context) error {
@@ -176,21 +175,9 @@ func (server *Server) createComment(ctx echo.Context) error {
 		return err
 	}
 
-	// Invalidate cache for this content's comments
-	pattern := redis.GenerateKey("comments", contentID, "*")
-	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), pattern)
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), "comments*")
 	if err != nil {
-		log.Printf("Error invalidating comments cache: %v", err)
-		// Continue despite cache invalidation error
-	} else {
-		log.Printf("Invalidated cache for content ID: %s", contentID)
-	}
-
-	commentCountKey := redis.GenerateKey("comment_count", contentID)
-	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), commentCountKey)
-	if err != nil {
-		log.Printf("Error invalidating comment count cache: %v", err)
-		// Continue despite cache invalidation error
+		log.Printf("Failed to invalidate comment-related cache: %v", err)
 	}
 
 	return server.listContentComments(ctx)
@@ -273,34 +260,9 @@ func (server *Server) handleUpvoteComment(ctx echo.Context) error {
 		reactionStatus = updatedUserReaction.Reaction
 	}
 
-	// Invalidate cache for this content's comments
-	pattern := redis.GenerateKey("comments", updatedComment.ContentID, "*")
-	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), pattern)
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), "comments*")
 	if err != nil {
-		log.Printf("Error invalidating comments cache: %v", err)
-		// Continue despite cache invalidation error
-	} else {
-		log.Printf("Invalidated cache for content ID: %s", updatedComment.ContentID)
-	}
-
-	// Invalidate cache for this content's reactions
-	reactionsKey := redis.GenerateKey("user_reactions", updatedComment.ContentID, userData.UserID)
-	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), reactionsKey)
-	if err != nil {
-		log.Printf("Error invalidating reactions cache: %v", err)
-		// Continue despite cache invalidation error
-	} else {
-		log.Printf("Invalidated cache for content ID: %s", updatedComment.ContentID)
-	}
-
-	// Invalidate cache for fetched replies
-	if updatedComment.ParentCommentID.Valid {
-		repliesKey := redis.GenerateKey("comment_replies", updatedComment.ParentCommentID, "*")
-		err = server.cacheService.DeleteByPattern(ctx.Request().Context(), repliesKey)
-		if err != nil {
-			log.Printf("Error invalidating replies cache: %v", err)
-			// Continue despite cache invalidation error
-		}
+		log.Printf("Failed to invalidate comment-related cache: %v", err)
 	}
 
 	// Render just the comment actions part
@@ -383,34 +345,9 @@ func (server *Server) handleDownvoteComment(ctx echo.Context) error {
 		reactionStatus = updatedUserReaction.Reaction
 	}
 
-	// Invalidate cache for this content's comments
-	pattern := redis.GenerateKey("comments", updatedComment.ContentID, "*")
-	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), pattern)
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), "comments*")
 	if err != nil {
-		log.Printf("Error invalidating comments cache: %v", err)
-		// Continue despite cache invalidation error
-	} else {
-		log.Printf("Invalidated cache for content ID: %s", updatedComment.ContentID)
-	}
-
-	// Invalidate cache for this content's reactions
-	reactionsKey := redis.GenerateKey("user_reactions", updatedComment.ContentID, userData.UserID)
-	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), reactionsKey)
-	if err != nil {
-		log.Printf("Error invalidating reactions cache: %v", err)
-		// Continue despite cache invalidation error
-	} else {
-		log.Printf("Invalidated cache for content ID: %s", updatedComment.ContentID)
-	}
-
-	// Invalidate cache for fetched replies
-	if updatedComment.ParentCommentID.Valid {
-		repliesKey := redis.GenerateKey("comment_replies", updatedComment.ParentCommentID, "*")
-		err = server.cacheService.DeleteByPattern(ctx.Request().Context(), repliesKey)
-		if err != nil {
-			log.Printf("Error invalidating replies cache: %v", err)
-			// Continue despite cache invalidation error
-		}
+		log.Printf("Failed to invalidate comment-related cache: %v", err)
 	}
 
 	// Render just the comment actions part
@@ -418,7 +355,7 @@ func (server *Server) handleDownvoteComment(ctx echo.Context) error {
 }
 
 type CreateReplyReq struct {
-	ReplyText string `form:"reply_text" validate:"required,min=3,max=10000"`
+	ReplyText string `form:"reply_text" validate:"required,min=1,max=10000"`
 }
 
 func (server *Server) createReply(ctx echo.Context) error {
@@ -494,41 +431,10 @@ func (server *Server) createReply(ctx echo.Context) error {
 		return err
 	}
 
-	// After creating the reply, invalidate relevant caches
-	replyCountCacheKey := redis.GenerateKey("reply_count", parentCommentID)
-	checkedCacheKey := redis.GenerateKey("checked_admin_replies", parentCommentID)
-	adminPfpCacheKey := redis.GenerateKey("admin_pfp", parentCommentID)
-
-	// Invalidate caches related to the parent comment
-	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), replyCountCacheKey)
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), "comments*")
 	if err != nil {
-		log.Printf("Error invalidating caches for ParentCommentID: %s: %v", parentCommentID, err)
+		log.Printf("Failed to invalidate comment-related cache: %v", err)
 	}
-	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), checkedCacheKey)
-	if err != nil {
-		log.Printf("Error invalidating caches for ParentCommentID: %s: %v", parentCommentID, err)
-	}
-	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), adminPfpCacheKey)
-	if err != nil {
-		log.Printf("Error invalidating caches for ParentCommentID: %s: %v", parentCommentID, err)
-	}
-
-	commentCountKey := redis.GenerateKey("comment_count", comment.ContentID)
-	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), commentCountKey)
-	if err != nil {
-		log.Printf("Error invalidating comment count cache: %v", err)
-		// Continue despite cache invalidation error
-	}
-
-	commentRepliesKey := redis.GenerateKey("comment_replies", parentCommentID, "*")
-	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), commentRepliesKey)
-	if err != nil {
-		log.Printf("Error invalidating comment replies cache: %v", err)
-		// Continue despite cache invalidation error
-	}
-
-	// Log the invalidation
-	log.Printf("Invalidated caches for reply count, admin check, and admin pfp for ParentCommentID: %s", parentCommentID)
 
 	convertedComment := db.ListContentCommentsRow{
 		CommentID:       comment.CommentID,
@@ -620,4 +526,47 @@ func (server *Server) listCommentReplies(ctx echo.Context) error {
 	url := fmt.Sprintf("/api/comments/%s/more-replies?limit=", parentCommentIDStr)
 
 	return Render(ctx, http.StatusOK, components.CommentReplyList(convertedReplies, userData, userReactions, int(nextLimit), url))
+}
+
+type UpdateCommentReq struct {
+	CommentText string `form:"edit_text" validate:"required,min=1,max=10000"`
+}
+
+func (server *Server) updateComment(ctx echo.Context) error {
+	var req UpdateCommentReq
+
+	if err := ctx.Bind(&req); err != nil {
+		log.Println("Error binding request in updateComment:", err)
+		return err
+	}
+
+	if err := ctx.Validate(req); err != nil {
+		log.Println("Error validating request in updateComment:", err)
+		return err
+	}
+
+	commentIDStr := ctx.Param("id")
+	commentID, err := utils.ParseUUID(commentIDStr, "comment ID")
+	if err != nil {
+		log.Println("Invalid comment ID format in updateComment:", err)
+		return err
+	}
+
+	arg := db.UpdateCommentParams{
+		CommentID:   commentID,
+		CommentText: req.CommentText,
+	}
+
+	commentData, err := server.store.UpdateComment(ctx.Request().Context(), arg)
+	if err != nil {
+		log.Println("Error updating comment:", err)
+		return err
+	}
+
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), "comments*")
+	if err != nil {
+		log.Printf("Failed to invalidate comment-related cache: %v", err)
+	}
+
+	return Render(ctx, http.StatusOK, components.EditCommentResponse(commentData))
 }

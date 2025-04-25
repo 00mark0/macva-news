@@ -546,7 +546,7 @@ SET
     FROM comment_reaction 
     WHERE comment_id = c.comment_id AND reaction = 'dislike'
   ),
-  updated_at = now()
+  updated_at = c.updated_at  -- Explicitly keep the current value
 WHERE c.comment_id = $1
 RETURNING comment_id, content_id, user_id, comment_text, score, created_at, updated_at, is_deleted, parent_comment_id
 `

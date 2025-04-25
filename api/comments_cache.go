@@ -85,9 +85,9 @@ func (server *Server) getCommentsByScoreWithCache(ctx context.Context, contentID
 
 func (server *Server) getReplyCountAndAdminPfp(ctx context.Context, parentCommentID pgtype.UUID) (int64, string, error) {
 	// Generate cache keys
-	checkedCacheKey := redis.GenerateKey("checked_admin_replies", parentCommentID)
-	adminPfpCacheKey := redis.GenerateKey("admin_pfp", parentCommentID)
-	countCacheKey := redis.GenerateKey("reply_count", parentCommentID)
+	checkedCacheKey := redis.GenerateKey("comments_checked_admin_replies", parentCommentID)
+	adminPfpCacheKey := redis.GenerateKey("comments_admin_pfp", parentCommentID)
+	countCacheKey := redis.GenerateKey("comments_reply_count", parentCommentID)
 
 	// Check if we have the reply count cached
 	var replyCount int64
@@ -167,7 +167,7 @@ func scanForAdminPfp(ctx context.Context, server *Server, parentCommentID pgtype
 	}
 
 	// Look for admin replies
-	adminPfpCacheKey := redis.GenerateKey("admin_pfp", parentCommentID)
+	adminPfpCacheKey := redis.GenerateKey("comments_admin_pfp", parentCommentID)
 	for _, reply := range allReplies {
 		if reply.Role == "admin" {
 			adminPfp := reply.Pfp
@@ -185,7 +185,7 @@ func scanForAdminPfp(ctx context.Context, server *Server, parentCommentID pgtype
 }
 
 func (server *Server) getUserReactionsForContentWithCache(ctx context.Context, contentID, userID pgtype.UUID) (map[string]string, error) {
-	cacheKey := redis.GenerateKey("user_reactions", contentID, userID)
+	cacheKey := redis.GenerateKey("comments_user_reactions", contentID, userID)
 
 	var userReactions map[string]string
 	cacheHit, err := server.cacheService.Get(ctx, cacheKey, &userReactions)
@@ -220,7 +220,7 @@ func (server *Server) getUserReactionsForContentWithCache(ctx context.Context, c
 }
 
 func (server *Server) getCommentCountWithCache(ctx context.Context, contentID pgtype.UUID) (int64, error) {
-	cacheKey := redis.GenerateKey("comment_count", contentID)
+	cacheKey := redis.GenerateKey("comments_count", contentID)
 
 	var commentCount int64
 	cacheHit, err := server.cacheService.Get(ctx, cacheKey, &commentCount)
@@ -246,7 +246,7 @@ func (server *Server) getCommentCountWithCache(ctx context.Context, contentID pg
 }
 
 func (server *Server) listCommentRepliesWithCache(ctx context.Context, parentCommentID pgtype.UUID, limit int32) ([]db.ListCommentRepliesRow, error) {
-	cacheKey := redis.GenerateKey("comment_replies", parentCommentID, limit)
+	cacheKey := redis.GenerateKey("comments_replies", parentCommentID, limit)
 
 	var replies []db.ListCommentRepliesRow
 	cacheHit, err := server.cacheService.Get(ctx, cacheKey, &replies)
