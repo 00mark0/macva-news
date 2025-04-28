@@ -175,5 +175,5 @@ ALTER TABLE "content_reaction" ADD FOREIGN KEY ("content_id") REFERENCES "conten
 ALTER TABLE "content_reaction" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("user_id") ON DELETE CASCADE;
 ALTER TABLE "comment_reaction" ADD FOREIGN KEY ("comment_id") REFERENCES "comment" ("comment_id") ON DELETE CASCADE;
 ALTER TABLE "comment_reaction" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("user_id") ON DELETE CASCADE;
-ALTER TABLE "comment" ADD COLUMN "parent_comment_id" UUID DEFAULT NULL REFERENCES "comment"("comment_id");
+ALTER TABLE "comment" ADD COLUMN "parent_comment_id" UUID DEFAULT NULL REFERENCES "comment"("comment_id") ON DELETE CASCADE;
 

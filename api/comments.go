@@ -570,3 +570,25 @@ func (server *Server) updateComment(ctx echo.Context) error {
 
 	return Render(ctx, http.StatusOK, components.EditCommentResponse(commentData))
 }
+
+func (server *Server) deleteComment(ctx echo.Context) error {
+	commentIDStr := ctx.Param("id")
+	commentID, err := utils.ParseUUID(commentIDStr, "comment ID")
+	if err != nil {
+		log.Println("Invalid comment ID format in deleteComment:", err)
+		return err
+	}
+
+	_, err = server.store.DeleteComment(ctx.Request().Context(), commentID)
+	if err != nil {
+		log.Println("Error deleting comment:", err)
+		return err
+	}
+
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), "comments*")
+	if err != nil {
+		log.Printf("Failed to invalidate comment-related cache: %v", err)
+	}
+
+	return ctx.NoContent(http.StatusNoContent)
+}

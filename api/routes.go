@@ -206,6 +206,7 @@ func (server *Server) setupRouter() {
 	router.GET("/api/comments/:id/reply-info", server.listRepliesInfo)
 	router.GET("/api/comments/:id/more-replies", server.listCommentReplies)
 	authRoutes.PUT("/api/comments/:id/edit", server.updateComment)
+	authRoutes.DELETE("/api/comments/:id", server.deleteComment)
 
 	server.router = router
 }

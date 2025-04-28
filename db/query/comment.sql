@@ -29,6 +29,11 @@ RETURNING
   is_deleted,
   updated_at;
 
+-- name: DeleteComment :one
+DELETE FROM comment
+WHERE comment_id = $1
+RETURNING comment_id;
+
 -- name: ListContentComments :many
 SELECT
   cm.*,

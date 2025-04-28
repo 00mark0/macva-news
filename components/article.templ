@@ -337,6 +337,47 @@ templ Article(content db.GetContentDetailsRow, globalSettings db.GlobalSetting, 
             }
 		}
 
+		
+		
+		
+		function hideComment(button) {
+		    const buttonId = button.id;
+		    let commentId = null;
+		
+		    // Extract commentId from buttonId
+		    if (buttonId.startsWith("delete-button-")) {
+		        commentId = buttonId.substring("delete-button-".length);
+		    } else if (buttonId.startsWith("admin-delete-button-")) {
+		        commentId = buttonId.substring("admin-delete-button-".length);
+		    }
+		
+		    // Hide the main comment
+		    const comment = document.getElementById(`comment-${commentId}`);
+		    if (comment) {
+		        comment.classList.add("hidden");
+		    }
+		
+		    // Hide the reply info (if it exists)
+		    const replyInfo = document.getElementById(`comment-reply-info-${commentId}`);
+		    if (replyInfo) {
+		        replyInfo.classList.add("hidden");
+		    }
+		
+		    // Hide the replies container (if it exists)
+		    const repliesContainer = document.getElementById(`comment-replies-${commentId}`);
+		    if (repliesContainer) {
+		        repliesContainer.classList.add("hidden");
+		    }
+		
+		    // Hide the "show more replies" button (if it exists)
+		    const showMoreRepliesButton = document.getElementById(`show-more-replies-${commentId}`);
+		    if (showMoreRepliesButton) {
+		        showMoreRepliesButton.classList.add("hidden");
+		    }
+		}
+
+
+
 		document.addEventListener("input", function (event) {
 			if (event.target.tagName.toLowerCase() !== "textarea") return;
 
@@ -996,10 +1037,11 @@ templ CommentItem(comment db.ListContentCommentsRow, userData db.GetUserByIDRow,
 							}
 							if comment.UserID == userData.UserID {
 								<button
+									id={ fmt.Sprintf("delete-button-%s", comment.CommentID.String()) }
 									hx-delete={ fmt.Sprintf("/api/comments/%s", comment.CommentID.String()) }
-									hx-confirm="Are you sure you want to delete this comment?"
-									hx-target={ fmt.Sprintf("#comment-%s", comment.CommentID.String()) }
-									hx-swap="innerHTML"
+									hx-swap="none"
+									hx-trigger="click"
+									onclick="hideComment(this)"
 									class="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
 									role="menuitem"
 								>
@@ -1009,23 +1051,13 @@ templ CommentItem(comment db.ListContentCommentsRow, userData db.GetUserByIDRow,
 									Obriši
 								</button>
 							}
-							<button
-								hx-post={ fmt.Sprintf("/api/comments/%s/report", comment.CommentID.String()) }
-								hx-confirm="Are you sure you want to report this comment?"
-								class="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-								role="menuitem"
-							>
-								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path>
-								</svg>
-								Prijavi
-							</button>
 							if userData.Role == "admin" {
 								<button
+									id={ fmt.Sprintf("admin-delete-button-%s", comment.CommentID.String()) }
 									hx-delete={ fmt.Sprintf("/api/comments/%s", comment.CommentID.String()) }
-									hx-confirm="Are you sure you want to delete this comment?"
-									hx-target={ fmt.Sprintf("#comment-%s", comment.CommentID.String()) }
-									hx-swap="outerHTML"
+									hx-swap="none"
+									hx-trigger="click"
+									onclick="hideComment(this)"
 									class="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
 									role="menuitem"
 								>
@@ -1228,10 +1260,11 @@ templ CommentReplyItem(comment db.ListContentCommentsRow, userData db.GetUserByI
 							}
 							if comment.UserID == userData.UserID {
 								<button
+									id={ fmt.Sprintf("delete-button-%s", comment.CommentID.String()) }
 									hx-delete={ fmt.Sprintf("/api/comments/%s", comment.CommentID.String()) }
-									hx-confirm="Are you sure you want to delete this comment?"
-									hx-target={ fmt.Sprintf("#comment-%s", comment.CommentID.String()) }
-									hx-swap="innerHTML"
+									hx-swap="outerHTML"
+									hx-trigger="click"
+									onclick="hideComment(this)"
 									class="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
 									role="menuitem"
 								>
@@ -1241,23 +1274,13 @@ templ CommentReplyItem(comment db.ListContentCommentsRow, userData db.GetUserByI
 									Obriši
 								</button>
 							}
-							<button
-								hx-post={ fmt.Sprintf("/api/comments/%s/report", comment.CommentID.String()) }
-								hx-confirm="Are you sure you want to report this comment?"
-								class="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-								role="menuitem"
-							>
-								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path>
-								</svg>
-								Prijavi
-							</button>
 							if userData.Role == "admin" {
 								<button
+									id={ fmt.Sprintf("admin-delete-button-%s", comment.CommentID.String()) }
 									hx-delete={ fmt.Sprintf("/api/comments/%s", comment.CommentID.String()) }
-									hx-confirm="Are you sure you want to delete this comment?"
-									hx-target={ fmt.Sprintf("#comment-%s", comment.CommentID.String()) }
 									hx-swap="outerHTML"
+									hx-trigger="click"
+									onclick="hideComment(this)"
 									class="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
 									role="menuitem"
 								>
@@ -1456,7 +1479,7 @@ templ CommentActions(comment db.Comment, userData db.GetUserByIDRow, userReactio
 
 templ CommentReplyInfo(replyCount int, adminPfp string, commentID string) {
 	if replyCount > 0 {
-		<div class="ml-12 mt-2 flex items-center text-sm text-blue-600 dark:text-blue-400 cursor-pointer">
+		<div id={ fmt.Sprintf("comment-reply-info-%s", commentID) } class="ml-12 mt-2 flex items-center text-sm text-blue-600 dark:text-blue-400 cursor-pointer">
 			<button
 				id={ fmt.Sprintf("more-replies-button-%s", commentID) }
 				class="flex hover:bg-blue-200 dark:hover:bg-blue-800 space-x-2 rounded-xl p-2"
@@ -1517,9 +1540,11 @@ templ CommentReplyInfo(replyCount int, adminPfp string, commentID string) {
 }
 
 templ CommentReplyList(replies []db.ListContentCommentsRow, userData db.GetUserByIDRow, userReactions map[string]string, nextLimit int, url string) {
-	for _, reply := range replies {
-		@CommentReplyItem(reply, userData, userReactions[reply.CommentID.String()])
-	}
+	<div id={ fmt.Sprintf("comment-replies-%s", replies[0].ParentCommentID.String()) }>
+		for _, reply := range replies {
+			@CommentReplyItem(reply, userData, userReactions[reply.CommentID.String()])
+		}
+	</div>
 	if len(replies) >= nextLimit {
 		<div id={ fmt.Sprintf("show-more-replies-%s", replies[0].ParentCommentID.String()) } class="pl-6 sm:pl-12 mt-2">
 			<button
