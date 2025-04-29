@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"time"
@@ -8,6 +9,8 @@ import (
 	"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/db/services"
 	"github.com/00mark0/macva-news/utils"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )
@@ -930,26 +933,93 @@ func (server *Server) tagPage(ctx echo.Context) error {
 	return Render(ctx, http.StatusOK, components.TagsPage(userData, meta, activeAds, categories, tag))
 }
 
+func getOrCreateAnonID(c echo.Context) (uuid.UUID, error) {
+	cookie, err := c.Cookie("anon_token")
+	if err == nil {
+		anonID, err := uuid.Parse(cookie.Value)
+		if err == nil {
+			return anonID, nil
+		}
+	}
+	// Create new anon_token
+	newAnonID := uuid.New()
+	newCookie := &http.Cookie{
+		Name:     "anon_token",
+		Value:    newAnonID.String(),
+		Path:     "/",
+		HttpOnly: true,
+		Expires:  time.Now().Add(20 * 365 * 24 * time.Hour), // 20 years
+		SameSite: http.SameSiteStrictMode,
+	}
+	c.SetCookie(newCookie)
+	return newAnonID, nil
+}
+func (server *Server) handleViews(ctx echo.Context, contentIDStr, userIDStr string) {
+	contentID, err := utils.ParseUUID(contentIDStr, "contentID")
+	if err != nil {
+		log.Println("Invalid contentID:", err)
+		return
+	}
+	var viewerID pgtype.UUID
+	if userIDStr != "" {
+		viewerID, err = utils.ParseUUID(userIDStr, "userID")
+		if err != nil {
+			log.Println("Invalid userID:", err)
+			return
+		}
+	} else {
+		anonID, err := getOrCreateAnonID(ctx)
+		if err != nil {
+			log.Println("Error getting/creating anontoken:", err)
+			return
+		}
+		viewerID, err = utils.ParseUUID(anonID.String(), "anonID")
+		if err != nil {
+			log.Println("Invalid anonID:", err)
+			return
+		}
+	}
+	params := db.GetViewParams{
+		ContentID: contentID,
+		UserID:    viewerID,
+	}
+	_, err = server.store.GetView(ctx.Request().Context(), params)
+	if errors.Is(err, pgx.ErrNoRows) {
+		err = server.store.AddView(ctx.Request().Context(), db.AddViewParams{
+			ContentID: params.ContentID,
+			UserID:    params.UserID,
+		})
+		if err != nil {
+			log.Println("Error adding view:", err)
+		}
+		_, err = server.store.IncrementViewCount(ctx.Request().Context(), contentID)
+		if err != nil {
+			log.Println("Error incrementing view count:", err)
+		}
+
+	} else if err != nil {
+		log.Println("Error checking view:", err)
+	}
+}
 func (server *Server) articlePage(ctx echo.Context) error {
 	articleIDStr := ctx.Param("id")
 	articleID, err := utils.ParseUUID(articleIDStr, "articleID")
 	if err != nil {
-		log.Println("Invalid articleID format in articlePage, and also this is bs:", err)
+		log.Println("Invalid articleID format in articlePage:", err)
 		return err
 	} else {
 		log.Println("Valid articleID format in articlePage:", articleID)
 	}
-
 	article, err := server.store.GetContentDetails(ctx.Request().Context(), articleID)
 	if err != nil {
 		log.Println("Error getting category in categoriesPage:", err)
 		return err
 	}
-
 	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
 	if err != nil {
 		log.Println("Error getting user in homePage:", err)
 	}
+	server.handleViews(ctx, articleID.String(), userData.UserID.String())
 
 	// Prepare meta information dynamically for the search page
 	meta := components.Meta{
@@ -1003,5 +1073,53 @@ func (server *Server) articlePage(ctx echo.Context) error {
 		}
 	}
 
-	return Render(ctx, http.StatusOK, components.ArticlePage(userData, meta, activeAds, categories, article, globalSettings[0], userReaction))
+	return Render(ctx, http.StatusOK, components.ArticlePage(userData, meta, activeAds, categories, article, globalSettings[0], userReaction, activeAds))
+}
+
+func (server *Server) userSettingsPage(ctx echo.Context) error {
+	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")
+	if err != nil {
+		log.Println("Error getting user in userSettingsPage:", err)
+	}
+
+	userProps := components.UserSettingsProps{
+		UserID:   userData.UserID.String(),
+		Username: userData.Username,
+		Pfp:      userData.Pfp,
+	}
+
+	// Prepare meta information dynamically for the search page
+	meta := components.Meta{
+		Title:       "Mačva News | Korisnička Podešavanja", // Već promenjeno za stranicu kategorija
+		Description: "Korisnička Podešavanja",
+		Canonical:   BaseUrl + "/" + "podesavanja", // Ažurirano za URL stranice kategorija
+		OpenGraph: components.OpenGraphMeta{
+			Title:       "Mačva News | Korisnička Podešavanja",
+			Description: "Korisnička Podešavanja",
+			URL:         BaseUrl + "/" + "podesavanja", // Ažurirano za URL stranice kategorija
+			Type:        "website",
+			Image:       "/static/assets/macva-news-logo-cropped.jpeg", // Koristi istu sliku
+		},
+		Twitter: components.TwitterCardMeta{
+			Card:        "summary_large_image",
+			Title:       "Mačva News | Korisnička Podešavanja",
+			Description: "Korisnička Podešavanja",
+			Image:       "/static/assets/macva-news-logo-cropped.jpeg", // Koristi istu sliku
+			Creator:     "@MacvaNews",                                  // Opcionalno: vaš Twitter nalog
+		},
+	}
+
+	activeAds, err := server.store.ListActiveAds(ctx.Request().Context(), 4)
+	if err != nil {
+		log.Println("Error listing active ads in homePage:", err)
+		return err
+	}
+
+	categories, err := server.store.ListCategories(ctx.Request().Context(), 1000)
+	if err != nil {
+		log.Println("Error listing categories in homePage:", err)
+		return err
+	}
+
+	return Render(ctx, http.StatusOK, components.UserSettingsPage(userData, meta, activeAds, categories, userProps))
 }

@@ -778,6 +778,17 @@ func (server *Server) banUser(ctx echo.Context) error {
 		DeletedUsersCount: int(delCount),
 	}
 
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), "user*")
+	if err != nil {
+		log.Println("Error deleting cache in banUser:", err)
+		return err
+	}
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), "comments*")
+	if err != nil {
+		log.Println("Error deleting cache in banUser:", err)
+		return err
+	}
+
 	return Render(ctx, http.StatusOK, components.UsersNav(overview))
 }
 
@@ -819,6 +830,17 @@ func (server *Server) unbanUser(ctx echo.Context) error {
 		DeletedUsersCount: int(delCount),
 	}
 
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), "user*")
+	if err != nil {
+		log.Println("Error deleting cache in unbanUser:", err)
+		return err
+	}
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), "comments*")
+	if err != nil {
+		log.Println("Error deleting cache in banUser:", err)
+		return err
+	}
+
 	return Render(ctx, http.StatusOK, components.UsersNav(overview))
 }
 
@@ -858,6 +880,17 @@ func (server *Server) deleteUser(ctx echo.Context) error {
 		ActiveUsersCount:  int(activeCount),
 		BannedUsersCount:  int(bannedCount),
 		DeletedUsersCount: int(delCount),
+	}
+
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), "user*")
+	if err != nil {
+		log.Println("Error deleting user from cache in deleteUser:", err)
+		return err
+	}
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), "comments*")
+	if err != nil {
+		log.Println("Error deleting cache in banUser:", err)
+		return err
 	}
 
 	return Render(ctx, http.StatusOK, components.UsersNav(overview))
@@ -904,6 +937,17 @@ func (server *Server) updateUsername(ctx echo.Context) error {
 	err = server.store.UpdateUser(ctx.Request().Context(), arg)
 	if err != nil {
 		log.Println("Error updating user in updateUsername:", err)
+		return err
+	}
+
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), "user*")
+	if err != nil {
+		log.Println("Error deleting cache in updateUsername:", err)
+		return err
+	}
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), "comments*")
+	if err != nil {
+		log.Println("Error deleting cache in banUser:", err)
 		return err
 	}
 
@@ -1009,6 +1053,18 @@ func (server *Server) updatePfp(ctx echo.Context) error {
 		log.Println("Error updating user in updatePfp:", err)
 		// If update fails, delete the newly uploaded file to avoid orphaned files
 		os.Remove(filePath)
+		return err
+	}
+
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), "user*")
+	if err != nil {
+		log.Println("Error deleting cache in updatePfp:", err)
+		// If cache deletion fails, delete the newly uploaded file to avoid orphaned files
+		return err
+	}
+	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), "comments*")
+	if err != nil {
+		log.Println("Error deleting cache in banUser:", err)
 		return err
 	}
 

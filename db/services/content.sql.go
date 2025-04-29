@@ -409,6 +409,18 @@ func (q *Queries) HardDeleteContent(ctx context.Context, contentID pgtype.UUID) 
 	return i, err
 }
 
+const incrementCommentCount = `-- name: IncrementCommentCount :exec
+UPDATE content
+SET
+  comment_count = comment_count + 1
+WHERE content_id = $1
+`
+
+func (q *Queries) IncrementCommentCount(ctx context.Context, contentID pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, incrementCommentCount, contentID)
+	return err
+}
+
 const incrementViewCount = `-- name: IncrementViewCount :one
 UPDATE content
 SET

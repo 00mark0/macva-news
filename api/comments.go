@@ -175,6 +175,12 @@ func (server *Server) createComment(ctx echo.Context) error {
 		return err
 	}
 
+	err = server.store.IncrementCommentCount(ctx.Request().Context(), contentID)
+	if err != nil {
+		log.Println("Error incrementing comment count in createComment:", err)
+		return err
+	}
+
 	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), "comments*")
 	if err != nil {
 		log.Printf("Failed to invalidate comment-related cache: %v", err)
@@ -428,6 +434,12 @@ func (server *Server) createReply(ctx echo.Context) error {
 	comment, err := server.store.CreateReply(ctx.Request().Context(), arg)
 	if err != nil {
 		log.Println("Error creating reply:", err)
+		return err
+	}
+
+	err = server.store.IncrementCommentCount(ctx.Request().Context(), parentComment.ContentID)
+	if err != nil {
+		log.Println("Error incrementing comment count in createReply:", err)
 		return err
 	}
 

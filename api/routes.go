@@ -134,8 +134,8 @@ func (server *Server) setupRouter() {
 	adminRoutes.PUT("/api/admin/users/archive/:id", server.deleteUser)
 
 	// Admin settings
-	adminRoutes.PUT("/api/admin/settings/username/:id", server.updateUsername)
-	adminRoutes.PUT("/api/admin/settings/pfp/:id", server.updatePfp)
+	authRoutes.PUT("/api/admin/settings/username/:id", server.updateUsername)
+	authRoutes.PUT("/api/admin/settings/pfp/:id", server.updatePfp)
 	adminRoutes.PUT("/api/admin/global-settings", server.updateGlobalSettings)
 	adminRoutes.PUT("/api/admin/reset-global-settings", server.resetGlobalSettings)
 
@@ -178,6 +178,8 @@ func (server *Server) setupRouter() {
 	router.GET("/oznake/:tag/:id", server.tagPage)
 	// Article Page
 	router.GET("/:article/:id", server.articlePage)
+	// User settings
+	authRoutes.GET("/podesavanja", server.userSettingsPage)
 
 	//User API
 	// User Search

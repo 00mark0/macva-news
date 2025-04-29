@@ -367,6 +367,12 @@ SET
 WHERE content_id = $1
 RETURNING view_count;
 
+-- name: IncrementCommentCount :exec
+UPDATE content
+SET
+  comment_count = comment_count + 1
+WHERE content_id = $1;
+
 -- name: InsertOrUpdateContentReaction :one
 INSERT INTO content_reaction (content_id, user_id, reaction)
 VALUES ($1, $2, $3)
