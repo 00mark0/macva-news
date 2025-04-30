@@ -34,4 +34,51 @@ SELECT
 FROM "analytics_daily"
 WHERE "analytics_date" BETWEEN $1 AND $2;
 
+-- name: IncrementDailyViews :one
+UPDATE analytics_daily
+SET total_views = total_views + 1
+WHERE analytics_date = $1
+RETURNING *;
+
+-- name: IncrementDailyLikes :one
+UPDATE analytics_daily
+SET total_likes = total_likes + 1
+WHERE analytics_date = $1
+RETURNING *;
+
+-- name: IncrementDailyDislikes :one
+UPDATE analytics_daily
+SET total_dislikes = total_dislikes + 1
+WHERE analytics_date = $1
+RETURNING *;
+
+-- name: IncrementDailyComments :one
+UPDATE analytics_daily
+SET total_comments = total_comments + 1
+WHERE analytics_date = $1
+RETURNING *;
+
+-- name: IncrementDailyAdsClicks :one
+UPDATE analytics_daily
+SET total_ads_clicks = total_ads_clicks + 1
+WHERE analytics_date = $1
+RETURNING *;
+
+-- name: DecrementDailyLikes :one
+UPDATE analytics_daily
+SET total_likes = total_likes - 1
+WHERE analytics_date = $1
+RETURNING *;
+
+-- name: DecrementDailyDislikes :one
+UPDATE analytics_daily
+SET total_dislikes = total_dislikes - 1
+WHERE analytics_date = $1
+RETURNING *;
+
+-- name: DecrementDailyComments :one
+UPDATE analytics_daily
+SET total_comments = total_comments - 1
+WHERE analytics_date = $1
+RETURNING *;
 

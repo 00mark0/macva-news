@@ -72,6 +72,75 @@ func (q *Queries) CreateDailyAnalytics(ctx context.Context, analyticsDate pgtype
 	return i, err
 }
 
+const decrementDailyComments = `-- name: DecrementDailyComments :one
+UPDATE analytics_daily
+SET total_comments = total_comments - 1
+WHERE analytics_date = $1
+RETURNING analytics_date, total_views, total_likes, total_dislikes, total_comments, total_ads_clicks, created_at, updated_at
+`
+
+func (q *Queries) DecrementDailyComments(ctx context.Context, analyticsDate pgtype.Date) (AnalyticsDaily, error) {
+	row := q.db.QueryRow(ctx, decrementDailyComments, analyticsDate)
+	var i AnalyticsDaily
+	err := row.Scan(
+		&i.AnalyticsDate,
+		&i.TotalViews,
+		&i.TotalLikes,
+		&i.TotalDislikes,
+		&i.TotalComments,
+		&i.TotalAdsClicks,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const decrementDailyDislikes = `-- name: DecrementDailyDislikes :one
+UPDATE analytics_daily
+SET total_dislikes = total_dislikes - 1
+WHERE analytics_date = $1
+RETURNING analytics_date, total_views, total_likes, total_dislikes, total_comments, total_ads_clicks, created_at, updated_at
+`
+
+func (q *Queries) DecrementDailyDislikes(ctx context.Context, analyticsDate pgtype.Date) (AnalyticsDaily, error) {
+	row := q.db.QueryRow(ctx, decrementDailyDislikes, analyticsDate)
+	var i AnalyticsDaily
+	err := row.Scan(
+		&i.AnalyticsDate,
+		&i.TotalViews,
+		&i.TotalLikes,
+		&i.TotalDislikes,
+		&i.TotalComments,
+		&i.TotalAdsClicks,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const decrementDailyLikes = `-- name: DecrementDailyLikes :one
+UPDATE analytics_daily
+SET total_likes = total_likes - 1
+WHERE analytics_date = $1
+RETURNING analytics_date, total_views, total_likes, total_dislikes, total_comments, total_ads_clicks, created_at, updated_at
+`
+
+func (q *Queries) DecrementDailyLikes(ctx context.Context, analyticsDate pgtype.Date) (AnalyticsDaily, error) {
+	row := q.db.QueryRow(ctx, decrementDailyLikes, analyticsDate)
+	var i AnalyticsDaily
+	err := row.Scan(
+		&i.AnalyticsDate,
+		&i.TotalViews,
+		&i.TotalLikes,
+		&i.TotalDislikes,
+		&i.TotalComments,
+		&i.TotalAdsClicks,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getDailyAnalytics = `-- name: GetDailyAnalytics :many
 SELECT analytics_date, total_views, total_likes, total_dislikes, total_comments, total_ads_clicks, created_at, updated_at
 FROM analytics_daily
@@ -113,6 +182,121 @@ func (q *Queries) GetDailyAnalytics(ctx context.Context, arg GetDailyAnalyticsPa
 		return nil, err
 	}
 	return items, nil
+}
+
+const incrementDailyAdsClicks = `-- name: IncrementDailyAdsClicks :one
+UPDATE analytics_daily
+SET total_ads_clicks = total_ads_clicks + 1
+WHERE analytics_date = $1
+RETURNING analytics_date, total_views, total_likes, total_dislikes, total_comments, total_ads_clicks, created_at, updated_at
+`
+
+func (q *Queries) IncrementDailyAdsClicks(ctx context.Context, analyticsDate pgtype.Date) (AnalyticsDaily, error) {
+	row := q.db.QueryRow(ctx, incrementDailyAdsClicks, analyticsDate)
+	var i AnalyticsDaily
+	err := row.Scan(
+		&i.AnalyticsDate,
+		&i.TotalViews,
+		&i.TotalLikes,
+		&i.TotalDislikes,
+		&i.TotalComments,
+		&i.TotalAdsClicks,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const incrementDailyComments = `-- name: IncrementDailyComments :one
+UPDATE analytics_daily
+SET total_comments = total_comments + 1
+WHERE analytics_date = $1
+RETURNING analytics_date, total_views, total_likes, total_dislikes, total_comments, total_ads_clicks, created_at, updated_at
+`
+
+func (q *Queries) IncrementDailyComments(ctx context.Context, analyticsDate pgtype.Date) (AnalyticsDaily, error) {
+	row := q.db.QueryRow(ctx, incrementDailyComments, analyticsDate)
+	var i AnalyticsDaily
+	err := row.Scan(
+		&i.AnalyticsDate,
+		&i.TotalViews,
+		&i.TotalLikes,
+		&i.TotalDislikes,
+		&i.TotalComments,
+		&i.TotalAdsClicks,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const incrementDailyDislikes = `-- name: IncrementDailyDislikes :one
+UPDATE analytics_daily
+SET total_dislikes = total_dislikes + 1
+WHERE analytics_date = $1
+RETURNING analytics_date, total_views, total_likes, total_dislikes, total_comments, total_ads_clicks, created_at, updated_at
+`
+
+func (q *Queries) IncrementDailyDislikes(ctx context.Context, analyticsDate pgtype.Date) (AnalyticsDaily, error) {
+	row := q.db.QueryRow(ctx, incrementDailyDislikes, analyticsDate)
+	var i AnalyticsDaily
+	err := row.Scan(
+		&i.AnalyticsDate,
+		&i.TotalViews,
+		&i.TotalLikes,
+		&i.TotalDislikes,
+		&i.TotalComments,
+		&i.TotalAdsClicks,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const incrementDailyLikes = `-- name: IncrementDailyLikes :one
+UPDATE analytics_daily
+SET total_likes = total_likes + 1
+WHERE analytics_date = $1
+RETURNING analytics_date, total_views, total_likes, total_dislikes, total_comments, total_ads_clicks, created_at, updated_at
+`
+
+func (q *Queries) IncrementDailyLikes(ctx context.Context, analyticsDate pgtype.Date) (AnalyticsDaily, error) {
+	row := q.db.QueryRow(ctx, incrementDailyLikes, analyticsDate)
+	var i AnalyticsDaily
+	err := row.Scan(
+		&i.AnalyticsDate,
+		&i.TotalViews,
+		&i.TotalLikes,
+		&i.TotalDislikes,
+		&i.TotalComments,
+		&i.TotalAdsClicks,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const incrementDailyViews = `-- name: IncrementDailyViews :one
+UPDATE analytics_daily
+SET total_views = total_views + 1
+WHERE analytics_date = $1
+RETURNING analytics_date, total_views, total_likes, total_dislikes, total_comments, total_ads_clicks, created_at, updated_at
+`
+
+func (q *Queries) IncrementDailyViews(ctx context.Context, analyticsDate pgtype.Date) (AnalyticsDaily, error) {
+	row := q.db.QueryRow(ctx, incrementDailyViews, analyticsDate)
+	var i AnalyticsDaily
+	err := row.Scan(
+		&i.AnalyticsDate,
+		&i.TotalViews,
+		&i.TotalLikes,
+		&i.TotalDislikes,
+		&i.TotalComments,
+		&i.TotalAdsClicks,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const updateDailyAnalytics = `-- name: UpdateDailyAnalytics :one

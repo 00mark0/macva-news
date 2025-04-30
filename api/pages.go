@@ -954,6 +954,7 @@ func getOrCreateAnonID(c echo.Context) (uuid.UUID, error) {
 	c.SetCookie(newCookie)
 	return newAnonID, nil
 }
+
 func (server *Server) handleViews(ctx echo.Context, contentIDStr, userIDStr string) {
 	contentID, err := utils.ParseUUID(contentIDStr, "contentID")
 	if err != nil {
@@ -983,24 +984,30 @@ func (server *Server) handleViews(ctx echo.Context, contentIDStr, userIDStr stri
 		ContentID: contentID,
 		UserID:    viewerID,
 	}
+
 	_, err = server.store.GetView(ctx.Request().Context(), params)
 	if errors.Is(err, pgx.ErrNoRows) {
-		err = server.store.AddView(ctx.Request().Context(), db.AddViewParams{
+		if err := server.store.AddView(ctx.Request().Context(), db.AddViewParams{
 			ContentID: params.ContentID,
 			UserID:    params.UserID,
-		})
-		if err != nil {
+		}); err != nil {
 			log.Println("Error adding view:", err)
+			return // or skip daily increment
 		}
 		_, err = server.store.IncrementViewCount(ctx.Request().Context(), contentID)
 		if err != nil {
 			log.Println("Error incrementing view count:", err)
+		}
+		err = server.incrementDailyViews(ctx)
+		if err != nil {
+			log.Println(err)
 		}
 
 	} else if err != nil {
 		log.Println("Error checking view:", err)
 	}
 }
+
 func (server *Server) articlePage(ctx echo.Context) error {
 	articleIDStr := ctx.Param("id")
 	articleID, err := utils.ParseUUID(articleIDStr, "articleID")
@@ -1073,7 +1080,7 @@ func (server *Server) articlePage(ctx echo.Context) error {
 		}
 	}
 
-	return Render(ctx, http.StatusOK, components.ArticlePage(userData, meta, activeAds, categories, article, globalSettings[0], userReaction, activeAds))
+	return Render(ctx, http.StatusOK, components.ArticlePage(userData, meta, activeAds, categories, article, globalSettings[0], userReaction, activeAds, meta.Canonical))
 }
 
 func (server *Server) userSettingsPage(ctx echo.Context) error {

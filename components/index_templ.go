@@ -310,7 +310,7 @@ func ArticleCardSlider(article db.ListContentByCategoryRow, globalSettings db.Gl
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var10 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/%s/%s", utils.Slugify(article.Title), article.ContentID))
+			var templ_7745c5c3_Var10 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/%s/%s", utils.Slugify(utils.GenerateTitleTag(article.Title)), article.ContentID))
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var10)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -529,7 +529,7 @@ func GridCards(content []ContentData, globalSettings db.GlobalSetting, nextLimit
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var23 templ.SafeURL = templ.SafeURL(fmt.Sprintf("%s/%s", utils.Slugify(v.Title), v.ContentID))
+			var templ_7745c5c3_Var23 templ.SafeURL = templ.SafeURL(fmt.Sprintf("%s/%s", utils.Slugify(utils.GenerateTitleTag(v.Title)), v.ContentID))
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var23)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -579,7 +579,7 @@ func GridCards(content []ContentData, globalSettings db.GlobalSetting, nextLimit
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var26 templ.SafeURL = templ.SafeURL(fmt.Sprintf("%s/%s", utils.Slugify(v.Title), v.ContentID))
+			var templ_7745c5c3_Var26 templ.SafeURL = templ.SafeURL(fmt.Sprintf("%s/%s", utils.Slugify(utils.GenerateTitleTag(v.Title)), v.ContentID))
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var26)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

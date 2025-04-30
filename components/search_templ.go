@@ -164,7 +164,7 @@ func SearchResults(content []db.SearchContentRow, searchCount int64, searchTerm 
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var8 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/%s/%s", utils.Slugify(v.Title), v.ContentID.String()))
+			var templ_7745c5c3_Var8 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/%s/%s", utils.Slugify(utils.GenerateTitleTag(v.Title)), v.ContentID.String()))
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var8)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -214,7 +214,7 @@ func SearchResults(content []db.SearchContentRow, searchCount int64, searchTerm 
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var11 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/%s/%s", utils.Slugify(v.Title), v.ContentID.String()))
+			var templ_7745c5c3_Var11 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/%s/%s", utils.Slugify(utils.GenerateTitleTag(v.Title)), v.ContentID.String()))
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var11)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -422,7 +422,7 @@ func OtherContent(content []ListPublishedContentRes, nextLimit int, globalSettin
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var22 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/%s/%s", utils.Slugify(v.Title), v.ContentID))
+				var templ_7745c5c3_Var22 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/%s/%s", utils.Slugify(utils.GenerateTitleTag(v.Title)), v.ContentID))
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var22)))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -462,7 +462,7 @@ func OtherContent(content []ListPublishedContentRes, nextLimit int, globalSettin
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var25 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/%s/%s", utils.Slugify(v.Title), v.ContentID))
+			var templ_7745c5c3_Var25 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/%s/%s", utils.Slugify(utils.GenerateTitleTag(v.Title)), v.ContentID))
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var25)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

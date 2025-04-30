@@ -62,3 +62,9 @@ document.body.addEventListener('htmx:beforeSwap', function(evt) {
 document.body.addEventListener('htmx:afterSwap', function() {
     window.scrollTo({ top: lastScrollY, behavior: 'instant' });
 });
+
+function sendAdClick() {
+    htmx.ajax('POST', '/api/increment-ads-clicks', {
+        swap: 'none'
+    });
+}

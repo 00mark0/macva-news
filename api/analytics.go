@@ -7,6 +7,7 @@ import (
 
 	"github.com/00mark0/macva-news/components"
 	"github.com/00mark0/macva-news/db/services"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )
@@ -37,6 +38,213 @@ type TrendingContentRes struct {
 	PublishedAt         string `json:"published_at"`
 	IsDeleted           bool   `json:"is_deleted"`
 	TotalInteractions   int    `json:"total_interactions"`
+}
+
+var Now = time.Now().In(Loc)
+var Date = time.Date(Now.Year(), Now.Month(), Now.Day(), 0, 0, 0, 0, Loc)
+
+func (server Server) incrementDailyViews(ctx echo.Context) error {
+	date := pgtype.Date{Time: Date, Valid: true}
+
+	_, err := server.store.IncrementDailyViews(ctx.Request().Context(), date)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			// Row didn't exist — create it
+			_, createErr := server.store.CreateDailyAnalytics(ctx.Request().Context(), date)
+			if createErr != nil {
+				log.Println("Error creating daily analytics in incrementDailyViews:", createErr)
+				return createErr
+			}
+
+			// Try incrementing again after creating
+			_, retryErr := server.store.IncrementDailyViews(ctx.Request().Context(), date)
+			if retryErr != nil {
+				log.Println("Error retrying incrementDailyViews after create:", retryErr)
+				return retryErr
+			}
+		} else {
+			log.Println("Unexpected error in incrementDailyViews:", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (server Server) incrementDailyLikes(ctx echo.Context) error {
+	// Attempt to increment likes for today
+	_, err := server.store.IncrementDailyLikes(ctx.Request().Context(), pgtype.Date{Time: Date, Valid: true})
+
+	if err != nil && err == pgx.ErrNoRows {
+		// If the row doesn't exist, create it
+		_, err := server.store.CreateDailyAnalytics(ctx.Request().Context(), pgtype.Date{Time: Date, Valid: true})
+		if err != nil {
+			log.Println("Error creating daily analytics in incrementDailyLikes:", err)
+			return err
+		}
+
+		// Retry increment after creating the row
+		_, err = server.store.IncrementDailyLikes(ctx.Request().Context(), pgtype.Date{Time: Date, Valid: true})
+		if err != nil {
+			log.Println("Error retrying increment after creating analytics:", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (server Server) incrementDailyDislikes(ctx echo.Context) error {
+	// Attempt to increment dislikes for today
+	_, err := server.store.IncrementDailyDislikes(ctx.Request().Context(), pgtype.Date{Time: Date, Valid: true})
+
+	if err != nil && err == pgx.ErrNoRows {
+		// If the row doesn't exist, create it
+		_, err := server.store.CreateDailyAnalytics(ctx.Request().Context(), pgtype.Date{Time: Date, Valid: true})
+		if err != nil {
+			log.Println("Error creating daily analytics in incrementDailyDislikes:", err)
+			return err
+		}
+
+		// Retry increment after creating the row
+		_, err = server.store.IncrementDailyDislikes(ctx.Request().Context(), pgtype.Date{Time: Date, Valid: true})
+		if err != nil {
+			log.Println("Error retrying increment after creating analytics:", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (server Server) incrementDailyAdsClicks(ctx echo.Context) error {
+	// Attempt to increment ads clicks for today
+	_, err := server.store.IncrementDailyAdsClicks(ctx.Request().Context(), pgtype.Date{Time: Date, Valid: true})
+
+	if err != nil && err == pgx.ErrNoRows {
+		// If the row doesn't exist, create it
+		_, err := server.store.CreateDailyAnalytics(ctx.Request().Context(), pgtype.Date{Time: Date, Valid: true})
+		if err != nil {
+			log.Println("Error creating daily analytics in incrementDailyAdsClicks:", err)
+			return err
+		}
+
+		// Retry increment after creating the row
+		_, err = server.store.IncrementDailyAdsClicks(ctx.Request().Context(), pgtype.Date{Time: Date, Valid: true})
+		if err != nil {
+			log.Println("Error retrying increment after creating analytics:", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (server Server) incrementDailyComments(ctx echo.Context) error {
+	// Attempt to increment comments for today
+	_, err := server.store.IncrementDailyComments(ctx.Request().Context(), pgtype.Date{Time: Date, Valid: true})
+
+	if err != nil && err == pgx.ErrNoRows {
+		// If the row doesn't exist, create it
+		_, err := server.store.CreateDailyAnalytics(ctx.Request().Context(), pgtype.Date{Time: Date, Valid: true})
+		if err != nil {
+			log.Println("Error creating daily analytics in incrementDailyComments:", err)
+			return err
+		}
+
+		// Retry increment after creating the row
+		_, err = server.store.IncrementDailyComments(ctx.Request().Context(), pgtype.Date{Time: Date, Valid: true})
+		if err != nil {
+			log.Println("Error retrying increment after creating analytics:", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (server *Server) decrementDailyLikes(ctx echo.Context) error {
+	date := pgtype.Date{Time: Date, Valid: true}
+
+	_, err := server.store.DecrementDailyLikes(ctx.Request().Context(), date)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			// Row doesn't exist — create it
+			_, createErr := server.store.CreateDailyAnalytics(ctx.Request().Context(), date)
+			if createErr != nil {
+				log.Println("Error creating daily analytics in decrementDailyLikes:", createErr)
+				return createErr
+			}
+
+			// Retry decrementing after creating the row
+			_, retryErr := server.store.DecrementDailyLikes(ctx.Request().Context(), date)
+			if retryErr != nil {
+				log.Println("Error retrying decrementDailyLikes after create:", retryErr)
+				return retryErr
+			}
+		} else {
+			log.Println("Unexpected error in decrementDailyLikes:", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (server *Server) decrementDailyDislikes(ctx echo.Context) error {
+	date := pgtype.Date{Time: Date, Valid: true}
+
+	_, err := server.store.DecrementDailyDislikes(ctx.Request().Context(), date)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			// Row doesn't exist — create it
+			_, createErr := server.store.CreateDailyAnalytics(ctx.Request().Context(), date)
+			if createErr != nil {
+				log.Println("Error creating daily analytics in decrementDailyDislikes:", createErr)
+				return createErr
+			}
+
+			// Retry decrementing after creating the row
+			_, retryErr := server.store.DecrementDailyDislikes(ctx.Request().Context(), date)
+			if retryErr != nil {
+				log.Println("Error retrying decrementDailyDislikes after create:", retryErr)
+				return retryErr
+			}
+		} else {
+			log.Println("Unexpected error in decrementDailyDislikes:", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (server *Server) decrementDailyComments(ctx echo.Context) error {
+	date := pgtype.Date{Time: Date, Valid: true}
+
+	_, err := server.store.DecrementDailyComments(ctx.Request().Context(), date)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			// Row doesn't exist — create it
+			_, createErr := server.store.CreateDailyAnalytics(ctx.Request().Context(), date)
+			if createErr != nil {
+				log.Println("Error creating daily analytics in decrementDailyComments:", createErr)
+				return createErr
+			}
+
+			// Retry decrementing after creating the row
+			_, retryErr := server.store.DecrementDailyComments(ctx.Request().Context(), date)
+			if retryErr != nil {
+				log.Println("Error retrying decrementDailyComments after create:", retryErr)
+				return retryErr
+			}
+		} else {
+			log.Println("Unexpected error in decrementDailyComments:", err)
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (server *Server) listTrendingContent(ctx echo.Context) error {

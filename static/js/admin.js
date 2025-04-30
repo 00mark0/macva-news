@@ -60,7 +60,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const userMenuItems = [
         document.getElementById('user-menu-item-overview'),
         document.getElementById('user-menu-item-settings'),
-        document.getElementById('user-menu-item-earnings'),
         document.getElementById('user-menu-item-logout')
     ]
 

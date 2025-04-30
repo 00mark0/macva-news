@@ -1291,6 +1291,12 @@ func (server *Server) handleLikeContent(ctx echo.Context) error {
 				log.Println("Error deleting content reaction from like to remove like:", err)
 				return err
 			}
+			// Decrement daily likes since user removed their like
+			err = server.decrementDailyLikes(ctx)
+			if err != nil {
+				log.Println("Error decrementing daily likes:", err)
+				return err
+			}
 		} else if userReaction.Reaction == "dislike" {
 			// If disliked, change to like
 			_, err := server.store.InsertOrUpdateContentReaction(ctx.Request().Context(), db.InsertOrUpdateContentReactionParams{
@@ -1300,6 +1306,12 @@ func (server *Server) handleLikeContent(ctx echo.Context) error {
 			})
 			if err != nil {
 				log.Println("Error changing reaction from dislike to like:", err)
+				return err
+			}
+			// Increment daily likes since user changed from dislike to like
+			err = server.incrementDailyLikes(ctx)
+			if err != nil {
+				log.Println("Error incrementing daily likes:", err)
 				return err
 			}
 		}
@@ -1312,6 +1324,12 @@ func (server *Server) handleLikeContent(ctx echo.Context) error {
 		})
 		if err != nil {
 			log.Println("Error adding new like reaction:", err)
+			return err
+		}
+		// Increment daily likes since user is adding a like for the first time
+		err = server.incrementDailyLikes(ctx)
+		if err != nil {
+			log.Println("Error incrementing daily likes:", err)
 			return err
 		}
 	}
@@ -1384,6 +1402,12 @@ func (server *Server) handleDislikeContent(ctx echo.Context) error {
 				log.Println("Error deleting content reaction from dislike to remove dislike:", err)
 				return err
 			}
+			// Decrement daily dislikes since user removed their dislike
+			err = server.decrementDailyDislikes(ctx)
+			if err != nil {
+				log.Println("Error decrementing daily dislikes:", err)
+				return err
+			}
 		} else if userReaction.Reaction == "like" {
 			// If liked, change to dislike
 			_, err := server.store.InsertOrUpdateContentReaction(ctx.Request().Context(), db.InsertOrUpdateContentReactionParams{
@@ -1393,6 +1417,12 @@ func (server *Server) handleDislikeContent(ctx echo.Context) error {
 			})
 			if err != nil {
 				log.Println("Error changing reaction from like to dislike:", err)
+				return err
+			}
+			// Increment daily dislikes since user changed from like to dislike
+			err = server.incrementDailyDislikes(ctx)
+			if err != nil {
+				log.Println("Error incrementing daily dislikes:", err)
 				return err
 			}
 		}
@@ -1405,6 +1435,12 @@ func (server *Server) handleDislikeContent(ctx echo.Context) error {
 		})
 		if err != nil {
 			log.Println("Error adding new dislike reaction:", err)
+			return err
+		}
+		// Increment daily dislikes since user is adding a dislike for the first time
+		err = server.incrementDailyDislikes(ctx)
+		if err != nil {
+			log.Println("Error incrementing daily dislikes:", err)
 			return err
 		}
 	}

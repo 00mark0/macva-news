@@ -175,6 +175,11 @@ func (server *Server) createComment(ctx echo.Context) error {
 		return err
 	}
 
+	err = server.incrementDailyComments(ctx)
+	if err != nil {
+		log.Println(err)
+	}
+
 	err = server.store.IncrementCommentCount(ctx.Request().Context(), contentID)
 	if err != nil {
 		log.Println("Error incrementing comment count in createComment:", err)
@@ -437,6 +442,11 @@ func (server *Server) createReply(ctx echo.Context) error {
 		return err
 	}
 
+	err = server.incrementDailyComments(ctx)
+	if err != nil {
+		log.Println(err)
+	}
+
 	err = server.store.IncrementCommentCount(ctx.Request().Context(), parentComment.ContentID)
 	if err != nil {
 		log.Println("Error incrementing comment count in createReply:", err)
@@ -595,6 +605,11 @@ func (server *Server) deleteComment(ctx echo.Context) error {
 	if err != nil {
 		log.Println("Error deleting comment:", err)
 		return err
+	}
+
+	err = server.decrementDailyComments(ctx)
+	if err != nil {
+		log.Println(err)
 	}
 
 	err = server.cacheService.DeleteByPattern(ctx.Request().Context(), "comments*")

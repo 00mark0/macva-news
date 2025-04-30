@@ -1,9 +1,12 @@
 package components
 
+import "os"
 import "github.com/00mark0/macva-news/db/services"
 import "fmt"
 import "github.com/00mark0/macva-news/utils"
 import "strings"
+
+var BaseUrl = os.Getenv("BASE_URL")
 
 script handleCommentSort() {
 const select = document.getElementById('comment-sort-select');
@@ -17,7 +20,7 @@ console.warn('No URL set for this sort option.');
 }
 }
 
-templ Article(content db.GetContentDetailsRow, globalSettings db.GlobalSetting, userReaction string, activeAds []db.Ad) {
+templ Article(content db.GetContentDetailsRow, globalSettings db.GlobalSetting, userReaction string, activeAds []db.Ad, canonical string) {
 	<article class="max-w-4xl mx-auto px-4 sm:px-6 py-8">
 		<!-- Media Slider with shadow and rounded corners -->
 		<section id="article-page-media-slider" class="mb-8 rounded-xl overflow-hidden shadow-lg dark:shadow-gray-800" hx-get={ fmt.Sprintf("/api/content/media/%s", content.ContentID) } hx-trigger="load" hx-target="#article-page-media-slider" hx-swap="innerHTML">
@@ -56,12 +59,33 @@ templ Article(content db.GetContentDetailsRow, globalSettings db.GlobalSetting, 
 			<section id="article-stats" class="border-b border-gray-200 dark:border-gray-700 pb-4">
 				@ArticleStats(content, globalSettings, userReaction)
 			</section>
+			<section id="share-buttons" class="mt-4">
+				<div class="flex flex-wrap items-start flex-col gap-4">
+					<!-- Stats and interactions -->
+					<p class="text-sm text-gray-600 dark:text-gray-300">Podelite</p>
+					<div class="flex flex-wrap items-center gap-4">
+						<!-- Share buttons -->
+						<!-- Facebook Share -->
+						<a
+							href={ templ.SafeURL(fmt.Sprintf("https://www.facebook.com/sharer/sharer.php?u=%s", canonical)) }
+							target="_blank"
+							class="flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+							aria-label="Share on Facebook"
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5 fill-current mr-2">
+								<path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path>
+							</svg>
+							<span class="hidden sm:inline">Facebook</span>
+						</a>
+					</div>
+				</div>
+			</section>
 		</header>
 		for _, ad := range activeAds {
 			if ad.Placement.String == "article" {
 				<div class="lg:col-span-4 mt-6">
 					<a href={ templ.SafeURL(ad.TargetUrl.String) } target="_blank" class="mb-6 w-full">
-						<img src={ ad.ImageUrl.String } alt={ ad.Description.String } class="object-fit mb-6 w-full h-64"/>
+						<img src={ ad.ImageUrl.String } alt={ ad.Description.String } onclick="sendAdClick()" class="object-fit mb-6 w-full h-64"/>
 					</a>
 				</div>
 			}
@@ -385,7 +409,11 @@ templ Article(content db.GetContentDetailsRow, globalSettings db.GlobalSetting, 
 		    }
 		}
 
-
+		function sendAdClick() {
+			htmx.ajax('POST', '/api/increment-ads-clicks', {
+			swap: 'none'
+            });
+		}
 
 		document.addEventListener("input", function (event) {
 			if (event.target.tagName.toLowerCase() !== "textarea") return;
@@ -398,7 +426,7 @@ templ Article(content db.GetContentDetailsRow, globalSettings db.GlobalSetting, 
 }
 
 templ ArticlePage(props ...interface{}) {
-	@Layout(props[0].(db.GetUserByIDRow), props[1].(Meta), props[2].([]db.Ad), props[3].([]db.Category), Article(props[4].(db.GetContentDetailsRow), props[5].(db.GlobalSetting), props[6].(string), props[7].([]db.Ad)))
+	@Layout(props[0].(db.GetUserByIDRow), props[1].(Meta), props[2].([]db.Ad), props[3].([]db.Category), Article(props[4].(db.GetContentDetailsRow), props[5].(db.GlobalSetting), props[6].(string), props[7].([]db.Ad), props[8].(string)))
 }
 
 templ ArticleMediaSlider(media []db.Medium) {

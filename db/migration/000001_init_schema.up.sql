@@ -50,8 +50,10 @@ CREATE TABLE "content" (
 CREATE TABLE "views" (
   "view_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "content_id" UUID NOT NULL,
-  "user_id" UUID UNIQUE NOT NULL
+  "user_id" UUID NOT NULL,
+  UNIQUE ("content_id", "user_id")
 );
+
 
 CREATE TABLE "category" (
   "category_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
