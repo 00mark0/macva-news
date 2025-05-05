@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"os"
 
 	"github.com/00mark0/macva-news/utils"
@@ -12,6 +13,43 @@ func (server *Server) setupRouter() {
 	router := echo.New()
 
 	router.Use(middleware.Gzip())
+
+	// Create rate limiters for different types of operations
+	// For authentication - very strict limits to prevent brute force attacks
+	authLimiter, err := CreateRateLimiter("10-M") // 10 requests per minute
+	if err != nil {
+		log.Fatal("Failed to create auth rate limiter:", err)
+	}
+
+	// For comment operations - moderate limits to prevent comment spam
+	commentLimiter, err := CreateRateLimiter("30-M") // 30 requests per minute
+	if err != nil {
+		log.Fatal("Failed to create comment rate limiter:", err)
+	}
+
+	// For content interactions - higher limits for normal user activity
+	contentLimiter, err := CreateRateLimiter("60-M") // 60 requests per minute
+	if err != nil {
+		log.Fatal("Failed to create content rate limiter:", err)
+	}
+
+	// For user settings - moderate limits
+	userSettingsLimiter, err := CreateRateLimiter("30-M") // 30 requests per minute
+	if err != nil {
+		log.Fatal("Failed to create user settings rate limiter:", err)
+	}
+
+	// For admin operations - higher limits for admin work
+	adminLimiter, err := CreateRateLimiter("200-M") // 200 requests per minute
+	if err != nil {
+		log.Fatal("Failed to create admin rate limiter:", err)
+	}
+
+	// For search operations - prevent search abuse
+	searchLimiter, err := CreateRateLimiter("60-M") // 60 requests per minute
+	if err != nil {
+		log.Fatal("Failed to create search rate limiter:", err)
+	}
 
 	// Initialize custom validator from validator.go
 	router.Validator = NewCustomValidator()
@@ -36,180 +74,202 @@ func (server *Server) setupRouter() {
 	adminRoutes := router.Group("")
 	adminRoutes.Use(server.adminMiddleware(server.tokenMaker))
 
-	// Admin Page Routes
-	// Admin overview
+	// ==== Page Routes (No rate limiting) ====
+
+	// Admin Page Routes - no rate limiting for page views
 	adminRoutes.GET("/admin", server.adminDash)
 	adminRoutes.GET("/admin/hx-admin", server.adminDashContent)
-	// Admin categories
 	adminRoutes.GET("/admin/categories", server.adminCats)
 	adminRoutes.GET("/admin/create-cat-form", server.createCategoryForm)
 	adminRoutes.GET("/admin/delete-cat-modal/:id", server.deleteCategoryModal)
 	adminRoutes.GET("/admin/update-cat-form/:id", server.updateCategoryForm)
-	// Admin articles
 	adminRoutes.GET("/admin/content", server.adminArts)
 	adminRoutes.GET("/admin/content/create", server.createArticlePage)
 	adminRoutes.GET("/admin/content/update/:id", server.updateArticlePage)
 	adminRoutes.GET("/admin/pub-content", server.publishedContentList)
 	adminRoutes.GET("/admin/draft-content", server.draftContentList)
 	adminRoutes.GET("/admin/del-content", server.deletedContentList)
-	// Admin users
 	adminRoutes.GET("/admin/users", server.adminUsers)
 	adminRoutes.GET("/admin/active-users", server.activeUsersList)
 	adminRoutes.GET("/admin/banned-users", server.bannedUsersList)
 	adminRoutes.GET("/admin/deleted-users", server.deletedUsersList)
-	// Admin ads
 	adminRoutes.GET("/admin/ads", server.adminAds)
 	adminRoutes.GET("/admin/active-ads", server.activeAdsList)
 	adminRoutes.GET("/admin/inactive-ads", server.inactiveAdsList)
 	adminRoutes.GET("/admin/scheduled-ads", server.scheduledAdsList)
 	adminRoutes.GET("/admin/create-ad-modal", server.createAdModal)
 	adminRoutes.GET("/admin/update-ad-modal/:id", server.updateAdModal)
-	// Admin settings
 	adminRoutes.GET("/admin/settings", server.adminSettings)
 
-	// Admin API Routes
-	// Admin overview
-	adminRoutes.GET("/api/admin/trending", server.listTrendingContent)
-	adminRoutes.GET("/api/admin/analytics", server.getDailyAnalytics)
-
-	// Admin categories
-	adminRoutes.GET("/api/admin/categories", server.listCats)
-	adminRoutes.POST("/api/admin/category", server.createCategory)
-	adminRoutes.DELETE("/api/admin/category/:id", server.deleteCategory)
-	adminRoutes.PUT("/api/admin/category/:id", server.updateCategory)
-
-	// Admin articles
-	adminRoutes.GET("/api/admin/content/published", server.listPubContent)
-	adminRoutes.GET("/api/admin/content/published/oldest", server.listPubContentOldest)
-	adminRoutes.GET("/api/admin/content/published/title", server.listPubContentTitle)
-	adminRoutes.GET("/api/admin/content/draft", server.listDraftContent)
-	adminRoutes.GET("/api/admin/content/draft/oldest", server.listDraftContentOldest)
-	adminRoutes.GET("/api/admin/content/draft/title", server.listDraftContentTitle)
-	adminRoutes.GET("/api/admin/content/deleted", server.listDelContent)
-	adminRoutes.GET("/api/admin/content/deleted/oldest", server.listDelContentOldest)
-	adminRoutes.GET("/api/admin/content/deleted/title", server.listDelContentTitle)
-	adminRoutes.GET("/api/admin/content/published/search", server.listSearchPubContent)
-	adminRoutes.GET("/api/admin/content/draft/search", server.listSearchDraftContent)
-	adminRoutes.GET("/api/admin/content/deleted/search", server.listSearchDelContent)
-	adminRoutes.PUT("/api/admin/content/archive/:id", server.archivePubContent)
-	adminRoutes.DELETE("/api/admin/content/:id", server.deleteContent)
-	adminRoutes.PUT("/api/admin/content/publish/:id", server.publishDraftContent)
-	adminRoutes.PUT("/api/admin/content/unarchive/:id", server.unarchiveContent)
-	adminRoutes.PUT("/api/admin/content/:id", server.updateContent)
-	adminRoutes.POST("/api/admin/content/draft", server.createContent)
-	adminRoutes.POST("/api/admin/content/publish", server.createAndPublishContent)
-
-	// Admin Media
-	adminRoutes.GET("/api/admin/media", server.listMediaForContent)
-	adminRoutes.POST("/api/admin/media/upload/new", server.addMediaToNewContent)
-	adminRoutes.POST("/api/admin/media/upload/:id", server.addMediaToUpdateContent)
-	adminRoutes.DELETE("/api/admin/media/remove/:id", server.deleteMedia)
-
-	// Admin Tags
-	adminRoutes.GET("/api/admin/tags", server.listTags)
-	adminRoutes.GET("/api/admin/tags/search", server.listSearchTags)
-	adminRoutes.GET("/api/admin/tags/:id", server.listTagsByContent)
-	adminRoutes.POST("/api/admin/tags", server.createTag)
-	adminRoutes.POST("/api/admin/tags/add", server.addTagToContent)
-	adminRoutes.POST("/api/admin/tags/add/:id", server.addTagToContentUpdate)
-	adminRoutes.DELETE("/api/admin/tags/content/remove/:id", server.removeTagFromContent)
-	adminRoutes.DELETE("/api/admin/tags/content/remove/:content_id/:tag_id", server.removeTagFromContentUpdate)
-	adminRoutes.DELETE("/api/admin/tags/remove/:id", server.deleteTag)
-
-	// Admin Users
-	adminRoutes.GET("/api/admin/users/active", server.listActiveUsers)
-	adminRoutes.GET("/api/admin/users/active/oldest", server.listActiveUsersOldest)
-	adminRoutes.GET("/api/admin/users/active/title", server.listActiveUsersTitle)
-	adminRoutes.GET("/api/admin/users/banned", server.listBannedUsers)
-	adminRoutes.GET("/api/admin/users/banned/oldest", server.listBannedUsersOldest)
-	adminRoutes.GET("/api/admin/users/banned/title", server.listBannedUsersTitle)
-	adminRoutes.GET("/api/admin/users/deleted", server.listDeletedUsers)
-	adminRoutes.GET("/api/admin/users/deleted/oldest", server.listDeletedUsersOldest)
-	adminRoutes.GET("/api/admin/users/deleted/title", server.listDeletedUsersTitle)
-	adminRoutes.GET("/api/admin/users/active/search", server.searchActiveUsers)
-	adminRoutes.GET("/api/admin/users/banned/search", server.searchBannedUsers)
-	adminRoutes.GET("/api/admin/users/deleted/search", server.searchArchivedUsers)
-	adminRoutes.PUT("/api/admin/users/ban/:id", server.banUser)
-	adminRoutes.PUT("/api/admin/users/unban/:id", server.unbanUser)
-	adminRoutes.PUT("/api/admin/users/archive/:id", server.deleteUser)
-
-	// Admin settings
-	authRoutes.PUT("/api/admin/settings/username/:id", server.updateUsername)
-	authRoutes.PUT("/api/admin/settings/pfp/:id", server.updatePfp)
-	adminRoutes.PUT("/api/admin/global-settings", server.updateGlobalSettings)
-	adminRoutes.PUT("/api/admin/reset-global-settings", server.resetGlobalSettings)
-
-	// Admin ads
-	adminRoutes.GET("/api/admin/ads/active", server.listActiveAds)
-	adminRoutes.GET("/api/admin/ads/inactive", server.listInactiveAds)
-	adminRoutes.POST("/api/admin/ads", server.createAd)
-	adminRoutes.DELETE("/api/admin/ads/:id", server.deleteAd)
-	adminRoutes.PUT("/api/admin/ads/:id", server.updateAd)
-	adminRoutes.PUT("/api/admin/ads/deactivate/:id", server.deactivateAd)
-
-	// Cookie
-	adminRoutes.DELETE("/api/cookie", server.deleteCookie)
-
-	// Auth Pages
+	// Auth Pages - no rate limiting for page views
 	router.GET("/login", server.loginPage)
 	router.GET("/register", server.registerPage)
 	router.GET("/reset-lozinke/:token", server.passwordResetPage)
-
-	// Auth api
-	router.POST("/api/login", server.login)
-	router.POST("/api/register", server.register)
-	router.POST("/api/send-password-reset-form", server.requestPassResetFromForm)
-	authRoutes.POST("/api/logout", server.logOut)
-	authRoutes.POST("/api/send-password-reset", server.requestPassReset)
-	router.POST("/api/reset-password", server.resetPassword)
-
-	// User Page Routes
-	// Home Page
-	router.GET("/", server.homePage)
-	// Email Verified Page
-	router.GET("/potvrdi-email/:token", server.emailVerifiedPage)
-	// Forgotten Password Page
 	router.GET("/zaboravljena-lozinka", server.requestPassResetPage)
-	// User Search
+	router.GET("/potvrdi-email/:token", server.emailVerifiedPage)
+
+	// User Page Routes - no rate limiting for page views
+	router.GET("/", server.homePage)
 	router.GET("/pretraga", server.searchResultsPage)
-	// Categories Page
 	router.GET("/kategorije/:category/:id", server.categoriesPage)
-	// Tag Page
 	router.GET("/oznake/:tag/:id", server.tagPage)
-	// Article Page
 	router.GET("/:article/:id", server.articlePage)
-	// User settings
 	authRoutes.GET("/podesavanja", server.userSettingsPage)
 
-	//User API
-	// User Search
-	router.GET("/api/search", server.loadMoreSearch)
+	// ==== API Routes with Rate Limiting ====
+
+	// ---- Authentication API (Strict Limiting) ----
+	authApiRoutes := router.Group("/api")
+	authApiRoutes.Use(server.RateLimitMiddleware(authLimiter))
+
+	authApiRoutes.POST("/login", server.login)
+	authApiRoutes.POST("/register", server.register)
+	authApiRoutes.POST("/reset-password", server.resetPassword)
+	authApiRoutes.POST("/send-password-reset-form", server.requestPassResetFromForm)
+
+	// Auth routes that require auth middleware
+	authAuthRoutes := authRoutes.Group("/api")
+	authAuthRoutes.Use(server.RateLimitMiddleware(authLimiter))
+
+	authAuthRoutes.POST("/logout", server.logOut)
+	authAuthRoutes.POST("/send-password-reset", server.requestPassReset)
+
+	// ---- Comment API ----
+	commentApiRoutes := router.Group("/api")
+
+	// Comment listing routes - public (No rate limiting)
+	commentApiRoutes.GET("/content/comments/:id", server.listContentComments)
+	commentApiRoutes.GET("/content/comments/:id/score", server.listContentCommentsScore)
+	commentApiRoutes.GET("/comments/:id/reply-info", server.listRepliesInfo)
+	commentApiRoutes.GET("/comments/:id/more-replies", server.listCommentReplies)
+
+	// Comment write routes - require auth
+	commentAuthRoutes := authRoutes.Group("/api")
+	commentAuthRoutes.Use(server.RateLimitMiddleware(commentLimiter))
+
+	commentAuthRoutes.POST("/content/comments/:id", server.createComment)
+	commentAuthRoutes.POST("/comments/:id/upvote", server.handleUpvoteComment)
+	commentAuthRoutes.POST("/comments/:id/downvote", server.handleDownvoteComment)
+	commentAuthRoutes.POST("/comments/:id/reply", server.createReply)
+	commentAuthRoutes.PUT("/comments/:id/edit", server.updateComment)
+	commentAuthRoutes.DELETE("/comments/:id", server.deleteComment)
+
+	// ---- Content Interaction API (Moderate Limiting) ----
+	contentApiRoutes := authRoutes.Group("/api")
+	contentApiRoutes.Use(server.RateLimitMiddleware(contentLimiter))
+
+	contentApiRoutes.POST("/content/like/:id", server.handleLikeContent)
+	contentApiRoutes.POST("/content/dislike/:id", server.handleDislikeContent)
+	router.POST("/api/increment-ads-clicks", server.incrementDailyAdsClicks) // Public route
+
+	// ---- User Settings API (Moderate Limiting) ----
+	userSettingsRoutes := authRoutes.Group("/api/admin/settings")
+	userSettingsRoutes.Use(server.RateLimitMiddleware(userSettingsLimiter))
+
+	userSettingsRoutes.PUT("/username/:id", server.updateUsername)
+	userSettingsRoutes.PUT("/pfp/:id", server.updatePfp)
+
+	// Cookie deletion
+	authRoutes.DELETE("/api/cookie", server.deleteCookie)
+
+	// ---- Search API (Moderate Limiting) ----
+	searchApiRoutes := router.Group("/api")
+	searchApiRoutes.Use(server.RateLimitMiddleware(searchLimiter))
+
+	searchApiRoutes.GET("/search", server.loadMoreSearch)
+
+	// ---- Public Read-only API (No Rate Limiting) ----
+	// These routes are typically used for page loads and don't need rate limiting
 	router.GET("/api/content/other", server.listOtherContent)
-	// Home
 	router.GET("/api/news-slider", server.newsSlider)
 	router.GET("/api/content/popular", server.listTrendingContentUser)
 	router.GET("/api/content/categories", server.categoriesWithContent)
-	// Categories
 	router.GET("/api/category/content/recent/:id", server.listRecentCategoryContent)
 	router.GET("/api/category/:id/tags/content", server.listContentByTagsUnderCategory)
-	// Tags
 	router.GET("/api/tag/content/recent/:id", server.listAllContentByTag)
-	// Article
 	router.GET("/api/content/media/:id", server.listMediaForArticlePage)
-	authRoutes.POST("/api/content/like/:id", server.handleLikeContent)
-	authRoutes.POST("/api/content/dislike/:id", server.handleDislikeContent)
-	// Article Comments
-	router.GET("/api/content/comments/:id", server.listContentComments)
-	router.GET("/api/content/comments/:id/score", server.listContentCommentsScore)
-	authRoutes.POST("/api/content/comments/:id", server.createComment)
-	authRoutes.POST("/api/comments/:id/upvote", server.handleUpvoteComment)
-	authRoutes.POST("/api/comments/:id/downvote", server.handleDownvoteComment)
-	authRoutes.POST("/api/comments/:id/reply", server.createReply)
-	router.GET("/api/comments/:id/reply-info", server.listRepliesInfo)
-	router.GET("/api/comments/:id/more-replies", server.listCommentReplies)
-	authRoutes.PUT("/api/comments/:id/edit", server.updateComment)
-	authRoutes.DELETE("/api/comments/:id", server.deleteComment)
-	router.POST("/api/increment-ads-clicks", server.incrementDailyAdsClicks)
+
+	// ---- Admin API (Higher Limits) ----
+	// Admin content management API
+	adminApiRoutes := adminRoutes.Group("/api/admin")
+	adminApiRoutes.Use(server.RateLimitMiddleware(adminLimiter))
+
+	// Admin overview
+	adminApiRoutes.GET("/trending", server.listTrendingContent)
+	adminApiRoutes.GET("/analytics", server.getDailyAnalytics)
+
+	// Admin categories
+	adminApiRoutes.GET("/categories", server.listCats)
+	adminApiRoutes.POST("/category", server.createCategory)
+	adminApiRoutes.DELETE("/category/:id", server.deleteCategory)
+	adminApiRoutes.PUT("/category/:id", server.updateCategory)
+
+	// Admin articles
+	adminApiRoutes.GET("/content/published", server.listPubContent)
+	adminApiRoutes.GET("/content/published/oldest", server.listPubContentOldest)
+	adminApiRoutes.GET("/content/published/title", server.listPubContentTitle)
+	adminApiRoutes.GET("/content/draft", server.listDraftContent)
+	adminApiRoutes.GET("/content/draft/oldest", server.listDraftContentOldest)
+	adminApiRoutes.GET("/content/draft/title", server.listDraftContentTitle)
+	adminApiRoutes.GET("/content/deleted", server.listDelContent)
+	adminApiRoutes.GET("/content/deleted/oldest", server.listDelContentOldest)
+	adminApiRoutes.GET("/content/deleted/title", server.listDelContentTitle)
+	adminApiRoutes.GET("/content/published/search", server.listSearchPubContent)
+	adminApiRoutes.GET("/content/draft/search", server.listSearchDraftContent)
+	adminApiRoutes.GET("/content/deleted/search", server.listSearchDelContent)
+	adminApiRoutes.PUT("/content/archive/:id", server.archivePubContent)
+	adminApiRoutes.DELETE("/content/:id", server.deleteContent)
+	adminApiRoutes.PUT("/content/publish/:id", server.publishDraftContent)
+	adminApiRoutes.PUT("/content/unarchive/:id", server.unarchiveContent)
+	adminApiRoutes.PUT("/content/:id", server.updateContent)
+	adminApiRoutes.POST("/content/draft", server.createContent)
+	adminApiRoutes.POST("/content/publish", server.createAndPublishContent)
+
+	// Admin Media
+	adminApiRoutes.GET("/media", server.listMediaForContent)
+	adminApiRoutes.POST("/media/upload/new", server.addMediaToNewContent)
+	adminApiRoutes.POST("/media/upload/:id", server.addMediaToUpdateContent)
+	adminApiRoutes.DELETE("/media/remove/:id", server.deleteMedia)
+
+	// Admin Tags
+	adminApiRoutes.GET("/tags", server.listTags)
+	adminApiRoutes.GET("/tags/search", server.listSearchTags)
+	adminApiRoutes.GET("/tags/:id", server.listTagsByContent)
+	adminApiRoutes.POST("/tags", server.createTag)
+	adminApiRoutes.POST("/tags/add", server.addTagToContent)
+	adminApiRoutes.POST("/tags/add/:id", server.addTagToContentUpdate)
+	adminApiRoutes.DELETE("/tags/content/remove/:id", server.removeTagFromContent)
+	adminApiRoutes.DELETE("/tags/content/remove/:content_id/:tag_id", server.removeTagFromContentUpdate)
+	adminApiRoutes.DELETE("/tags/remove/:id", server.deleteTag)
+
+	// Admin Users
+	adminApiRoutes.GET("/users/active", server.listActiveUsers)
+	adminApiRoutes.GET("/users/active/oldest", server.listActiveUsersOldest)
+	adminApiRoutes.GET("/users/active/title", server.listActiveUsersTitle)
+	adminApiRoutes.GET("/users/banned", server.listBannedUsers)
+	adminApiRoutes.GET("/users/banned/oldest", server.listBannedUsersOldest)
+	adminApiRoutes.GET("/users/banned/title", server.listBannedUsersTitle)
+	adminApiRoutes.GET("/users/deleted", server.listDeletedUsers)
+	adminApiRoutes.GET("/users/deleted/oldest", server.listDeletedUsersOldest)
+	adminApiRoutes.GET("/users/deleted/title", server.listDeletedUsersTitle)
+	adminApiRoutes.GET("/users/active/search", server.searchActiveUsers)
+	adminApiRoutes.GET("/users/banned/search", server.searchBannedUsers)
+	adminApiRoutes.GET("/users/deleted/search", server.searchArchivedUsers)
+	adminApiRoutes.PUT("/users/ban/:id", server.banUser)
+	adminApiRoutes.PUT("/users/unban/:id", server.unbanUser)
+	adminApiRoutes.PUT("/users/archive/:id", server.deleteUser)
+
+	// Admin settings
+	adminApiRoutes.PUT("/global-settings", server.updateGlobalSettings)
+	adminApiRoutes.PUT("/reset-global-settings", server.resetGlobalSettings)
+
+	// Admin ads
+	adminApiRoutes.GET("/ads/active", server.listActiveAds)
+	adminApiRoutes.GET("/ads/inactive", server.listInactiveAds)
+	adminApiRoutes.POST("/ads", server.createAd)
+	adminApiRoutes.DELETE("/ads/:id", server.deleteAd)
+	adminApiRoutes.PUT("/ads/:id", server.updateAd)
+	adminApiRoutes.PUT("/ads/deactivate/:id", server.deactivateAd)
 
 	server.router = router
 }

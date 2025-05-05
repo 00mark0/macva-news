@@ -188,12 +188,6 @@ templ Layout(user db.GetUserByIDRow, meta Meta, activeAds []db.Ad, categories []
 						</a>
 					}
 				}
-				<!-- Sidebar Ad (Desktop) -->
-				/*<aside class="hidden lg:block lg:col-span-1">
-					<div class="w-full h-96 bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 mb-6">
-						Sidebar Advertisement
-					</div>
-				</aside>*/
 				<!-- Main Content Area -->
 				<main class="lg:col-span-3">
 					<div class="mt-10">
@@ -358,12 +352,14 @@ templ InfoWarning(message string) {
 			</div>
 			<div class="sm:ml-auto sm:pl-3">
 				<div class="flex space-x-2">
-					<a
-						href="/login"
-						class="inline-flex text-xs bg-yellow-50 hover:bg-yellow-100 text-yellow-700 font-medium py-1 px-2 rounded-md transition-colors duration-150"
-					>
-						Prijava
-					</a>
+					if message != "Previše zahteva. Pokušajte ponovo kasnije." {
+						<a
+							href="/login"
+							class="inline-flex text-xs bg-yellow-50 hover:bg-yellow-100 text-yellow-700 font-medium py-1 px-2 rounded-md transition-colors duration-150"
+						>
+							Prijava
+						</a>
+					}
 					<button
 						onclick="this.parentElement.parentElement.parentElement.parentElement.parentElement.innerHTML = ''"
 						class="cursor-pointer inline-flex text-xs bg-yellow-50 hover:bg-yellow-100 text-yellow-700 font-medium py-1 px-2 rounded-md transition-colors duration-150"

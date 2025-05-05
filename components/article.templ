@@ -127,7 +127,7 @@ templ Article(content db.GetContentDetailsRow, globalSettings db.GlobalSetting, 
 					</div>
 				</form>
 			</div>
-			<section id="article-comments" hx-get={ fmt.Sprintf("/api/content/comments/%s", content.ContentID.String()) } hx-trigger="load" hx-target="#article-comments" hx-swap="innerHTML">
+			<section id="article-comments" hx-get={ fmt.Sprintf("/api/content/comments/%s", content.ContentID.String()) } hx-trigger="load" hx-target="#article-comments" hx-swap="innerHTML" class="w-full">
 				@LoadingSpinner()
 			</section>
 			<script type="module">
@@ -1054,58 +1054,60 @@ templ CommentItem(comment db.ListContentCommentsRow, userData db.GetUserByIDRow,
 						</svg>
 					</button>
 					<!-- Dropdown Menu -->
-					<div
-						id={ fmt.Sprintf("comment-dropdown-%s", comment.CommentID.String()) }
-						class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
-					>
-						<div class="py-1" role="menu" aria-orientation="vertical">
-							if comment.UserID == userData.UserID {
-								<button
-									id={ fmt.Sprintf("edit-button-%s", comment.CommentID.String()) }
-									onclick="toggleEditForm(this)"
-									class="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-									role="menuitem"
-								>
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-									</svg>
-									Uredi
-								</button>
-							}
-							if comment.UserID == userData.UserID {
-								<button
-									id={ fmt.Sprintf("delete-button-%s", comment.CommentID.String()) }
-									hx-delete={ fmt.Sprintf("/api/comments/%s", comment.CommentID.String()) }
-									hx-swap="none"
-									hx-trigger="click"
-									onclick="hideComment(this)"
-									class="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-									role="menuitem"
-								>
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-									</svg>
-									Obriši
-								</button>
-							}
-							if userData.Role == "admin" {
-								<button
-									id={ fmt.Sprintf("admin-delete-button-%s", comment.CommentID.String()) }
-									hx-delete={ fmt.Sprintf("/api/comments/%s", comment.CommentID.String()) }
-									hx-swap="none"
-									hx-trigger="click"
-									onclick="hideComment(this)"
-									class="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-									role="menuitem"
-								>
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-									</svg>
-									Obriši (Admin)
-								</button>
-							}
+					if comment.UserID == userData.UserID || userData.Role == "admin" {
+						<div
+							id={ fmt.Sprintf("comment-dropdown-%s", comment.CommentID.String()) }
+							class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
+						>
+							<div class="py-1" role="menu" aria-orientation="vertical">
+								if comment.UserID == userData.UserID {
+									<button
+										id={ fmt.Sprintf("edit-button-%s", comment.CommentID.String()) }
+										onclick="toggleEditForm(this)"
+										class="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+										role="menuitem"
+									>
+										<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+										</svg>
+										Uredi
+									</button>
+								}
+								if comment.UserID == userData.UserID {
+									<button
+										id={ fmt.Sprintf("delete-button-%s", comment.CommentID.String()) }
+										hx-delete={ fmt.Sprintf("/api/comments/%s", comment.CommentID.String()) }
+										hx-swap="none"
+										hx-trigger="click"
+										onclick="hideComment(this)"
+										class="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+										role="menuitem"
+									>
+										<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+										</svg>
+										Obriši
+									</button>
+								}
+								if userData.Role == "admin" {
+									<button
+										id={ fmt.Sprintf("admin-delete-button-%s", comment.CommentID.String()) }
+										hx-delete={ fmt.Sprintf("/api/comments/%s", comment.CommentID.String()) }
+										hx-swap="none"
+										hx-trigger="click"
+										onclick="hideComment(this)"
+										class="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+										role="menuitem"
+									>
+										<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+										</svg>
+										Obriši (Admin)
+									</button>
+								}
+							</div>
 						</div>
-					</div>
+					}
 				</div>
 			</div>
 			<div id={ fmt.Sprintf("comment-content-%s", comment.CommentID.String()) } class="line-clamp-3 break-all text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
@@ -1247,7 +1249,7 @@ templ CommentReplyItem(comment db.ListContentCommentsRow, userData db.GetUserByI
 	<div id={ fmt.Sprintf("comment-%s", comment.CommentID.String()) } class="flex space-x-3 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
 		<!-- User Avatar -->
 		<div class="flex-shrink-0">
-			<img class="w-8 h-8 sm:w-10 sm:h-10 rounded-full" src={ comment.Pfp } alt="user avatar"/>
+			<img class="w-6 h-6 sm:w-10 sm:h-10 rounded-full" src={ comment.Pfp } alt="user avatar"/>
 		</div>
 		<!-- Comment Content -->
 		<div class="flex-1 min-w-0">
@@ -1277,58 +1279,60 @@ templ CommentReplyItem(comment db.ListContentCommentsRow, userData db.GetUserByI
 						</svg>
 					</button>
 					<!-- Dropdown Menu -->
-					<div
-						id={ fmt.Sprintf("comment-dropdown-%s", comment.CommentID.String()) }
-						class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
-					>
-						<div class="py-1" role="menu" aria-orientation="vertical">
-							if comment.UserID == userData.UserID {
-								<button
-									id={ fmt.Sprintf("edit-button-%s", comment.CommentID.String()) }
-									onclick="toggleEditForm(this)"
-									class="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-									role="menuitem"
-								>
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-									</svg>
-									Uredi
-								</button>
-							}
-							if comment.UserID == userData.UserID {
-								<button
-									id={ fmt.Sprintf("delete-button-%s", comment.CommentID.String()) }
-									hx-delete={ fmt.Sprintf("/api/comments/%s", comment.CommentID.String()) }
-									hx-swap="outerHTML"
-									hx-trigger="click"
-									onclick="hideComment(this)"
-									class="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-									role="menuitem"
-								>
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-									</svg>
-									Obriši
-								</button>
-							}
-							if userData.Role == "admin" {
-								<button
-									id={ fmt.Sprintf("admin-delete-button-%s", comment.CommentID.String()) }
-									hx-delete={ fmt.Sprintf("/api/comments/%s", comment.CommentID.String()) }
-									hx-swap="outerHTML"
-									hx-trigger="click"
-									onclick="hideComment(this)"
-									class="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-									role="menuitem"
-								>
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-									</svg>
-									Obriši (Admin)
-								</button>
-							}
+					if comment.UserID == userData.UserID || userData.Role == "admin" {
+						<div
+							id={ fmt.Sprintf("comment-dropdown-%s", comment.CommentID.String()) }
+							class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
+						>
+							<div class="py-1" role="menu" aria-orientation="vertical">
+								if comment.UserID == userData.UserID {
+									<button
+										id={ fmt.Sprintf("edit-button-%s", comment.CommentID.String()) }
+										onclick="toggleEditForm(this)"
+										class="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+										role="menuitem"
+									>
+										<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+										</svg>
+										Uredi
+									</button>
+								}
+								if comment.UserID == userData.UserID {
+									<button
+										id={ fmt.Sprintf("delete-button-%s", comment.CommentID.String()) }
+										hx-delete={ fmt.Sprintf("/api/comments/%s", comment.CommentID.String()) }
+										hx-swap="outerHTML"
+										hx-trigger="click"
+										onclick="hideComment(this)"
+										class="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+										role="menuitem"
+									>
+										<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+										</svg>
+										Obriši
+									</button>
+								}
+								if userData.Role == "admin" {
+									<button
+										id={ fmt.Sprintf("admin-delete-button-%s", comment.CommentID.String()) }
+										hx-delete={ fmt.Sprintf("/api/comments/%s", comment.CommentID.String()) }
+										hx-swap="outerHTML"
+										hx-trigger="click"
+										onclick="hideComment(this)"
+										class="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+										role="menuitem"
+									>
+										<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+										</svg>
+										Obriši (Admin)
+									</button>
+								}
+							</div>
 						</div>
-					</div>
+					}
 				</div>
 			</div>
 			<div id={ fmt.Sprintf("comment-content-%s", comment.CommentID.String()) } class="line-clamp-3 break-all text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
@@ -1579,7 +1583,9 @@ templ CommentReplyInfo(replyCount int, adminPfp string, commentID string) {
 templ CommentReplyList(replies []db.ListContentCommentsRow, userData db.GetUserByIDRow, userReactions map[string]string, nextLimit int, url string) {
 	<div id={ fmt.Sprintf("comment-replies-%s", replies[0].ParentCommentID.String()) }>
 		for _, reply := range replies {
-			@CommentReplyItem(reply, userData, userReactions[reply.CommentID.String()])
+			<div class="mb-3">
+				@CommentReplyItem(reply, userData, userReactions[reply.CommentID.String()])
+			</div>
 		}
 	</div>
 	if len(replies) >= nextLimit {

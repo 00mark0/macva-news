@@ -97,7 +97,7 @@ func AdminLayout(payload db.GetUserByIDRow, children ...templ.Component) templ.C
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " <a href=\"/\" class=\"hover:underline\">Mačva News™</a>. All Rights Reserved.</p></footer></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " <a href=\"/\" class=\"hover:underline\">Mačva News™</a>. All Rights Reserved.</p></footer><div id=\"user-modal\" class=\"fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2\"></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

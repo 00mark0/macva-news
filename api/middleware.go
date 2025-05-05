@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -9,6 +10,8 @@ import (
 	"github.com/00mark0/macva-news/token"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/ulule/limiter/v3"
+	"github.com/ulule/limiter/v3/drivers/store/memory"
 
 	"net/http"
 
@@ -21,6 +24,42 @@ const (
 	authorizationPayloadKey = "authorization_payload"
 )
 
+// CreateRateLimiter creates a rate limiter with the specified limit
+func CreateRateLimiter(rateStr string) (*limiter.Limiter, error) {
+	rate, err := limiter.NewRateFromFormatted(rateStr)
+	if err != nil {
+		return nil, fmt.Errorf("invalid rate format: %w", err)
+	}
+	store := memory.NewStore()
+	return limiter.New(store, rate), nil
+}
+
+// RateLimitMiddleware creates middleware for a specific rate limit
+func (server *Server) RateLimitMiddleware(limiterInstance *limiter.Limiter) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(ctx echo.Context) error {
+			ip := ctx.RealIP()
+			limiterCtx, err := limiterInstance.Get(ctx.Request().Context(), ip)
+			if err != nil {
+				log.Println("Rate limiter error:", err)
+				return ctx.NoContent(http.StatusInternalServerError)
+			}
+
+			// Add headers for client-side observability
+			ctx.Response().Header().Set("X-RateLimit-Limit", fmt.Sprintf("%d", limiterCtx.Limit))
+			ctx.Response().Header().Set("X-RateLimit-Remaining", fmt.Sprintf("%d", limiterCtx.Remaining))
+			ctx.Response().Header().Set("X-RateLimit-Reset", fmt.Sprintf("%d", limiterCtx.Reset))
+
+			if limiterCtx.Reached {
+				log.Printf("Rate limit reached for IP: %s on path: %s", ip, ctx.Request().URL.Path)
+				ctx.Response().Header().Set("HX-Retarget", "#user-modal")
+				return Render(ctx, http.StatusOK, components.InfoWarning("Previše zahteva. Pokušajte ponovo kasnije."))
+			}
+
+			return next(ctx)
+		}
+	}
+}
 func (server *Server) authMiddleware(tokenMaker token.Maker) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
