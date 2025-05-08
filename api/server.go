@@ -49,4 +49,3 @@ func NewServer(store *db.Store, symmetricKey string, redisClient *redisClient.Cl
 func (server *Server) Start(address string) error {
 	return server.router.Start(address)
 }
-

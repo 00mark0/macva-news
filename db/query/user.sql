@@ -185,6 +185,14 @@ UPDATE "user"
 SET email_verified = true 
 WHERE user_id = $1;
 
+-- name: CheckAdminExists :one
+SELECT EXISTS (
+  SELECT 1
+  FROM "user"
+  WHERE "role" = 'admin'
+);
+
+
 
 
 

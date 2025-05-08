@@ -15,7 +15,21 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var Loc, _ = time.LoadLocation("Europe/Belgrade")
+var (
+	Loc  *time.Location
+	Now  time.Time
+	Date time.Time
+)
+
+func init() {
+	var err error
+	Loc, err = time.LoadLocation("Europe/Belgrade")
+	if err != nil {
+		log.Fatalf("failed to load location: %v", err)
+	}
+	Now = time.Now().In(Loc)
+	Date = time.Date(Now.Year(), Now.Month(), Now.Day(), 0, 0, 0, 0, Loc)
+}
 
 func (server *Server) homePage(ctx echo.Context) error {
 	userData, err := server.getUserFromCacheOrDb(ctx, "refresh_token")

@@ -22,6 +22,21 @@ func (q *Queries) BanUser(ctx context.Context, userID pgtype.UUID) error {
 	return err
 }
 
+const checkAdminExists = `-- name: CheckAdminExists :one
+SELECT EXISTS (
+  SELECT 1
+  FROM "user"
+  WHERE "role" = 'admin'
+)
+`
+
+func (q *Queries) CheckAdminExists(ctx context.Context) (bool, error) {
+	row := q.db.QueryRow(ctx, checkAdminExists)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const checkEmailExists = `-- name: CheckEmailExists :one
 SELECT 1 
 FROM "user" 

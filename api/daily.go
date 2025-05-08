@@ -18,13 +18,8 @@ func (server *Server) scheduleDailyAnalytics() {
 	var err error
 	_, err = c.AddFunc("@daily", func() {
 		// Use time.Now() to set the current day at midnight
-		now := time.Now().In(Loc)
-		date := pgtype.Date{
-			Time:  time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()),
-			Valid: true,
-		}
 
-		if _, err := server.store.CreateDailyAnalytics(context.Background(), date); err != nil {
+		if _, err := server.store.CreateDailyAnalytics(context.Background(), pgtype.Date{Time: Date, Valid: true}); err != nil {
 			log.Printf("Failed to create daily analytics: %v\n", err)
 		} else {
 			log.Println("Daily analytics created successfully at midnight.")

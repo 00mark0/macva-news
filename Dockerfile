@@ -55,7 +55,7 @@ RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.2/
 FROM alpine:latest AS prod
 WORKDIR /app
 # (Optional) Install ca-certificates if your app needs to make HTTPS requests
-RUN apk --no-cache add ca-certificates
+RUN apk --no-cache add ca-certificates tzdata
 # Copy the compiled Go binary from the builder stage
 COPY --from=builder /app/app .
 # Copy the .env file from the builder stage

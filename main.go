@@ -52,6 +52,11 @@ func main() {
 	// Initialize the store and pass it into the server
 	store := db.NewStore(conn)
 
+	// Ensure an admin user exists before starting the server
+	if err := api.BootstrapAdmin(store); err != nil {
+		log.Fatal("Bootstrap failed:", err)
+	}
+
 	// Pass both store and Redis client into the server
 	server, err := api.NewServer(store, symmetricKey, redis.Client)
 	if err != nil {

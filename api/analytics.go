@@ -40,9 +40,6 @@ type TrendingContentRes struct {
 	TotalInteractions   int    `json:"total_interactions"`
 }
 
-var Now = time.Now().In(Loc)
-var Date = time.Date(Now.Year(), Now.Month(), Now.Day(), 0, 0, 0, 0, Loc)
-
 func (server Server) incrementDailyViews(ctx echo.Context) error {
 	date := pgtype.Date{Time: Date, Valid: true}
 

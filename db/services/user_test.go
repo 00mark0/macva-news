@@ -3,13 +3,12 @@ package db
 import (
 	"fmt"
 	"log"
+	"os"
 	"testing"
 
 	"github.com/00mark0/macva-news/utils"
 
 	"context"
-
-	//"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -42,14 +41,14 @@ func createRandomUser(t *testing.T) User {
 }
 
 func createAdminUser(t *testing.T) User {
-	hashedPassword, err := utils.HashPassword("HlebIsir69!")
+	hashedPassword, err := utils.HashPassword(os.Getenv("ADMIN_PASSWORD"))
 	if err != nil {
 		log.Println(err)
 	}
 
 	arg := CreateUserAdminParams{
-		Username: "admin",
-		Email:    "00marko.r@gmail.com",
+		Username: os.Getenv("ADMIN_USERNAME"),
+		Email:    os.Getenv("EMAIL"),
 		Password: hashedPassword,
 		Role:     "admin",
 	}
